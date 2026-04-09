@@ -17,6 +17,7 @@ console.log('✅ Đã tạo MySQL Connection Pool.');
 async function initDb() {
     let conn;
     try {
+        conn = await pool.getConnection();
         console.log('🚀 Đang khởi tạo bảng dữ liệu MySQL...');
         
         // 1. monthly_finance
@@ -67,8 +68,9 @@ async function initDb() {
         console.log('✨ Khởi tạo bảng MySQL hoàn tất.');
     } catch (err) {
         console.error('❌ Lỗi khởi tạo MySQL:', err.message);
+        throw err; // Ném lỗi để index.js bắt được
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 }
 
