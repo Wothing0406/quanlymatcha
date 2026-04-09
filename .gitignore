@@ -24,6 +24,11 @@ __pycache__/
 dist/
 build/
 
+# Database files
+*.db
+database/
+
+
 # OS
 .DS_Store
 Thumbs.db
