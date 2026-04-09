@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Personal Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .transition-all {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-all">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800">
+            <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a href="dashboard.html" class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all font-bold">
+                <i class="fas fa-th-large w-6"></i> <span class="text-sm">Bảng điều khiển</span>
+            </a>
+            <a href="agenda.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+                <i class="fas fa-tasks w-6"></i> <span class="text-sm">Công việc hôm nay</span>
+            </a>
+            <a href="history.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+                <i class="fas fa-history w-6"></i> <span class="text-sm">Nhật ký hoạt động</span>
+            </a>
+            <a href="finance.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+                <i class="fas fa-wallet w-6"></i> <span class="text-sm">Theo dõi tài chính</span>
+            </a>
+            <a href="goals.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+                <i class="fas fa-bullseye w-6"></i> <span class="text-sm">Mục tiêu tiết kiệm</span>
+            </a>
+            <a href="schedule.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+                <i class="fas fa-calendar-alt w-6"></i> <span class="text-sm">Lịch trình hàng tuần</span>
+            </a>
+        </nav>
+
+        <!-- Global Agenda Section -->
+        <div id="sidebar-agenda-container" class="hidden md:flex flex-col mt-auto border-t border-gray-800 pt-6">
+            <div class="px-6 mb-4 flex items-center gap-2">
+                <i class="fas fa-bolt text-[10px] text-blue-500"></i>
+                <p class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Sắp tới & Đang làm</p>
+            </div>
+            <div id="sidebar-agenda-list" class="px-4 space-y-2 pb-6">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </aside>
+
+    <div class="md:ml-64 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm flex items-center justify-between px-6 sticky top-0 z-40 transition-all border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="md:hidden text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-bars-staggered text-xl"></i></button>
+                <div class="hidden md:block">
+                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Thời gian thực</p>
+                    <div id="real-time-clock" class="text-sm font-bold text-blue-600"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-2xl">
+                    <button id="btn-light-mode" onclick="setTheme('light')"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center transition-all bg-white shadow-sm text-yellow-500"><i
+                            class="fas fa-sun"></i></button>
+                    <button id="btn-dark-mode" onclick="setTheme('dark')"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center transition-all text-gray-400"><i
+                            class="fas fa-moon"></i></button>
+                </div>
+                <button id="btn-export"
+                    class="hidden md:flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-blue-200 dark:shadow-none">
+                    <i class="fas fa-cloud-download-alt"></i> Sao lưu
+                </button>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="p-6 space-y-8 flex-1">
+            <div data-aos="fade-down">
+                <h1 class="text-3xl font-black tracking-tight mb-2">Bảng điều khiển</h1>
+                <p class="text-sm text-gray-500 font-medium">Chào buổi sáng! Hãy cùng điểm qua vài mốc thống kê nhé.</p>
+            </div>
+
+            <!-- Focus Center / Working Now Widget -->
+            <div id="working-now-container" class="hidden">
+                <div
+                    class="bg-blue-600 dark:bg-blue-700 p-8 rounded-[2.5rem] text-white shadow-xl shadow-blue-100 dark:shadow-none relative overflow-hidden group">
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div class="space-y-4">
+                            <span
+                                class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">Đang
+                                diễn ra</span>
+                            <div id="working-now-content">
+                                <!-- Targeted task will be injected here -->
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                             <a href="agenda.html" class="px-6 py-3 bg-white text-blue-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg">Xác nhận ngay</a>
+                        </div>
+                    </div>
+                    <!-- Abstract glass shapes -->
+                    <div
+                        class="absolute -bottom-10 -right-10 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats & Analytics Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Spending Chart -->
+                <div data-aos="fade-right" data-aos-delay="100"
+                    class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white dark:border-gray-700 shadow-xl transition-all hover:shadow-2xl hover:scale-[1.01]">
+                    <h3 class="text-xl font-black mb-6 flex items-center gap-3">
+                        <i class="fas fa-chart-line text-blue-500"></i> Theo dõi chi tiêu
+                    </h3>
+                    <div class="h-64 h-64">
+                        <canvas id="chart-spending"></canvas>
+                    </div>
+                </div>
+                <!-- Task Performance Chart -->
+                <div data-aos="fade-left" data-aos-delay="200"
+                    class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white dark:border-gray-700 shadow-xl transition-all hover:shadow-2xl hover:scale-[1.01]">
+                    <h3 class="text-xl font-black mb-6 flex items-center gap-3">
+                        <i class="fas fa-tasks text-blue-500"></i> Hiệu suất công việc
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chart-tasks"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secondary Layout Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Today's Agenda -->
+                <section data-aos="fade-up" data-aos-delay="300"
+                    class="lg:col-span-2 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 class="text-2xl font-black tracking-tight">📋 Lịch trình hôm nay</h2>
+                            <p class="text-sm text-gray-400 font-medium">Thứ trong tuần: <span
+                                    id="current-weekday-label" class="text-blue-500 font-bold">...</span></p>
+                        </div>
+                        <a href="schedule.html"
+                            class="p-4 bg-gray-100 dark:bg-gray-700 rounded-2xl hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                    </div>
+
+                    <div id="dash-today-tasks" class="space-y-4">
+                        <div class="text-center py-12 opacity-50 italic">Đang tải lịch trình...</div>
+                    </div>
+                </section>
+
+                <!-- Finance & Goals Brief -->
+                <div class="space-y-8">
+                    <!-- Finance Health Bar -->
+                    <div data-aos="fade-up" data-aos-delay="400" id="dash-budget-health"
+                        class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Quick Wallet Stats -->
+                    <div data-aos="fade-up" data-aos-delay="500"
+                        class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3 class="text-xl font-black mb-8 flex items-center gap-4">
+                            <i class="fas fa-wallet text-blue-500"></i> Ví của bạn
+                        </h3>
+                        <div id="dash-finance-stats" class="grid grid-cols-2 gap-6">
+                            <div
+                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-green-500/5 transition-all">
+                                <p id="stat-income" class="text-xl font-black text-blue-600">0 VNĐ</p>
+                            </div>
+                            <div
+                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-red-500/5 transition-all">
+                                <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Đã tiêu</p>
+                                <p id="stat-expenses" class="text-xl font-black text-red-500">0 VNĐ</p>
+                            </div>
+                            <div
+                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-blue-500/5 transition-all">
+                                <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Tiết kiệm</p>
+                                <p id="stat-saving" class="text-xl font-black text-green-500">0 VNĐ</p>
+                            </div>
+                            <div
+                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-purple-500/5 transition-all">
+                                <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Còn lại</p>
+                                <p id="stat-remaining" class="text-xl font-black text-purple-600">0 VNĐ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="p-6 text-center text-sm text-gray-500 dark:text-gray-400 transition-all">
+            Ứng dụng Quản lý Cá nhân của Matcha
+        </footer>
+    </div>
+
+    <!-- Modals for interactivity -->
+    <!-- Verification Modal -->
+    <div id="modal-verify-task"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-[2.5rem] w-full max-w-md p-8 space-y-6 shadow-2xl animate-scale-in">
+            <div class="text-center space-y-2">
+                <div
+                    class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <h3 class="text-2xl font-black">Xác nhận hoàn thành</h3>
+                <p id="verify-task-title" class="text-sm text-gray-400 font-medium"></p>
+            </div>
+
+            <input type="hidden" id="verify-task-id">
+
+            <div class="space-y-6">
+                <div
+                    class="border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[2rem] p-8 text-center group hover:border-blue-500 transition-all cursor-pointer">
+                    <label class="cursor-pointer block">
+                        <input type="file" id="verify-photo-input" accept="image/*" capture="environment"
+                            class="hidden">
+                        <div id="verify-preview-container" class="space-y-3">
+                            <i
+                                class="fas fa-cloud-upload-alt text-4xl text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                            <p class="text-xs text-gray-400 font-black uppercase tracking-widest">Chụp hoặc chọn ảnh
+                                minh chứng</p>
+                        </div>
+                        <img id="verify-preview-img" class="hidden w-full max-h-56 object-cover rounded-2xl shadow-lg">
+                    </label>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeVerifyModal()"
+                        class="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-700 rounded-2xl text-xs font-black uppercase tracking-widest transition-all hover:bg-gray-200">Hủy</button>
+                    <button id="btn-confirm-done" disabled
+                        class="flex-1 px-6 py-4 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-30 shadow-lg shadow-blue-200 dark:shadow-none">Xác
+                        nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skip/Postpone Modal -->
+    <div id="modal-skip-task"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-[2.5rem] w-full max-w-md p-8 space-y-8 shadow-2xl animate-scale-in">
+            <div class="space-y-2">
+                <h3 class="text-2xl font-black flex items-center gap-3">
+                    <i class="fas fa-calendar-times text-red-500"></i> Báo bận
+                </h3>
+                <p class="text-sm text-gray-400 font-medium">Chọn phương án phù hợp để mình sắp xếp lại nhé.</p>
+            </div>
+
+            <div class="space-y-6">
+                <textarea id="skip-reason"
+                    class="w-full bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-blue-500 rounded-[1.5rem] p-4 text-sm font-medium transition-all outline-none resize-none"
+                    placeholder="Lý do bận hôm nay..." rows="3"></textarea>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="confirmSkipAction('postponed')"
+                        class="flex flex-col items-center gap-3 p-5 bg-orange-50 dark:bg-orange-900/10 text-orange-600 rounded-[1.5rem] hover:scale-[1.02] transition-all border border-orange-100 dark:border-orange-900/20">
+                        <i class="fas fa-clock text-2xl"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Để làm sau</span>
+                    </button>
+                    <button onclick="confirmSkipAction('skipped')"
+                        class="flex flex-col items-center gap-3 p-5 bg-red-50 dark:bg-red-900/10 text-red-600 rounded-[1.5rem] hover:scale-[1.02] transition-all border border-red-100 dark:border-red-900/20">
+                        <i class="fas fa-ban text-2xl"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Bỏ qua luôn</span>
+                    </button>
+                </div>
+
+                <button onclick="closeSkipModal()"
+                    class="w-full py-4 text-[10px] font-black text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-[0.3em]">Hệ
+                    thống sẽ giữ nguyên</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Smooth initialization for charts
+        document.addEventListener('DOMContentLoaded', () => {
+            initDashboard();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật ký - Quản lý Cá nhân</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        .transition-all { transition: all 0.3s ease-in-out; }
+        .sidebar-item { transition: all 0.2s ease; }
+        .sidebar-item:hover { transform: translateX(5px); }
+        .filter-btn.active { background: white; color: #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .dark .filter-btn.active { background: #374151; color: #60a5fa; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-all">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800">
+            <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
+        </div>
+
+        <nav class="mt-6 px-4 space-y-2">
+            <a href="dashboard.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-th-large w-6"></i> <span class="text-sm font-bold">Bảng điều khiển</span>
+            </a>
+            <a href="agenda.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-tasks w-6"></i> <span class="text-sm font-bold">Công việc hôm nay</span>
+            </a>
+            <a href="history.html" class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all font-bold">
+                <i class="fas fa-history w-6"></i> <span class="text-sm">Nhật ký hoạt động</span>
+            </a>
+            <a href="finance.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-wallet w-6"></i> <span class="text-sm font-bold">Theo dõi tài chính</span>
+            </a>
+            <a href="goals.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-bullseye w-6"></i> <span class="text-sm font-bold">Mục tiêu tiết kiệm</span>
+            </a>
+            <a href="schedule.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-calendar-alt w-6"></i> <span class="text-sm font-bold">Lịch trình hàng tuần</span>
+            </a>
+        </nav>
+
+        <!-- Global Agenda Section -->
+        <div id="sidebar-agenda-container" class="hidden md:flex flex-col mt-auto border-t border-gray-100 dark:border-gray-800 pt-6">
+            <div class="px-6 mb-4 flex items-center gap-2">
+                <i class="fas fa-bolt text-[10px] text-blue-500"></i>
+                <p class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Sắp tới & Đang làm</p>
+            </div>
+            <div id="sidebar-agenda-list" class="px-4 space-y-2 pb-6">
+                <!-- Injected via JS as Tabs -->
+            </div>
+        </div>
+    </aside>
+
+    <div class="md:ml-64 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm flex items-center justify-between px-6 sticky top-0 z-40 transition-all border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="md:hidden text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-bars-staggered text-xl"></i></button>
+                <div class="hidden md:block">
+                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Thời gian thực</p>
+                    <div id="real-time-clock" class="text-sm"></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-2xl">
+                    <button id="btn-light-mode" onclick="setTheme('light')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all bg-white shadow-sm text-yellow-500"><i class="fas fa-sun"></i></button>
+                    <button id="btn-dark-mode" onclick="setTheme('dark')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all text-gray-400"><i class="fas fa-moon"></i></button>
+                </div>
+                <button id="btn-export" class="hidden md:flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-blue-200 dark:shadow-none">
+                    <i class="fas fa-cloud-download-alt"></i> Sao lưu
+                </button>
+            </div>
+        </header>
+
+        <main class="p-6 space-y-12 flex-1">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <p class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-2">Nhìn lại hành trình</p>
+                    <h2 class="text-4xl font-black tracking-tight">📜 Nhật ký hoạt động</h2>
+                </div>
+                <!-- Filters -->
+                <div class="flex flex-wrap gap-2 bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl">
+                    <button onclick="filterHistory('all')" class="filter-btn active bg-white dark:bg-gray-700 shadow-sm px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-600">Tất cả</button>
+                    <button onclick="filterHistory('task')" class="filter-btn px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-600 transition-all">Việc đã làm</button>
+                    <button onclick="filterHistory('purchase')" class="filter-btn px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-600 transition-all">Chi tiêu</button>
+                </div>
+            </div>
+
+            <!-- History Widgets Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="history-timeline">
+                <!-- Items will be injected here -->
+                <div class="col-span-full text-center py-20 opacity-50 italic">Đang tải nhật ký hành trình...</div>
+            </div>
+        </main>
+
+        <footer class="p-6 text-center text-sm text-gray-500">Ứng dụng Quản lý Cá nhân Nội bộ</footer>
+    </div>
+
+    <!-- Image Modal (Zoom) -->
+    <div id="image-modal" class="fixed inset-0 bg-black/90 z-[60] hidden flex items-center justify-center p-4 cursor-pointer" onclick="closeImageModal()">
+        <img id="modal-img" src="" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="app.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof loadHistory === 'function') loadHistory();
+        });
+        
+        function filterHistory(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600');
+                btn.classList.add('text-gray-400');
+            });
+            event.target.classList.add('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600');
+            event.target.classList.remove('text-gray-400');
+            if(typeof loadHistory === 'function') loadHistory(type);
+        }
+
+        function openImage(src) {
+            const modal = document.getElementById('image-modal');
+            const img = document.getElementById('modal-img');
+            img.src = src;
+            modal.classList.remove('hidden');
+        }
+        function closeImageModal() {
+            document.getElementById('image-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

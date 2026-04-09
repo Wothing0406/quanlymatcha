@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: matcha-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: matcha-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./frontend:/app/frontend
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  discord-bot:
+    build: ./discord-bot
+    container_name: matcha-bot
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    env_file:
+      - .env
+    volumes:
+      - ./discord-bot/uploads:/app/uploads
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: matcha-tunnel
+    restart: unless-stopped
+    # Quick Tunnel: Gives you a random trycloudflare.com URL for free, no domain needed!
+    command: tunnel --no-autoupdate --url http://backend:3000
+    depends_on:
+      - backend

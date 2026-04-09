@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker - Personal Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        .transition-all { transition: all 0.3s ease-in-out; }
+        .sidebar-item { transition: all 0.2s ease; }
+        .sidebar-item:hover { transform: translateX(5px); }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-all">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800">
+            <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a href="dashboard.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-th-large w-6"></i> <span class="text-sm font-bold">Bảng điều khiển</span>
+            </a>
+            <a href="agenda.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-tasks w-6"></i> <span class="text-sm font-bold">Công việc hôm nay</span>
+            </a>
+            <a href="history.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-history w-6"></i> <span class="text-sm font-bold">Nhật ký hoạt động</span>
+            </a>
+            <a href="finance.html" class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all font-bold">
+                <i class="fas fa-wallet w-6"></i> <span class="text-sm">Theo dõi tài chính</span>
+            </a>
+            <a href="goals.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-bullseye w-6"></i> <span class="text-sm font-bold">Mục tiêu tiết kiệm</span>
+            </a>
+            <a href="schedule.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-calendar-alt w-6"></i> <span class="text-sm font-bold">Lịch trình hàng tuần</span>
+            </a>
+        </nav>
+
+        <!-- Global Agenda Section -->
+        <div id="sidebar-agenda-container" class="hidden md:flex flex-col mt-auto border-t border-gray-800 pt-6">
+            <div class="px-6 mb-4 flex items-center gap-2">
+                <i class="fas fa-bolt text-[10px] text-blue-500"></i>
+                <p class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Sắp tới & Đang làm</p>
+            </div>
+            <div id="sidebar-agenda-list" class="px-4 space-y-2 pb-6">
+                <!-- Injected via JS as Tabs -->
+            </div>
+        </div>
+    </aside>
+
+    <div class="md:ml-64 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm flex items-center justify-between px-6 sticky top-0 z-40 transition-all border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="md:hidden text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-bars-staggered text-xl"></i></button>
+                <div class="hidden md:block">
+                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Thời gian thực</p>
+                    <div id="real-time-clock" class="text-sm"></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-2xl">
+                    <button id="btn-light-mode" onclick="setTheme('light')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all bg-white shadow-sm text-yellow-500"><i class="fas fa-sun"></i></button>
+                    <button id="btn-dark-mode" onclick="setTheme('dark')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all text-gray-400"><i class="fas fa-moon"></i></button>
+                </div>
+                <button id="btn-export" class="hidden md:flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-blue-200 dark:shadow-none">
+                    <i class="fas fa-cloud-download-alt"></i> Sao lưu
+                </button>
+            </div>
+        </header>
+
+        <main class="p-6 flex flex-col items-center gap-12">
+            <div class="w-full max-w-xl space-y-12">
+                <div class="text-center space-y-2">
+                    <h2 class="text-4xl font-black tracking-tight">💰 Tài chính & Chi tiêu</h2>
+                    <p class="text-sm text-gray-400 font-medium">Theo dõi và tối ưu hóa ngân sách cá nhân của bạn.</p>
+                </div>
+
+                <!-- Add Quick Purchase Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl p-10 space-y-8 border border-blue-500/10 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
+                    <h3 class="text-xl font-black flex items-center gap-3"><i class="fas fa-plus-circle text-blue-500"></i> Nhập chi tiêu mới</h3>
+                    <form id="form-purchase-with-photo" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Tên món đồ</label>
+                                <input type="text" id="pur-name" class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" placeholder="VD: Bún bò" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Số tiền (VNĐ)</label>
+                                <input type="number" id="pur-amount" class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" placeholder="VD: 50000" required>
+                            </div>
+                        </div>
+                        <div class="border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[2rem] p-8 text-center transition-all hover:border-blue-500 group cursor-pointer relative">
+                            <label class="cursor-pointer block">
+                                <input type="file" id="pur-photo-input" accept="image/*" capture="environment" class="hidden">
+                                <div id="pur-preview-container" class="space-y-3">
+                                    <i class="fas fa-camera text-3xl text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                                    <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Chụp ảnh món đồ minh chứng</p>
+                                </div>
+                                <img id="pur-preview-img" class="hidden w-full max-h-48 object-cover rounded-2xl shadow-lg">
+                            </label>
+                        </div>
+                        <button type="submit" id="btn-save-purchase" class="w-full bg-blue-500 text-white rounded-2xl px-6 py-4 font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-100 dark:shadow-none hover:bg-blue-600 hover:scale-[1.02] transition-all active:scale-95">Lưu chi tiêu ngay</button>
+                    </form>
+                </div>
+                
+                <!-- Purchase History Feed -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-black flex items-center gap-3">
+                        <i class="fas fa-shopping-bag text-blue-500"></i> Lịch sử gần đây
+                    </h3>
+                    <div id="finance-purchase-list" class="space-y-4">
+                        <div class="text-center py-12 opacity-50 italic">Đang tải lịch sử chi tiêu...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="p-6 text-center text-sm text-gray-500">Ứng dụng Quản lý Cá nhân Nội bộ</footer>
+    </div>
+
+    <!-- Image Modal (Zoom) -->
+    <div id="image-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4 cursor-pointer" onclick="this.classList.add('hidden')">
+        <img id="modal-img" src="" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="app.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+        function openImage(src) {
+            const modal = document.getElementById('image-modal');
+            const img = document.getElementById('modal-img');
+            img.src = src;
+            modal.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

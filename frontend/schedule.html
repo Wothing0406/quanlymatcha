@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Schedule - Personal Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        .transition-all { transition: all 0.3s ease-in-out; }
+        .sidebar-item { transition: all 0.2s ease; }
+        .sidebar-item:hover { transform: translateX(5px); }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-all">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800">
+            <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a href="dashboard.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-th-large w-6"></i> <span class="text-sm font-bold">Bảng điều khiển</span>
+            </a>
+            <a href="agenda.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-tasks w-6"></i> <span class="text-sm font-bold">Công việc hôm nay</span>
+            </a>
+            <a href="history.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-history w-6"></i> <span class="text-sm font-bold">Nhật ký hoạt động</span>
+            </a>
+            <a href="finance.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-wallet w-6"></i> <span class="text-sm font-bold">Theo dõi tài chính</span>
+            </a>
+            <a href="goals.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
+                <i class="fas fa-bullseye w-6"></i> <span class="text-sm font-bold">Mục tiêu tiết kiệm</span>
+            </a>
+            <a href="schedule.html" class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all font-bold">
+                <i class="fas fa-calendar-alt w-6"></i> <span class="text-sm">Lịch trình hàng tuần</span>
+            </a>
+        </nav>
+
+        <!-- Global Agenda Section -->
+        <div id="sidebar-agenda-container" class="hidden md:flex flex-col mt-auto border-t border-gray-800 pt-6">
+            <div class="px-6 mb-4 flex items-center gap-2">
+                <i class="fas fa-bolt text-[10px] text-blue-500"></i>
+                <p class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Sắp tới & Đang làm</p>
+            </div>
+            <div id="sidebar-agenda-list" class="px-4 space-y-2 pb-6">
+                <!-- Injected via JS as Tabs -->
+            </div>
+        </div>
+    </aside>
+
+    <div class="md:ml-64 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm flex items-center justify-between px-6 sticky top-0 z-40 transition-all border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="md:hidden text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-bars-staggered text-xl"></i></button>
+                <div class="hidden md:block">
+                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Thời gian thực</p>
+                    <div id="real-time-clock" class="text-sm font-bold text-blue-600"></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-2xl">
+                    <button id="btn-light-mode" onclick="setTheme('light')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all bg-white shadow-sm text-yellow-500"><i class="fas fa-sun"></i></button>
+                    <button id="btn-dark-mode" onclick="setTheme('dark')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all text-gray-400"><i class="fas fa-moon"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-6 md:p-10 space-y-12">
+            <div class="text-center md:text-left space-y-2" data-aos="fade-down">
+                <p class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-2">Quản lý thời gian</p>
+                <h2 class="text-4xl font-black tracking-tight">🗓️ Lịch trình hàng tuần</h2>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl p-8 md:p-10 max-w-2xl border border-blue-500/10 relative overflow-hidden" data-aos="fade-up">
+                <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
+                <form id="form-schedule" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Tên công việc</label>
+                        <input type="text" id="task-name" class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" placeholder="VD: Tập Gym, Học Tiếng Anh..." required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Thứ trong tuần</label>
+                        <select id="task-weekday" class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                            <option>Thứ 2</option><option>Thứ 3</option><option>Thứ 4</option><option>Thứ 5</option>
+                            <option>Thứ 6</option><option>Thứ 7</option><option>Chủ Nhật</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-1/2">
+                            <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Bắt đầu</label>
+                            <input type="time" id="task-start" class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Kết thúc</label>
+                            <input type="time" id="task-end" class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="md:col-span-2 bg-blue-500 text-white rounded-2xl px-6 py-4 font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-100 dark:shadow-none hover:bg-blue-600 hover:scale-[1.02] transition-all active:scale-95">
+                        <i class="fas fa-plus mr-2"></i> Thêm vào lịch trình
+                    </button>
+                </form>
+            </div>
+
+            <div class="space-y-6" data-aos="fade-up">
+                <h3 class="text-2xl font-black flex items-center gap-3"><i class="fas fa-list-ul text-blue-500"></i> Các công việc đã thiết lập</h3>
+                <div id="tasks-list" class="space-y-4 pb-10">
+                    <!-- Task items list here -->
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-auto p-8 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Hệ thống Quản lý Matcha &copy; 2026
+        </footer>
+    </div>
+
+    <!-- Global Modals -->
+    <div id="modal-verify-task" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] w-full max-w-md p-8 relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
+            <h3 class="text-2xl font-black mb-2" id="verify-task-title">Xác thực công việc</h3>
+            <p class="text-sm text-gray-500 mb-6">Vui lòng chụp ảnh hoặc tải lên bằng chứng hoàn thành.</p>
+            <form id="form-verify-task" class="space-y-6">
+                <input type="hidden" id="verify-task-id">
+                <div class="border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[2rem] p-10 text-center hover:border-blue-500 group transition-all cursor-pointer relative">
+                    <input type="file" id="verify-photo-input" accept="image/*" capture="environment" class="hidden" required>
+                    <label for="verify-photo-input" class="cursor-pointer">
+                        <div id="verify-preview-placeholder" class="space-y-4">
+                            <i class="fas fa-camera text-4xl text-blue-500 group-hover:scale-110 transition-transform"></i>
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Chụp ảnh / Tải lên</p>
+                        </div>
+                        <img id="verify-preview-img" class="hidden w-full h-48 object-cover rounded-2xl shadow-lg">
+                    </label>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" onclick="closeVerifyModal()" class="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-400 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Hủy</button>
+                    <button type="button" id="btn-confirm-done" class="flex-1 px-6 py-4 bg-blue-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-blue-100">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-skip-task" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] w-full max-w-md p-8 relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 left-0 w-full h-2 bg-orange-500"></div>
+            <h3 class="text-2xl font-black mb-2">Báo bận / Dời lịch</h3>
+            <p class="text-sm text-gray-500 mb-6">Hãy cho mình biết lý do bạn chưa thể thực hiện nhé.</p>
+            <div class="space-y-6">
+                <textarea id="skip-reason" class="w-full h-32 p-4 rounded-2xl bg-gray-50 dark:bg-gray-700 border-none text-sm focus:ring-2 focus:ring-orange-500 transition-all outline-none resize-none" placeholder="Lý do bận hôm nay..."></textarea>
+                <div class="flex flex-col gap-3">
+                    <div class="flex gap-3">
+                        <button onclick="confirmSkipAction('skipped')" class="flex-1 px-6 py-4 bg-orange-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-orange-600 transition-all">Bỏ qua</button>
+                        <button onclick="confirmSkipAction('postponed')" class="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Dời lịch</button>
+                    </div>
+                    <button onclick="closeSkipModal()" class="w-full py-3 text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-gray-600 transition-all">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="app.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+    </script>
+</body>
+</html>
+
+</html>
