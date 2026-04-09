@@ -17,37 +17,41 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-all">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
         <div class="h-16 flex items-center justify-center border-b border-gray-800">
             <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
         </div>
         <nav class="mt-6 px-4 space-y-2">
-            <a href="dashboard.html" class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all font-bold">
+            <a href="dashboard.html"
+                class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all font-bold">
                 <i class="fas fa-th-large w-6"></i> <span class="text-sm">Bảng điều khiển</span>
             </a>
-            <a href="agenda.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+            <a href="agenda.html"
+                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
                 <i class="fas fa-tasks w-6"></i> <span class="text-sm">Công việc hôm nay</span>
             </a>
-            <a href="history.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+            <a href="history.html"
+                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
                 <i class="fas fa-history w-6"></i> <span class="text-sm">Nhật ký hoạt động</span>
             </a>
-            <a href="finance.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+            <a href="finance.html"
+                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
                 <i class="fas fa-wallet w-6"></i> <span class="text-sm">Theo dõi tài chính</span>
             </a>
-            <a href="goals.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+            <a href="goals.html"
+                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
                 <i class="fas fa-bullseye w-6"></i> <span class="text-sm">Mục tiêu tiết kiệm</span>
             </a>
-            <a href="schedule.html" class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+            <a href="schedule.html"
+                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
                 <i class="fas fa-calendar-alt w-6"></i> <span class="text-sm">Lịch trình hàng tuần</span>
             </a>
         </nav>
 
         <!-- Global Agenda Section -->
         <div id="sidebar-agenda-container" class="hidden md:flex flex-col mt-auto border-t border-gray-800 pt-6">
-            <div class="px-6 mb-4 flex items-center gap-2">
-                <i class="fas fa-bolt text-[10px] text-blue-500"></i>
-                <p class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Sắp tới & Đang làm</p>
-            </div>
+
             <div id="sidebar-agenda-list" class="px-4 space-y-2 pb-6">
                 <!-- Injected via JS -->
             </div>
@@ -56,9 +60,11 @@
 
     <div class="md:ml-64 flex flex-col min-h-screen">
         <!-- Header -->
-        <header class="h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm flex items-center justify-between px-6 sticky top-0 z-40 transition-all border-b border-gray-100 dark:border-gray-700">
+        <header
+            class="h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm flex items-center justify-between px-6 sticky top-0 z-40 transition-all border-b border-gray-100 dark:border-gray-700">
             <div class="flex items-center gap-4">
-                <button id="sidebar-toggle" class="md:hidden text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-bars-staggered text-xl"></i></button>
+                <button id="sidebar-toggle" class="md:hidden text-gray-500 hover:text-gray-700 transition-colors"><i
+                        class="fas fa-bars-staggered text-xl"></i></button>
                 <div class="hidden md:block">
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Thời gian thực</p>
                     <div id="real-time-clock" class="text-sm font-bold text-blue-600"></div>
@@ -102,7 +108,9 @@
                             </div>
                         </div>
                         <div class="flex gap-3">
-                             <a href="agenda.html" class="px-6 py-3 bg-white text-blue-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg">Xác nhận ngay</a>
+                            <a href="agenda.html"
+                                class="px-6 py-3 bg-white text-blue-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg">Xác
+                                nhận ngay</a>
                         </div>
                     </div>
                     <!-- Abstract glass shapes -->

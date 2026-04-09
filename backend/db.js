@@ -11,19 +11,11 @@ const dbConfig = {
     queueLimit: 0
 };
 
-let pool;
-
-async function getPool() {
-    if (!pool) {
-        pool = mysql.createPool(dbConfig);
-        console.log('✅ Kết nối tới MySQL Pool thành công.');
-        await initDb();
-    }
-    return pool;
-}
+const pool = mysql.createPool(dbConfig);
+console.log('✅ Đã tạo MySQL Connection Pool.');
 
 async function initDb() {
-    const conn = await pool.getConnection();
+    let conn;
     try {
         console.log('🚀 Đang khởi tạo bảng dữ liệu MySQL...');
         
@@ -81,12 +73,8 @@ async function initDb() {
 }
 
 module.exports = {
-    query: async (sql, params) => {
-        const p = await getPool();
-        return p.query(sql, params);
-    },
-    execute: async (sql, params) => {
-        const p = await getPool();
-        return p.execute(sql, params);
-    }
+    pool,
+    initDb,
+    query: (sql, params) => pool.query(sql, params),
+    execute: (sql, params) => pool.execute(sql, params)
 };

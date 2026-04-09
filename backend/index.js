@@ -198,6 +198,16 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // START
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`API Server is running on http://0.0.0.0:${PORT}`);
-});
+async function startServer() {
+    try {
+        await db.initDb();
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`API Server is running on http://0.0.0.0:${PORT}`);
+        });
+    } catch (err) {
+        console.error("❌ Failed to start server:", err);
+        process.exit(1);
+    }
+}
+
+startServer();
