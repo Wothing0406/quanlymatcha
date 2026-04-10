@@ -4,7 +4,7 @@
 
 async function initDashboard() {
     try {
-        const stats = await fetchJSON(`${API_BASE}/stats`);
+        const stats = await fetchJSON(`${API_BASE}/finance/stats`);
         updateDashboardStats(stats);
         loadDashboardHistory();
     } catch (err) { console.error('Lỗi dashboard:', err); }

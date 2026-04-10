@@ -105,9 +105,18 @@ Nhiệm vụ của bạn:
 """
 
         try:
+            # Configure safety settings to OFF so the bot can be harsh without Google blocking it
+            from google.generativeai.types import HarmCategory, HarmBlockThreshold
+            safety_settings = {
+                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+            }
+
             # Indicate typing while generating response
             async with message.channel.typing():
-                response = self.model.generate_content(system_prompt)
+                response = self.model.generate_content(system_prompt, safety_settings=safety_settings)
                 ai_text = response.text
                 
                 # Discord has a 2000 char message limit

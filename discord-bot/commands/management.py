@@ -65,7 +65,8 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
             name="🔧 Hệ thống",
             value=(
                 "`/help` - Xem danh sách lệnh\n"
-                "`/status` - Trạng thái bot và database"
+                "`/status` - Trạng thái bot và database\n"
+                "`/web` - Lấy link trang bảng điều khiển Web"
             ),
             inline=False
         )

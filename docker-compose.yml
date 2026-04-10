@@ -52,9 +52,9 @@ services:
     restart: unless-stopped
 
   tunnel:
-    image: node:18-alpine
+    image: cloudflare/cloudflared:latest
     container_name: matcha-tunnel
     restart: unless-stopped
-    command: npx localtunnel --port 3000 --local-host backend --subdomain matcha-quanly
+    command: tunnel --no-autoupdate --url http://backend:3000
     depends_on:
       - backend

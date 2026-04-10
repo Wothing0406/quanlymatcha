@@ -61,17 +61,13 @@ async def check_tasks(bot, dm_channel):
             await dm_channel.send(embed=embed)
             db.execute("UPDATE tasks SET notified_15m = 1 WHERE id = %s", (task['id'],))
 
-        # --- Tự động đánh missed sau 45 phút ---
+        # --- Tự động nhắc nhở sau 45 phút, không auto-fail nữa ---
         elif diff >= 45 and task['status'] == 'pending' and task['notified_45m'] == 0:
-            logger.info(f"❌ [AUTO MISSED] Task: {task['task_name']}")
-            db.execute(
-                "UPDATE tasks SET status = 'missed', notified_45m = 1, reason = 'Tự động đánh dấu missed sau 45 phút' WHERE id = %s",
-                (task['id'],)
-            )
+            db.execute("UPDATE tasks SET notified_45m = 1 WHERE id = %s", (task['id'],))
             import discord
             embed = discord.Embed(
-                title=f"❌ Đã bỏ lỡ: {task['task_name']}",
-                description=f"Hmm, đã 45 phút trôi qua mà chưa hoàn thành.\nMình tự động đánh dấu task này là **missed** rồi nhé. 😔",
-                color=discord.Color.red()
+                title=f"⚠️ Chú ý: {task['task_name']}",
+                description=f"Đã 45 phút trôi qua kể từ lịch hẹn mà bạn vẫn chưa bắt đầu công việc. Hay là bạn quên đánh dấu trên hệ thống rồi? 🧐",
+                color=discord.Color.orange()
             )
             await dm_channel.send(embed=embed)
