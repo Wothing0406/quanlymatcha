@@ -88,6 +88,29 @@ def init_db():
         
         conn.commit()
         logger.info("✨ Khởi tạo bảng MySQL thành công.")
+        
+        # --- AUTO MIGRATION SECTION ---
+        # Kiểm tra và thêm các cột còn thiếu cho database cũ
+        tasks_columns = [
+            ("photo_start_path", "VARCHAR(500)"),
+            ("reason", "TEXT"),
+            ("notified_start", "TINYINT(1) DEFAULT 0"),
+            ("notified_15m", "TINYINT(1) DEFAULT 0"),
+            ("notified_45m", "TINYINT(1) DEFAULT 0"),
+            ("started_at", "DATETIME")
+        ]
+        
+        for col_name, col_type in tasks_columns:
+            try:
+                # Check if column exists
+                cursor.execute(f"SHOW COLUMNS FROM tasks LIKE '{col_name}'")
+                if not cursor.fetchone():
+                    logger.info(f"🛠️ Migration: Đang thêm cột '{col_name}' vào bảng tasks...")
+                    cursor.execute(f"ALTER TABLE tasks ADD COLUMN {col_name} {col_type}")
+                    conn.commit()
+            except Exception as migrate_err:
+                logger.error(f"⚠️ Lỗi migration cột {col_name}: {migrate_err}")
+
     except Exception as e:
         logger.error(f"❌ Lỗi khởi tạo MySQL từ Bot: {e}")
     finally:

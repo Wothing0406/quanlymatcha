@@ -7,7 +7,11 @@ async function initDashboard() {
         const stats = await fetchJSON(`${API_BASE}/finance/stats`);
         updateDashboardStats(stats);
         loadDashboardHistory();
-    } catch (err) { console.error('Lỗi dashboard:', err); }
+    } catch (err) { 
+        console.error('Lỗi dashboard:', err);
+        const gridEl = document.getElementById('agenda-task-grid');
+        if (gridEl) gridEl.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Không thể kết nối Database. Vui lòng kiểm tra lại Bot!</div>`;
+    }
 }
 
 function updateDashboardStats(stats) {
