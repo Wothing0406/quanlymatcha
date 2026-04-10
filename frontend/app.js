@@ -729,51 +729,6 @@ function parseSmartAmount(text) {
     
     return val;
 }
-                        ${item.photo_path ? `
-                            <div class="relative group overflow-hidden rounded-2xl">
-                                <img src="${item.photo_path}" class="w-full max-h-72 object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer" onclick="openImage('${item.photo_path}')">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                                    <span class="text-white text-xs font-bold"><i class="fas fa-search-plus mr-1"></i> Xem chi tiết</span>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            } else {
-                const isDone = item.status === 'done';
-                const colorClass = isDone ? 'text-green-500' : 'text-red-500';
-                const bgClass = isDone ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30';
-                const icon = isDone ? 'fa-check-circle' : 'fa-times-circle';
-                
-                return `
-                    <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg border border-transparent hover:border-blue-500 transition-all duration-300 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 ${bgClass} ${colorClass} rounded-2xl flex items-center justify-center">
-                                    <i class="fas ${isDone ? 'fa-tasks' : 'fa-exclamation-triangle'} text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Công việc</p>
-                                    <h4 class="font-bold text-lg">${item.task_name}</h4>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-black ${colorClass}">${isDone ? 'HOÀN THÀNH' : 'BÁO BẬN'}</p>
-                                <p class="text-[10px] text-gray-400 font-bold">${timeDisplay}</p>
-                            </div>
-                        </div>
-                        ${item.photo_path ? `
-                            <div class="relative group overflow-hidden rounded-2xl">
-                                <img src="${item.photo_path}" class="w-full max-h-72 object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer" onclick="openImage('${item.photo_path}')">
-                            </div>
-                        ` : ''}
-                        ${item.reason ? `<div class="bg-red-50 dark:bg-red-900/10 p-3 rounded-xl border-l-4 border-red-500"><p class="text-xs italic text-red-600 dark:text-red-400">Lý do: ${item.reason}</p></div>` : ''}
-                    </div>
-                `;
-            }
-        }).join('') : '<div class="text-center py-10 text-gray-400 italic">Chưa có hoạt động nào được ghi lại.</div>';
-    } catch (err) { console.error('Lỗi khi tải nhật ký:', err); }
-}
 
 // Verification & Reports Logic
 function openVerifyModal(id, title) {
