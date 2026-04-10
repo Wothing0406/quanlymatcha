@@ -8,10 +8,10 @@ def reset_database():
     print("🧨 ĐANG TIẾN HÀNH RESET DATABASE SANG V5.0...")
     
     conn = mysql.connector.connect(
-        host=os.getenv('DB_HOST', 'matcha-db'),
-        user=os.getenv('DB_USER', 'matcha_user'),
-        password=os.getenv('DB_PASSWORD', 'matcha_pass'),
-        database=os.getenv('DB_NAME', 'matcha_db')
+        host=os.getenv('MYSQL_HOST', 'mysql'),
+        user=os.getenv('MYSQL_USER', 'matcha_user'),
+        password=os.getenv('MYSQL_PASSWORD', 'matcha_pass'),
+        database=os.getenv('MYSQL_DATABASE', 'matcha_db')
     )
     cursor = conn.cursor()
     
