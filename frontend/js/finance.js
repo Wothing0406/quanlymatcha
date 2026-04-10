@@ -30,15 +30,63 @@ async function handleGoalSubmit(e) {
     e.preventDefault();
     const data = {
         goal_name: document.getElementById('goal-name').value,
-        target_amount: parseFloat(document.getElementById('target-amount').value),
-        deadline_months: parseInt(document.getElementById('deadline').value),
-        current_saved: parseFloat(document.getElementById('current-saved').value) || 0
+        target_amount: parseFloat(document.getElementById('goal-target').value),
+        deadline_months: parseInt(document.getElementById('goal-deadline').value) || 12,
+        current_saved: 0
     };
 
     try {
         await fetchJSON(`${API_BASE}/goals`, 'POST', data);
-        alert('Đã thêm mục tiêu tiết kiệm mới! 🎯');
-        location.reload();
+    } catch (err) { alert('Lỗi: ' + err.message); }
+}
+
+async function loadGoalsList() {
+    const listEl = document.getElementById('goals-list');
+    if (!listEl) return;
+    try {
+        const goals = await fetchJSON(`${API_BASE}/goals`);
+        if (goals.length === 0) {
+            listEl.innerHTML = '<div class="col-span-full text-center py-10 opacity-50 italic">Bạn chưa có mục tiêu nào. Hãy thiết lập ngay!</div>';
+            return;
+        }
+
+        listEl.innerHTML = goals.map(g => {
+            const percent = g.target_amount > 0 ? Math.min(100, Math.round((g.current_saved / g.target_amount) * 100)) : 0;
+            const remaining = g.target_amount - g.current_saved;
+            const bgClass = percent >= 100 ? 'bg-green-500/10 border-green-500/50' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700';
+
+            return `
+                <div data-aos="fade-up" class="glass-card ${bgClass} rounded-2xl p-6 shadow-sm border transition-all hover:shadow-lg group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 text-purple-500 rounded-xl flex items-center justify-center shadow-inner">
+                            <i class="fas fa-bullseye text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-black text-gray-300 dark:text-gray-600">${percent}%</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-1 truncate">${g.goal_name}</h4>
+                    <p class="text-xs text-gray-500 font-medium mb-6">Mục tiêu: <span class="font-bold text-gray-900 dark:text-white">${formatVNĐ(g.target_amount)}</span></p>
+                    
+                    <div class="w-full bg-gray-100 dark:bg-gray-700 h-3 rounded-full overflow-hidden mb-3">
+                        <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-full rounded-full transition-all duration-1000 relative" style="width: ${percent}%">
+                            <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                        <span class="text-blue-500">Đã gom: ${formatVNĐ(g.current_saved)}</span>
+                        <span class="text-gray-400">Còn: ${formatVNĐ(remaining > 0 ? remaining : 0)}</span>
+                    </div>
+                    <button onclick="deleteGoal(${g.id})" class="mt-6 w-full py-2 bg-red-50 dark:bg-red-900/10 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Xóa / Hủy Bỏ</button>
+                </div>
+            `;
+        }).join('');
+    } catch (err) { console.error('Lỗi tải mục tiêu:', err); }
+}
+
+async function deleteGoal(id) {
+    if (!confirm('Bạn có chắc chắn muốn xóa mục tiêu này?')) return;
+    try {
+        await fetchJSON(`${API_BASE}/goals/${id}`, 'DELETE');
+        loadGoalsList();
     } catch (err) { alert('Lỗi: ' + err.message); }
 }
 

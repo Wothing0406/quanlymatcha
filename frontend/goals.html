@@ -221,6 +221,13 @@
     <script src="js/dashboard.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
+        
+        // Initialize Goals List
+        loadGoalsList();
+        
+        // Bind form
+        const formGoals = document.getElementById('form-goals');
+        if(formGoals) formGoals.onsubmit = handleGoalSubmit;
     </script>
 </body>
 

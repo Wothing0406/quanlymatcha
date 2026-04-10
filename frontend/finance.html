@@ -185,6 +185,8 @@
     <script src="js/dashboard.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
+        loadPurchaseFeed();
+        
         function openImage(src) {
             const modal = document.getElementById('image-modal');
             const img = document.getElementById('modal-img');

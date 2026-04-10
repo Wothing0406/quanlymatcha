@@ -274,9 +274,17 @@
     <script src="js/dashboard.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
+        
+        // Initialize the schedule list
+        loadScheduleTasks();
+        
+        // Bind functions
+        const formEditTask = document.getElementById('form-edit-task');
+        if(formEditTask) formEditTask.onsubmit = submitEditTask;
+        
+        const formVerifyTask = document.getElementById('form-verify-task');
+        if(formVerifyTask) formVerifyTask.onsubmit = submitReport;
     </script>
 </body>
-
-</html>
 
 </html>

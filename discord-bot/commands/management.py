@@ -15,7 +15,17 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
 
     @app_commands.command(name="web", description="Lấy đường link truy cập trang quản lý Web Dashboard")
     async def get_web(self, interaction: discord.Interaction):
-        url = "https://matcha-quanly.loca.lt"
+        # Dynamically read the tunnel log to get the trycloudflare URL
+        url = "Đang khởi tạo đường truyền..."
+        log_path = "/app/uploads/cloudflared.log"
+        if os.path.exists(log_path):
+            import re
+            with open(log_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                match = re.search(r'(https://[a-zA-Z0-9-]+\.trycloudflare\.com)', content)
+                if match:
+                    url = match.group(1)
+
         pin = os.getenv("WEB_PIN", "1234")
         
         embed = discord.Embed(
@@ -24,7 +34,7 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
             color=discord.Color.teal()
         )
         embed.add_field(name="🔒 Mã PIN Bảo Mật:", value=f"`{pin}`", inline=False)
-        embed.set_footer(text="Lưu ý: Bạn phải nhấn 'Click to Continue' ở màn hình LocalTunnel!")
+        embed.set_footer(text="Nếu link lỗi, đợi 1-2 phút để Server tạo URL mới nhé!")
         
         # Tin nhắn dạng ephemeral tức là chỉ bạn nhìn thấy, người khác trong channel không thấy PIN
         await interaction.response.send_message(embed=embed, ephemeral=True)
