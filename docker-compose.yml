@@ -6,9 +6,9 @@ services:
     container_name: matcha-mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: rootpassword
       TZ: Asia/Ho_Chi_Minh
     volumes:
@@ -26,9 +26,9 @@ services:
       - .env
     environment:
       - MYSQL_HOST=mysql
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
       - TZ=Asia/Ho_Chi_Minh
     depends_on:
       - mysql
@@ -39,9 +39,9 @@ services:
     container_name: matcha-bot
     environment:
       - MYSQL_HOST=mysql
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
       - TZ=Asia/Ho_Chi_Minh
     env_file:
       - .env
