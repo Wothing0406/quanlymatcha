@@ -74,6 +74,16 @@ def init_db():
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
         
+        # 5. activity_log (Unified Feed V5.0)
+        cursor.execute("""CREATE TABLE IF NOT EXISTS activity_log (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            type ENUM('income', 'expense', 'saving', 'task_done', 'task_missed') NOT NULL,
+            title VARCHAR(255),
+            amount DOUBLE DEFAULT 0,
+            photo_path VARCHAR(500),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )""")
+        
         conn.commit()
         logger.info("✨ Khởi tạo bảng MySQL thành công.")
     except Exception as e:
@@ -113,3 +123,36 @@ def execute(sql, params=None, fetch=None):
             cursor.close()
         if conn:
             conn.close()
+def parse_amount(text):
+    """
+    Biến các chuỗi như '30k', '1.5tr', '2m' thành con số thực.
+    """
+    if not text: return 0
+    import re
+    text = str(text).lower().replace(' ', '').replace(',', '').replace('.', '')
+    
+    # regex matches number and suffix
+    match = re.match(r"(\d+\.?\d*)(k|tr|m|b|t)?", text)
+    if not match:
+        try: return float(text)
+        except: return 0
+        
+    val, unit = match.groups()
+    val = float(val)
+    
+    multipliers = {
+        'k': 1_000,
+        'tr': 1_000_000,
+        'm': 1_000_000,
+        'b': 1_000_000_000,
+        't': 1_000_000_000_000
+    }
+    
+    return val * multipliers.get(unit, 1)
+
+def log_activity(activity_type, title, amount=0, photo_path=None):
+    """Ghi log hoạt động tập trung vào bảng activity_log."""
+    execute(
+        "INSERT INTO activity_log (type, title, amount, photo_path) VALUES (%s, %s, %s, %s)",
+        (activity_type, title, amount, photo_path)
+    )

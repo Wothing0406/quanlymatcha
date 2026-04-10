@@ -59,9 +59,13 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     # ─── /expense ────────────────────────────────────────────────────────────
     expense_group = app_commands.Group(name="expense", description="Quản lý chi tiêu")
 
-    @expense_group.command(name="add", description="Thêm chi tiêu mới (VNĐ)")
-    @app_commands.describe(amount="Số tiền (VNĐ)", description="Mô tả khoản chi")
-    async def expense_add(self, interaction: discord.Interaction, amount: int, description: str):
+    @expense_group.command(name="add", description="Thêm chi tiêu mới (Ví dụ: 30k, 1.5tr)")
+    @app_commands.describe(amount="Số tiền (VND, hỗ trợ k, tr, m)", description="Mô tả khoản chi")
+    async def expense_add(self, interaction: discord.Interaction, amount: str, description: str):
+        parsed_amount = db.parse_amount(amount)
+        if parsed_amount <= 0:
+            return await interaction.response.send_message("❌ Số tiền không hợp lệ! Vui lòng nhập kiểu `30000`, `30k` hoặc `1.5tr`.", ephemeral=True)
+
         month = get_current_month()
         db.execute(
             """INSERT INTO monthly_finance (month, income, expenses, saving, remaining)
@@ -69,15 +73,22 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
                ON DUPLICATE KEY UPDATE
                expenses = expenses + %s,
                remaining = income - (expenses + %s) - saving""",
-            (month, amount, amount, amount, amount)
+            (month, parsed_amount, parsed_amount, parsed_amount, parsed_amount)
         )
+
+        # ✨ ĐỒNG BỘ: Thêm vào nhật ký hoạt động chung (activity_log)
+        db.log_activity('expense', description, parsed_amount)
+
+        # Legacy Sync (vẫn giữ bảng purchases cho tính tương thích nếu cần)
+        db.execute("INSERT INTO purchases (item_name, amount) VALUES (%s, %s)", (description, parsed_amount))
+
         row = db.execute("SELECT remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')
         remaining = row.get('remaining', 0) if row else 0
 
-        logger.info(f"💸 Chi tiêu: -{vnd(amount)} | {description}")
+        logger.info(f"💸 Chi tiêu: -{vnd(parsed_amount)} | {description}")
         embed = discord.Embed(
             title="💸 Đã ghi nhận chi tiêu",
-            description=f"**{description}**: `-{vnd(amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(remaining)}`",
+            description=f"**{description}**: `-{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(remaining)}`",
             color=discord.Color.orange()
         )
         await interaction.response.send_message(embed=embed)
@@ -85,9 +96,13 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     # ─── /income ────────────────────────────────────────────────────────────
     income_group = app_commands.Group(name="income", description="Quản lý thu nhập")
 
-    @income_group.command(name="add", description="Thêm thu nhập mới (VNĐ)")
-    @app_commands.describe(amount="Số tiền thu nhập (VNĐ)")
-    async def income_add(self, interaction: discord.Interaction, amount: int):
+    @income_group.command(name="add", description="Thêm thu nhập mới (Ví dụ: 10tr)")
+    @app_commands.describe(amount="Số tiền thu nhập (VND, hỗ trợ k, tr, m)", description="Nguồn thu nhập")
+    async def income_add(self, interaction: discord.Interaction, amount: str, description: str = "Thu nhập mới"):
+        parsed_amount = db.parse_amount(amount)
+        if parsed_amount <= 0:
+            return await interaction.response.send_message("❌ Số tiền không hợp lệ!", ephemeral=True)
+
         month = get_current_month()
         db.execute(
             """INSERT INTO monthly_finance (month, income, expenses, saving, remaining)
@@ -95,13 +110,17 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
                ON DUPLICATE KEY UPDATE
                income = income + %s,
                remaining = (income + %s) - expenses - saving""",
-            (month, amount, amount, amount, amount)
+            (month, parsed_amount, parsed_amount, parsed_amount, parsed_amount)
         )
+        
+        # ✨ ĐỒNG BỘ: Thêm vào nhật ký hoạt động
+        db.log_activity('income', description, parsed_amount)
+
         row = db.execute("SELECT income, remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')
-        logger.info(f"💵 Thu nhập mới: +{vnd(amount)}")
+        logger.info(f"💵 Thu nhập mới: +{vnd(parsed_amount)}")
         embed = discord.Embed(
             title="💵 Đã cộng thu nhập",
-            description=f"**+{vnd(amount)}** đã được ghi nhận!\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`",
+            description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`",
             color=discord.Color.green()
         )
         await interaction.response.send_message(embed=embed)
@@ -109,9 +128,13 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     # ─── /saving ────────────────────────────────────────────────────────────
     saving_group = app_commands.Group(name="saving", description="Quản lý tiết kiệm")
 
-    @saving_group.command(name="add", description="Thêm tiết kiệm tháng này (VNĐ)")
-    @app_commands.describe(amount="Số tiền tiết kiệm (VNĐ)")
-    async def saving_add(self, interaction: discord.Interaction, amount: int):
+    @saving_group.command(name="add", description="Tiết kiệm tháng này (Ví dụ: 2tr)")
+    @app_commands.describe(amount="Số tiền (VND, hỗ trợ k, tr, m)", description="Ghi chú tiết kiệm")
+    async def saving_add(self, interaction: discord.Interaction, amount: str, description: str = "Tiết kiệm tháng"):
+        parsed_amount = db.parse_amount(amount)
+        if parsed_amount <= 0:
+            return await interaction.response.send_message("❌ Số tiền không hợp lệ!", ephemeral=True)
+
         month = get_current_month()
         db.execute(
             """INSERT INTO monthly_finance (month, income, expenses, saving, remaining)
@@ -119,13 +142,17 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
                ON DUPLICATE KEY UPDATE
                saving = saving + %s,
                remaining = income - expenses - (saving + %s)""",
-            (month, amount, amount, amount, amount)
+            (month, parsed_amount, parsed_amount, parsed_amount, parsed_amount)
         )
+        
+        # ✨ ĐỒNG BỘ: Thêm vào nhật ký hoạt động
+        db.log_activity('saving', description, parsed_amount)
+
         row = db.execute("SELECT remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')
-        logger.info(f"🏦 Tiết kiệm mới: +{vnd(amount)}")
+        logger.info(f"🏦 Tiết kiệm mới: +{vnd(parsed_amount)}")
         embed = discord.Embed(
             title="🏦 Đã cộng tiết kiệm",
-            description=f"**+{vnd(amount)}** đã được thêm vào tiết kiệm!\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`",
+            description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`",
             color=discord.Color.teal()
         )
         await interaction.response.send_message(embed=embed)
@@ -190,6 +217,41 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         embed.set_footer(text="Matcha Finance Summary ✨")
         await interaction.followup.send(embed=embed)
 
+
+    # ─── /note ────────────────────────────────────────────────────────────
+    @app_commands.command(name="note", description="Ghi chú thông minh (Ví dụ: cafe 30k, +100k bonus, save 2tr)")
+    @app_commands.describe(content="Nội dung ghi chú thông minh")
+    async def note(self, interaction: discord.Interaction, content: str):
+        """
+        Xử lý ghi chú thông minh:
+        - 'cafe 30k' -> Chi tiêu
+        - '+100k' hoặc 'plus 100k' -> Thu nhập
+        - 'save 1tr' -> Tiết kiệm
+        """
+        import re
+        content = content.lower().strip()
+        
+        # 1. Thu thập con số và hậu tố
+        match = re.search(r"(\d+\.?\d*[ktr mbt]*)", content)
+        if not match:
+            return await interaction.response.send_message("❌ Không tìm thấy con số trong ghi chú. Ví dụ: `cafe 30k`", ephemeral=True)
+            
+        amount_str = match.group(1)
+        parsed_amount = db.parse_amount(amount_str)
+        
+        # 2. Xác định loại (type)
+        if content.startswith('+') or 'plus' in content or 'income' in content or 'lương' in content:
+            # Thu nhập
+            clean_title = content.replace(amount_str, '').replace('+', '').replace('plus', '').replace('income', '').strip()
+            await self.income_add.callback(self, interaction, amount_str, clean_title or "Ghi chú Thu nhập")
+        elif 'save' in content or 'gửi' in content or 'cất' in content:
+            # Tiết kiệm
+            clean_title = content.replace(amount_str, '').replace('save', '').replace('gửi', '').replace('cất', '').strip()
+            await self.saving_add.callback(self, interaction, amount_str, clean_title or "Ghi chú Tiết kiệm")
+        else:
+            # Mặc định là Chi tiêu
+            clean_title = content.replace(amount_str, '').strip()
+            await self.expense_add.callback(self, interaction, amount_str, clean_title or "Ghi chú Chi tiêu")
 
 async def setup(bot):
     await bot.add_cog(FinanceCog(bot))

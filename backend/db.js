@@ -64,6 +64,16 @@ async function initDb() {
             photo_path VARCHAR(500),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        // 5. activity_log (Unified Feed V5.0)
+        await conn.query(`CREATE TABLE IF NOT EXISTS activity_log (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            type ENUM('income', 'expense', 'saving', 'task_done', 'task_missed') NOT NULL,
+            title VARCHAR(255),
+            amount DOUBLE DEFAULT 0,
+            photo_path VARCHAR(500),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
         
         console.log('✨ Khởi tạo bảng MySQL hoàn tất.');
     } catch (err) {

@@ -104,15 +104,15 @@
             </div>
         </header>
 
-        <main class="p-6 space-y-12 flex-1">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <main class="p-6 main-content-p space-y-12 flex-1">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6" data-aos="fade-down">
                 <div>
                     <p class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-2">Nhìn lại hành trình
                     </p>
-                    <h2 class="text-4xl font-black tracking-tight">📜 Nhật ký hoạt động</h2>
+                    <h2 class="text-4xl font-black tracking-tight responsive-title">📜 Nhật ký hoạt động</h2>
                 </div>
                 <!-- Filters -->
-                <div class="flex flex-wrap gap-2 bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl">
+                <div class="flex flex-wrap gap-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-md p-2 rounded-2xl border border-white/10 grid-gap-small">
                     <button onclick="filterHistory('all')"
                         class="filter-btn active bg-white dark:bg-gray-700 shadow-sm px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-600">Tất
                         cả</button>
@@ -124,10 +124,10 @@
                         tiêu</button>
                 </div>
             </div>
-
+ 
             <!-- History Widgets Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="history-timeline">
-                <!-- Items will be injected here -->
+                <!-- Items will be injected here via app.js with glass-card class -->
                 <div class="col-span-full text-center py-20 opacity-50 italic">Đang tải nhật ký hành trình...</div>
             </div>
         </main>

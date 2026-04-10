@@ -16,7 +16,8 @@ function setTheme(theme) {
 }
 
 function initDarkMode() {
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         setTheme('dark');
     } else {
         setTheme('light');
@@ -118,13 +119,13 @@ function updateToggleState(isDark) {
             });
         });
 
-        // 5. Swipe gestures (left = close, right = open)
+        // 5. Swipe gestures (refined for native feel)
         let touchStartX = 0;
         let touchStartY = 0;
         let touchMoveX = 0;
         let isSwiping = false;
-        const SWIPE_THRESHOLD = 50;
-        const EDGE_ZONE = 30; // pixels from left edge to start a swipe-open
+        const SWIPE_THRESHOLD = 70; // Increased to avoid accidental triggers
+        const EDGE_ZONE = 40; 
 
         document.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
@@ -137,34 +138,116 @@ function updateToggleState(isDark) {
             const diffX = touchMoveX - touchStartX;
             const diffY = Math.abs(e.touches[0].clientY - touchStartY);
 
-            // Only horizontal swipes (not vertical scroll)
-            if (Math.abs(diffX) > diffY && Math.abs(diffX) > 10) {
+            // Only horizontal swipes + ignore if we're scrolling vertically
+            if (Math.abs(diffX) > diffY && Math.abs(diffX) > 15) {
                 isSwiping = true;
             }
         }, { passive: true });
 
-        document.addEventListener('touchend', () => {
+        document.addEventListener('touchend', (e) => {
             if (!isSwiping) return;
             const diffX = touchMoveX - touchStartX;
 
-            if (window.innerWidth >= 768) return; // Only mobile
+            if (window.innerWidth >= 768) return;
 
-            // Swipe Right → Open (only from left edge)
+            // Swipe Right → Open
             if (diffX > SWIPE_THRESHOLD && touchStartX < EDGE_ZONE && !isSidebarOpen()) {
                 openSidebar();
+                e.preventDefault(); // Prevent accidental clicks during swipe
             }
             // Swipe Left → Close
             if (diffX < -SWIPE_THRESHOLD && isSidebarOpen()) {
                 closeSidebar();
+                e.preventDefault(); 
             }
             isSwiping = false;
-        }, { passive: true });
+        }, { passive: false }); // Needs to be non-passive to preventDefault
 
         // Make globally available
         window.openSidebar = openSidebar;
         window.closeSidebar = closeSidebar;
+
+        // ✨ Initialize New V5.0 Systems
+        initSmartMoneyInput();
+        injectPremiumStyles();
+        initDarkMode(); // Ensure theme is initialized
+        initExport(); // Bind backup buttons
     });
 })();
+
+function initExport() {
+    const exportBtns = document.querySelectorAll('#btn-export');
+    exportBtns.forEach(btn => {
+        btn.onclick = (e) => {
+            e.preventDefault();
+            exportData();
+        };
+    });
+}
+
+async function exportData() {
+    try {
+        const response = await fetch(`${API_BASE}/export`);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().toISOString().split('T')[0];
+        a.download = `matcha_backup_${timestamp}.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        alert('🌿 Sao lưu dữ liệu thành công! File đã được tải xuống.');
+    } catch (err) {
+        console.error('Lỗi sao lưu:', err);
+        alert('❌ Có lỗi xảy ra khi sao lưu dữ liệu.');
+    }
+}
+
+function injectPremiumStyles() {
+    if (document.getElementById('matcha-premium-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'matcha-premium-styles';
+    style.innerHTML = `
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
+        .dark {
+            --glass-bg: rgba(31, 41, 55, 0.6);
+            --glass-border: rgba(75, 85, 99, 0.3);
+        }
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid var(--glass-border);
+        }
+        .premium-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        .hover-lift {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @media (min-width: 768px) {
+            .hover-lift:hover { transform: translateY(-5px); }
+        }
+        
+        /* Mobile-Specific Refinements */
+        @media (max-width: 640px) {
+            .responsive-card-p { padding: 1.25rem !important; }
+            .responsive-title { font-size: 1.5rem !important; line-height: 2rem !important; }
+            .responsive-amount { font-size: 1.125rem !important; }
+            .sidebar-item { padding: 0.75rem !important; }
+            
+            /* Fix for excessive horizontal spacing on small screens */
+            .main-content-p { padding: 1rem !important; }
+            .grid-gap-small { gap: 1rem !important; }
+        }
+    `;
+    document.head.appendChild(style);
+}
 
 // Legacy compat
 function toggleSidebar() {
@@ -356,10 +439,13 @@ async function initDashboard() {
 
 function renderDashboardStats(stats) {
     const { finance, spent } = stats;
+    // ✨ SYNC MATH: Calculate remaining dynamically to ensure consistency
+    const currentRemaining = (finance.income || 0) - (spent || 0) - (finance.saving || 0);
+    
     document.getElementById('stat-income').innerText = formatVNĐ(finance.income || 0);
     document.getElementById('stat-expenses').innerText = formatVNĐ(spent || 0);
     document.getElementById('stat-saving').innerText = formatVNĐ(finance.saving || 0);
-    document.getElementById('stat-remaining').innerText = formatVNĐ(finance.remaining || 0);
+    document.getElementById('stat-remaining').innerText = formatVNĐ(currentRemaining);
 
     // Health Bar
     const healthSection = document.getElementById('dash-budget-health');
@@ -519,15 +605,19 @@ function renderCharts(stats, tasks) {
 
 async function handleFinanceSubmit(e) {
     e.preventDefault();
-    const income = Number(document.getElementById('fin-income').value);
-    const expenses = Number(document.getElementById('fin-expenses').value);
-    const saving = Number(document.getElementById('fin-saving').value);
+    const income = parseSmartAmount(document.getElementById('fin-income').value);
+    const expenses = parseSmartAmount(document.getElementById('fin-expenses').value);
+    const saving = parseSmartAmount(document.getElementById('fin-saving').value);
     const remaining = income - expenses - saving;
     try {
         await fetchJSON(`${API_BASE}/finance`, 'POST', {
             month: new Date().toISOString().slice(0, 7),
             income, expenses, saving
         });
+        
+        // Also log as generic activity if it's a major update
+        await fetchJSON(`${API_BASE}/finance/income`, 'POST', { amount: income, title: 'Cập nhật ngân sách tháng' });
+        
         document.getElementById('fin-result').innerText = formatVNĐ(remaining);
         document.getElementById('fin-result-card').classList.remove('hidden');
         alert('Đã cập nhật báo cáo tháng!');
@@ -537,7 +627,7 @@ async function handleFinanceSubmit(e) {
 async function handleGoalSubmit(e) {
     e.preventDefault();
     const goal_name = document.getElementById('goal-name').value;
-    const target_amount = Number(document.getElementById('goal-target').value);
+    const target_amount = parseSmartAmount(document.getElementById('goal-target').value);
     const deadline_months = Number(document.getElementById('goal-deadline').value);
     try {
         await fetchJSON(`${API_BASE}/goals`, 'POST', {
@@ -548,54 +638,97 @@ async function handleGoalSubmit(e) {
     } catch (err) { alert('Lỗi thêm mục tiêu!'); }
 }
 
-// --- History / Nhật ký Unified Feed ---
+// --- History / Nhật ký Unified Feed V5.0 ---
 async function loadHistory(filterType = 'all') {
     const listEl = document.getElementById('history-timeline');
     if (!listEl) return;
     try {
-        const [tasks, purchases] = await Promise.all([
-            fetchJSON(`${API_BASE}/tasks`),
-            fetchJSON(`${API_BASE}/purchases`)
-        ]);
+        const activities = await fetchJSON(`${API_BASE}/activities`);
+        
+        let filtered = activities;
+        if (filterType === 'task') filtered = activities.filter(a => a.type.startsWith('task'));
+        if (filterType === 'purchase' || filterType === 'expense') filtered = activities.filter(a => a.type === 'expense');
 
-        // Combine and format
-        let combined = [
-            ...tasks.filter(t => t.status === 'done' || t.status === 'skipped').map(t => ({
-                ...t, type: 'task', date: new Date(t.created_at || Date.now())
-            })),
-            ...purchases.map(p => ({
-                ...p, type: 'purchase', date: new Date(p.created_at)
-            }))
-        ];
-
-        // Sort DESC
-        combined.sort((a, b) => b.date - a.date);
-
-        // Filter
-        if (filterType === 'task') combined = combined.filter(i => i.type === 'task');
-        if (filterType === 'purchase') combined = combined.filter(i => i.type === 'purchase');
-
-        listEl.innerHTML = combined.length > 0 ? combined.map(item => {
-            const timeDisplay = formatRelativeTime(item.date);
+        listEl.innerHTML = filtered.length > 0 ? filtered.map(item => {
+            const timeDisplay = formatRelativeTime(new Date(item.created_at));
+            const isTask = item.type.startsWith('task');
+            const isIncome = item.type === 'income';
+            const isSaving = item.type === 'saving';
+            const isExpense = item.type === 'expense';
             
-            if (item.type === 'purchase') {
-                return `
-                    <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg border border-transparent hover:border-blue-500 transition-all duration-300 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-2xl flex items-center justify-center">
-                                    <i class="fas fa-shopping-cart text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Chi tiêu</p>
-                                    <h4 class="font-bold text-lg">${item.item_name}</h4>
-                                </div>
+            // Icon & Color Logic
+            let icon = 'fa-shopping-cart';
+            let colorClass = 'blue';
+            let label = 'Hoạt động';
+
+            if (isTask) { icon = 'fa-check-circle'; colorClass = 'purple'; label = 'Công việc'; }
+            if (isIncome) { icon = 'fa-plus-circle'; colorClass = 'green'; label = 'Thu nhập'; }
+            if (isSaving) { icon = 'fa-piggy-bank'; colorClass = 'teal'; label = 'Tiết kiệm'; }
+            if (isExpense) { icon = 'fa-shopping-cart'; colorClass = 'red'; label = 'Chi tiêu'; }
+
+            return `
+                <div class="glass-card bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-xl border border-white/20 dark:border-gray-700/30 hover:scale-[1.02] transition-all duration-300" 
+                     data-aos="fade-up">
+                    <div class="flex justify-between items-start gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 bg-${colorClass}-100 dark:bg-${colorClass}-900/30 text-${colorClass}-500 rounded-2xl flex items-center justify-center shadow-inner">
+                                <i class="fas ${icon} text-2xl"></i>
                             </div>
-                            <div class="text-right">
-                                <p class="text-xl font-black text-blue-500">${formatVNĐ(item.amount)}</p>
-                                <p class="text-[10px] text-gray-400 font-bold">${timeDisplay}</p>
+                            <div>
+                                <p class="text-[10px] text-${colorClass}-500/80 uppercase font-black tracking-[0.2em] mb-1">${label}</p>
+                                <h4 class="font-bold text-lg leading-tight text-gray-900 dark:text-white">${item.title}</h4>
                             </div>
                         </div>
+                        <div class="text-right">
+                            ${item.amount ? `<p class="text-xl font-black ${isIncome ? 'text-green-500' : 'text-blue-500'}">${isIncome ? '+' : ''}${formatVNĐ(item.amount)}</p>` : ''}
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">${timeDisplay}</p>
+                        </div>
+                    </div>
+                    ${item.photo_path ? `
+                        <div class="mt-5 relative group overflow-hidden rounded-3xl shadow-lg cursor-zoom-in" onclick="openImage('${item.photo_path}')">
+                            <img src="${item.photo_path}" class="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+                        </div>` : ''}
+                </div>
+            `;
+        }).join('') : '<div class="col-span-full text-center py-20 opacity-50 italic text-gray-500">Chưa có dấu chân nào trong nhật ký...</div>';
+    } catch (err) { console.error('Lỗi tải nhật ký:', err); }
+}
+
+// ✨ Smart Money Input Formatting
+function initSmartMoneyInput() {
+    const amountInputs = document.querySelectorAll('input[type="number"], input#pur-amount, input#fin-income, input#fin-expenses, input#fin-saving');
+    amountInputs.forEach(input => {
+        // Replace number inputs with text to support dots and 'k' suffixes
+        if (input.type === 'number') {
+            input.type = 'text';
+            input.inputMode = 'text';
+        }
+        
+        input.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/[^0-9ktr mbt,.]/gi, '');
+            // Auto-format with dots if it's just numbers
+            if (/^\d+$/.test(val.replace(/[.,]/g, ''))) {
+                const numeric = val.replace(/[.,]/g, '');
+                e.target.value = new Intl.NumberFormat('vi-VN').format(numeric);
+            } else {
+                e.target.value = val;
+            }
+        });
+    });
+}
+
+function parseSmartAmount(text) {
+    if (!text) return 0;
+    let valStr = String(text).toLowerCase().replace(/[^0-9ktr mbt,.]/g, '').replace(/[.,]/g, '');
+    let val = parseFloat(valStr) || 0;
+    
+    if (valStr.includes('k')) val *= 1000;
+    if (valStr.includes('tr') || valStr.includes('m')) val *= 1000000;
+    if (valStr.includes('b')) val *= 1000000000;
+    
+    return val;
+}
                         ${item.photo_path ? `
                             <div class="relative group overflow-hidden rounded-2xl">
                                 <img src="${item.photo_path}" class="w-full max-h-72 object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer" onclick="openImage('${item.photo_path}')">
@@ -776,7 +909,7 @@ function renderAgendaTasks(tasks) {
 
         return `
             <div data-aos="fade-up" data-aos-delay="${idx * 100}" 
-                 class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-sm border ${active ? 'border-blue-500/50 shadow-xl shadow-blue-500/10' : 'border-gray-100 dark:border-gray-700'} relative overflow-hidden group transition-all hover:scale-[1.02]">
+                 class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 responsive-card-p shadow-sm border ${active ? 'border-blue-500/50 shadow-xl shadow-blue-500/10' : 'border-gray-100 dark:border-gray-700'} relative overflow-hidden group transition-all hover:scale-[1.02]">
                 <div class="flex justify-between items-start mb-6">
                     <div class="w-14 h-14 rounded-2xl ${active ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-blue-500'} flex items-center justify-center text-xl shadow-lg">
                         <i class="fas ${done ? 'fa-check-circle' : 'fa-calendar-check'}"></i>
@@ -784,7 +917,7 @@ function renderAgendaTasks(tasks) {
                     ${statusBadge}
                 </div>
                 
-                <h4 class="text-xl font-black mb-1 truncate">${t.task_name}</h4>
+                <h4 class="text-xl font-black mb-1 truncate responsive-title">${t.task_name}</h4>
                 <div class="flex items-center gap-2 text-gray-400 text-xs font-bold mb-8 italic">
                     <i class="far fa-clock"></i> ${t.start_time} - ${t.end_time}
                 </div>
@@ -931,9 +1064,12 @@ if (window.location.pathname.includes('finance.html')) {
         purForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('pur-name').value;
-            const amount = document.getElementById('pur-amount').value;
+            const amountRaw = document.getElementById('pur-amount').value;
+            const amount = parseSmartAmount(amountRaw);
             const photo = document.getElementById('pur-photo-input').files[0];
             const btn = document.getElementById('btn-save-purchase');
+
+            if (amount <= 0) return alert('Số tiền không hợp lệ! Thử gõ 30k hoặc 1.5tr xem sao.');
 
             const formData = new FormData();
             formData.append('item_name', name);
@@ -941,11 +1077,16 @@ if (window.location.pathname.includes('finance.html')) {
             if(photo) formData.append('photo', photo);
 
             try {
-                btn.innerText = 'Đang lưu...'; btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang lưu...'; 
+                btn.disabled = true;
                 await fetchJSON(`${API_BASE}/purchases`, 'POST', formData);
                 alert('Đã ghi nhận chi tiêu!'); 
                 location.reload();
-            } catch (err) { alert('Lỗi lưu chi tiêu!'); btn.innerText = 'Lưu chi tiêu'; btn.disabled = false; }
+            } catch (err) { 
+                alert('Lỗi lưu chi tiêu!'); 
+                btn.innerText = 'Lưu chi tiêu ngay'; 
+                btn.disabled = false; 
+            }
         });
     }
 }

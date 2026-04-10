@@ -60,7 +60,7 @@ app.post('/api/finance', async (req, res) => {
 });
 
 app.post('/api/finance/income', async (req, res) => {
-    const { amount } = req.body;
+    const { amount, title } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
     try {
         const sql = `
@@ -71,6 +71,38 @@ app.post('/api/finance/income', async (req, res) => {
             remaining = remaining + ?
         `;
         await db.query(sql, [currentMonth, amount, amount, amount, amount]);
+        
+        // ✨ Log Activity
+        await db.query(
+            "INSERT INTO activity_log (type, title, amount) VALUES ('income', ?, ?)",
+            [title || 'Thu nhập mới', amount]
+        );
+        
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/finance/saving', async (req, res) => {
+    const { amount, title } = req.body;
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    try {
+        const sql = `
+            INSERT INTO monthly_finance (month, income, expenses, saving, remaining) 
+            VALUES (?, 0, 0, ?, ?) 
+            ON DUPLICATE KEY UPDATE 
+            saving = saving + ?, 
+            remaining = remaining - ?
+        `;
+        await db.query(sql, [currentMonth, amount, -amount, amount, amount]);
+        
+        // ✨ Log Activity
+        await db.query(
+            "INSERT INTO activity_log (type, title, amount) VALUES ('saving', ?, ?)",
+            [title || 'Tiết kiệm mới', amount]
+        );
+        
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -119,6 +151,13 @@ app.post('/api/purchases', upload.single('photo'), async (req, res) => {
             `INSERT INTO purchases (item_name, amount, photo_path) VALUES (?, ?, ?)`,
             [item_name, amount, photo_path]
         );
+        
+        // ✨ Log Activity
+        await db.query(
+            "INSERT INTO activity_log (type, title, amount, photo_path) VALUES ('expense', ?, ?, ?)",
+            [item_name, amount, photo_path]
+        );
+
         res.json({ success: true, id: result.insertId, photo_path });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -161,7 +200,17 @@ app.post('/api/tasks/complete', upload.single('photo'), async (req, res) => {
     const { id } = req.body;
     const photo_path = req.file ? '/uploads/' + req.file.filename : null;
     try {
+        const [rows] = await db.query("SELECT task_name FROM tasks WHERE id = ?", [id]);
+        const taskName = rows[0] ? rows[0].task_name : 'Công việc';
+
         await db.query(`UPDATE tasks SET status = 'done', photo_path = ? WHERE id = ?`, [photo_path, id]);
+        
+        // ✨ Log Activity
+        await db.query(
+            "INSERT INTO activity_log (type, title, photo_path) VALUES ('task_done', ?, ?)",
+            [taskName, photo_path]
+        );
+
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -172,8 +221,52 @@ app.post('/api/tasks/skip', async (req, res) => {
     const { id, reason, status } = req.body;
     const finalStatus = status || 'skipped';
     try {
+        const [rows] = await db.query("SELECT task_name FROM tasks WHERE id = ?", [id]);
+        const taskName = rows[0] ? rows[0].task_name : 'Công việc';
+
         await db.query(`UPDATE tasks SET status = ?, reason = ? WHERE id = ?`, [finalStatus, reason, id]);
+        
+        // ✨ Log Activity
+        await db.query(
+            "INSERT INTO activity_log (type, title) VALUES ('task_missed', ?)",
+            [taskName]
+        );
+
         res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ----- Unified Activity Log API -----
+app.get('/api/activities', async (req, res) => {
+    try {
+        const [rows] = await db.query("SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 50");
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ----- Backup/Export API -----
+app.get('/api/export', async (req, res) => {
+    try {
+        const [activities] = await db.query("SELECT * FROM activity_log");
+        const [tasks] = await db.query("SELECT * FROM tasks");
+        const [finance] = await db.query("SELECT * FROM monthly_finance");
+        const [purchases] = await db.query("SELECT * FROM purchases");
+        
+        const backupData = {
+            export_date: new Date().toISOString(),
+            activities,
+            tasks,
+            finance,
+            purchases
+        };
+        
+        res.setHeader('Content-disposition', 'attachment; filename=matcha_backup.json');
+        res.setHeader('Content-type', 'application/json');
+        res.send(JSON.stringify(backupData, null, 2));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

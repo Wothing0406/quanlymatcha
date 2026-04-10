@@ -88,9 +88,9 @@
         </header>
 
         <!-- Page Content -->
-        <main class="p-6 space-y-8 flex-1">
+        <main class="p-6 main-content-p space-y-8 flex-1">
             <div data-aos="fade-down">
-                <h1 class="text-3xl font-black tracking-tight mb-2">Bảng điều khiển</h1>
+                <h1 class="text-3xl font-black tracking-tight mb-2 responsive-title">Bảng điều khiển</h1>
                 <p class="text-sm text-gray-500 font-medium">Chào buổi sáng! Hãy cùng điểm qua vài mốc thống kê nhé.</p>
             </div>
 
@@ -124,17 +124,17 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Spending Chart -->
                 <div data-aos="fade-right" data-aos-delay="100"
-                    class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white dark:border-gray-700 shadow-xl transition-all hover:shadow-2xl hover:scale-[1.01]">
+                    class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-8 responsive-card-p rounded-[2.5rem] border border-white dark:border-gray-700 shadow-xl transition-all hover:shadow-2xl hover:scale-[1.01]">
                     <h3 class="text-xl font-black mb-6 flex items-center gap-3">
                         <i class="fas fa-chart-line text-blue-500"></i> Theo dõi chi tiêu
                     </h3>
-                    <div class="h-64 h-64">
+                    <div class="h-64">
                         <canvas id="chart-spending"></canvas>
                     </div>
                 </div>
                 <!-- Task Performance Chart -->
                 <div data-aos="fade-left" data-aos-delay="200"
-                    class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white dark:border-gray-700 shadow-xl transition-all hover:shadow-2xl hover:scale-[1.01]">
+                    class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-8 responsive-card-p rounded-[2.5rem] border border-white dark:border-gray-700 shadow-xl transition-all hover:shadow-2xl hover:scale-[1.01]">
                     <h3 class="text-xl font-black mb-6 flex items-center gap-3">
                         <i class="fas fa-tasks text-blue-500"></i> Hiệu suất công việc
                     </h3>
@@ -180,25 +180,26 @@
                         <h3 class="text-xl font-black mb-8 flex items-center gap-4">
                             <i class="fas fa-wallet text-blue-500"></i> Ví của bạn
                         </h3>
-                        <div id="dash-finance-stats" class="grid grid-cols-2 gap-6">
+                        <div id="dash-finance-stats" class="grid grid-cols-2 gap-4 grid-gap-small">
                             <div
-                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-green-500/5 transition-all">
-                                <p id="stat-income" class="text-xl font-black text-blue-600">0 VNĐ</p>
+                                class="p-4 responsive-card-p bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-green-500/5 transition-all flex flex-col justify-between h-full">
+                                <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Thu nhập</p>
+                                <p id="stat-income" class="text-xl responsive-amount font-black text-blue-600">0 VNĐ</p>
                             </div>
                             <div
-                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-red-500/5 transition-all">
+                                class="p-4 responsive-card-p bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-red-500/5 transition-all flex flex-col justify-between h-full">
                                 <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Đã tiêu</p>
-                                <p id="stat-expenses" class="text-xl font-black text-red-500">0 VNĐ</p>
+                                <p id="stat-expenses" class="text-xl responsive-amount font-black text-red-500">0 VNĐ</p>
                             </div>
                             <div
-                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-blue-500/5 transition-all">
+                                class="p-4 responsive-card-p bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-blue-500/5 transition-all flex flex-col justify-between h-full">
                                 <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Tiết kiệm</p>
-                                <p id="stat-saving" class="text-xl font-black text-green-500">0 VNĐ</p>
+                                <p id="stat-saving" class="text-xl responsive-amount font-black text-green-500">0 VNĐ</p>
                             </div>
                             <div
-                                class="p-5 bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-purple-500/5 transition-all">
+                                class="p-4 responsive-card-p bg-gray-50 dark:bg-gray-700/30 rounded-3xl group hover:bg-purple-500/5 transition-all flex flex-col justify-between h-full">
                                 <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Còn lại</p>
-                                <p id="stat-remaining" class="text-xl font-black text-purple-600">0 VNĐ</p>
+                                <p id="stat-remaining" class="text-xl responsive-amount font-black text-purple-600">0 VNĐ</p>
                             </div>
                         </div>
                     </div>

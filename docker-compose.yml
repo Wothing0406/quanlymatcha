@@ -10,6 +10,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: rootpassword
+      TZ: Asia/Ho_Chi_Minh
     volumes:
       - ./mysql_data:/var/lib/mysql
 
@@ -23,6 +24,8 @@ services:
       - ./frontend:/app/frontend
     env_file:
       - .env
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     depends_on:
       - mysql
     restart: unless-stopped
@@ -35,6 +38,7 @@ services:
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_DATABASE=${DB_NAME}
+      - TZ=Asia/Ho_Chi_Minh
     env_file:
       - .env
     volumes:

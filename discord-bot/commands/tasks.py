@@ -79,6 +79,10 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
             return await interaction.response.send_message(f"❌ Không tìm thấy task ID `{task_id}`.", ephemeral=True)
 
         db.execute("UPDATE tasks SET status = 'done' WHERE id = %s", (task_id,))
+        
+        # ✨ ĐỒNG BỘ: Ghi log hoạt động
+        db.log_activity('task_done', task['task_name'])
+        
         logger.info(f"✅ Task done: [{task_id}] {task['task_name']}")
 
         embed = discord.Embed(
@@ -96,6 +100,10 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
             return await interaction.response.send_message(f"❌ Không tìm thấy task ID `{task_id}`.", ephemeral=True)
 
         db.execute("UPDATE tasks SET status = 'missed' WHERE id = %s", (task_id,))
+
+        # ✨ ĐỒNG BỘ: Ghi log hoạt động
+        db.log_activity('task_missed', task['task_name'])
+
         logger.info(f"❌ Task missed: [{task_id}] {task['task_name']}")
 
         embed = discord.Embed(
@@ -138,7 +146,8 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
                 inline=False
             )
 
-        embed.set_footer(text="Dùng /task done <id> để hoàn thành!")
+        current_time_vn = datetime.now().strftime("%H:%M:%S")
+        embed.set_footer(text=f"Cập nhật lúc: {current_time_vn} | Dùng /task done <id> để hoàn thành!")
         await interaction.followup.send(embed=embed)
 
     # ─── /weekly_report ────────────────────────────────────────────────────
@@ -207,6 +216,10 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
             "UPDATE tasks SET photo_path = %s, status = 'done' WHERE id = %s",
             (db_path, task_id)
         )
+
+        # ✨ ĐỒNG BỘ: Ghi log hoạt động
+        db.log_activity('task_done', task['task_name'], photo_path=db_path)
+
         logger.info(f"📸 Upload ảnh cho task [{task_id}]: {filename}")
 
         embed = discord.Embed(
