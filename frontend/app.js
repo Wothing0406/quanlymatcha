@@ -100,13 +100,17 @@ function updateToggleState(isDark) {
             return !sidebar.classList.contains('-translate-x-full');
         }
 
-        // 2. Hamburger button toggle
+        // 2. Hamburger button toggle (Enhanced for better touch response)
         const toggleBtn = document.getElementById('sidebar-toggle');
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', (e) => {
+            // Listen for both click and touchstart for faster response
+            const toggleHandler = (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 isSidebarOpen() ? closeSidebar() : openSidebar();
-            });
+            };
+            
+            toggleBtn.addEventListener('click', toggleHandler);
         }
 
         // 3. Tap backdrop to close
