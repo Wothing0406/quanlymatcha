@@ -107,11 +107,6 @@ def init_db():
     finally:
         cursor.close()
         conn.close()
-    except Exception as e:
-        logger.error(f"❌ Lỗi khởi tạo MySQL V5.0: {e}")
-    finally:
-        cursor.close()
-        conn.close()
 
 def get_connection():
     return get_pool().get_connection()
