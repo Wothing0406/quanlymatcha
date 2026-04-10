@@ -109,6 +109,16 @@ router.get('/goals', async (req, res) => {
     }
 });
 
+router.delete('/goals/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query("DELETE FROM saving_goals WHERE id = ?", [id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Export
 router.get('/export', async (req, res) => {
     try {
