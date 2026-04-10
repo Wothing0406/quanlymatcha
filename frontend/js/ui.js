@@ -104,13 +104,30 @@ async function exportData() {
     } catch (err) { alert('❌ Lỗi sao lưu!'); }
 }
 
+// Global Currency Input Mask (v5.0 Upgrade)
+function initCurrencyMasks() {
+    const inputs = document.querySelectorAll('.currency-input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            // Remove everything except numbers
+            let value = this.value.replace(/\D/g, "");
+            if (value === "") return;
+            
+            // Format with dots
+            this.value = new Intl.NumberFormat('vi-VN').format(value);
+        });
+    });
+}
+
 function initSmartMoneyInput() {
+    initCurrencyMasks(); // Initialize masks first
     const inputs = document.querySelectorAll('input[placeholder*="30k"]');
     inputs.forEach(input => {
         input.addEventListener('blur', function() {
-            if (this.value.includes('k') || this.value.includes('tr')) {
+            // If user used k, tr, m...
+            if (this.value.toLowerCase().includes('k') || this.value.toLowerCase().includes('tr')) {
                 const amount = parseSmartAmount(this.value);
-                if (amount > 0) this.value = amount;
+                if (amount > 0) this.value = new Intl.NumberFormat('vi-VN').format(amount);
             }
         });
     });
@@ -118,7 +135,8 @@ function initSmartMoneyInput() {
 
 function parseSmartAmount(val) {
     if (!val) return 0;
-    let s = String(val).toLowerCase().replace(/,/g, '').replace(/\s/g, '');
+    // Remove dots for parsing
+    let s = String(val).toLowerCase().replace(/\./g, '').replace(/,/g, '').replace(/\s/g, '');
     let num = parseFloat(s);
     if (isNaN(num)) return 0;
     if (s.includes('k')) return num * 1000;

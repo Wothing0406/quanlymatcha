@@ -9,10 +9,7 @@ async function initAgenda() {
         renderAgendaTasks(tasks);
     } catch (err) { 
         console.error('Lỗi khởi tạo Agenda:', err);
-        if (gridEl) gridEl.innerHTML = `<div class="col-span-full text-center py-10 text-red-500 font-bold">Lỗi tải dữ liệu: ${err.message}. Thử F5 lại nhé!</div>`;
     }
-}
-
 }
 
 function renderAgendaTasks(tasks) {

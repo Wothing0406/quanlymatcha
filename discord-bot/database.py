@@ -88,6 +88,7 @@ def init_db():
             level INT DEFAULT 1,
             pet_state VARCHAR(50) DEFAULT 'neutral',
             last_roast_date DATE,
+            last_watchdog_date DATE,
             CHECK (id = 1)
         )""")
         cursor.execute("INSERT IGNORE INTO user_stats (id) VALUES (1)")

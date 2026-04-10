@@ -86,10 +86,14 @@ async def check_weekly_roast(bot, dm_channel):
     if now.weekday() != 0 or now.hour != 8 or now.minute != 0:
         return
 
+    # Check if already roasted today
+    stats = db.get_user_stats()
+    if stats.get('last_roast_date') == now.date():
+        return
+
     logger.info("🔥 [WEEKLY ROAST] Đã đến giờ 'sấy' tài chính tuần qua!")
     try:
         activities = db.execute("SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 20", fetch='all')
-        stats = db.add_points(0, "Check stats for roast") # Just to get current stats via add_points(0)
         
         summary = "\n".join([f"- {a['type']}: {a['title']} ({a['amount']:,}đ)" for a in activities])
         
@@ -97,8 +101,7 @@ async def check_weekly_roast(bot, dm_channel):
         Bạn là Matcha, trợ lý tài chính ĐANH ĐÁ. Đây là dữ liệu hoạt động tuần qua của tôi:
         {summary}
         
-        Hãy viết một bài 'ROAST' (sấy) thật gắt, mỉa mai những khoản chi vô lý.
-        Nếu làm tốt hãy khen 'miễn cưỡng'. Tiếng Việt GenZ, ngắn gọn.
+        Hãy viết một bài 'ROAST' (sấy) thật gắt. Tiếng Việt GenZ, ngắn gọn.
         """
         
         chat_cog = bot.get_cog("🧠 Trợ lý AI")
@@ -109,34 +112,41 @@ async def check_weekly_roast(bot, dm_channel):
             import discord
             embed = discord.Embed(title="🔥 BẢN TIN SẤY TUẦN MỚI", description=roast_text, color=discord.Color.red())
             if dm_channel: await dm_channel.send(embed=embed)
+            db.execute("UPDATE user_stats SET last_roast_date = %s WHERE id = 1", (now.date(),))
             db.log_activity('ai_roast', "Matcha đã sấy bạn")
     except Exception as e:
         logger.error(f"Lỗi Weekly Roast: {e}")
 
 async def spending_watchdog(bot, dm_channel):
-    """Cảnh báo khi tiêu quá 80% thu nhập"""
+    """Cảnh báo khi tiêu quá 80% thu nhập (Tối đa 1 lần/ngày)"""
     try:
-        month = datetime.now().strftime("%Y-%m")
-        # Lấy dữ liệu tài chính tháng này
+        now = datetime.now()
+        month = now.strftime("%Y-%m")
+        
+        # 1. Kiểm tra ngày gửi cảnh báo gần nhất
+        stats = db.get_user_stats()
+        if stats.get('last_watchdog_date') == now.date():
+            return
+
+        # 2. Lấy dữ liệu tài chính tháng này
         finance = db.execute("SELECT * FROM monthly_finance WHERE month = %s", (month,), fetch='one')
         if not finance or finance['income'] == 0:
             return
             
         remaining_ratio = finance['remaining'] / finance['income']
         
-        # Nếu còn dưới 20% và chưa cảnh báo
+        # 3. Nếu còn dưới 20%
         if remaining_ratio < 0.2:
             import discord
             embed = discord.Embed(
                 title="⚠️ CẢNH BÁO: CHÁY TÚI TỚI NƠI!",
-                description=f"Này! Bạn vừa tiêu lạm vào quỹ an toàn rồi! \n\nVí chỉ còn **{finance['remaining']:,}đ** ({remaining_ratio*100:.1f}%). \n\nLâu lâu Matcha mới nhắc, liệu hồn mà bớt ăn sang lại nhé! 🔥",
+                description=f"Này! Bạn vừa tiêu lạm vào quỹ an toàn rồi! \n\nVí chỉ còn **{finance['remaining']:,}đ** ({remaining_ratio*100:.1f}%).\n\nLâu lâu Matcha mới nhắc, liệu hồn nhé! 🔥",
                 color=discord.Color.red()
             )
-            embed.set_footer(text="Matcha Proactive Guard - Hệ thống bảo vệ ví tiền của bạn.")
-            
-            # Gửi vào DM để đảm bảo user thấy
             if dm_channel:
                 await dm_channel.send(embed=embed)
-                logger.info(f"🚨 Sent spending alert (Remaining: {remaining_ratio*100:.1f}%)")
+                # Cập nhật ngày để không spam nữa
+                db.execute("UPDATE user_stats SET last_watchdog_date = %s WHERE id = 1", (now.date(),))
+                logger.info(f"🚨 Sent spending alert once for today")
     except Exception as e:
         logger.error(f"Lỗi Spending Watchdog: {e}")

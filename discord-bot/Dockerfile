@@ -11,6 +11,7 @@ COPY bot.py .
 COPY database.py .
 COPY scheduler.py .
 COPY reset_v5.py .
+COPY force_reset_v5.py .
 COPY commands/ ./commands/
 
 # Create uploads dir

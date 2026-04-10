@@ -4,10 +4,17 @@
 
 async function handleFinanceSubmit(e) {
     e.preventDefault();
-    const month = document.getElementById('month-select').value;
-    const income = parseFloat(document.getElementById('income-input').value) || 0;
-    const expenses = parseFloat(document.getElementById('expenses-input').value) || 0;
-    const saving = parseFloat(document.getElementById('saving-input').value) || 0;
+    const monthEl = document.getElementById('month-select') || document.getElementById('fin-month');
+    const month = monthEl ? monthEl.value : new Date().toISOString().slice(0, 7);
+    
+    // Support both ID styles
+    const incomeEl = document.getElementById('income-input') || document.getElementById('fin-income');
+    const expensesEl = document.getElementById('expenses-input') || document.getElementById('fin-expenses');
+    const savingEl = document.getElementById('saving-input') || document.getElementById('fin-saving');
+
+    const income = parseSmartAmount(incomeEl ? incomeEl.value : 0);
+    const expenses = parseSmartAmount(expensesEl ? expensesEl.value : 0);
+    const saving = parseSmartAmount(savingEl ? savingEl.value : 0);
 
     try {
         await fetchJSON(`${API_BASE}/finance`, 'POST', { month, income, expenses, saving });
@@ -30,7 +37,7 @@ async function handleGoalSubmit(e) {
     e.preventDefault();
     const data = {
         goal_name: document.getElementById('goal-name').value,
-        target_amount: parseFloat(document.getElementById('goal-target').value),
+        target_amount: parseSmartAmount(document.getElementById('goal-target').value),
         deadline_months: parseInt(document.getElementById('goal-deadline').value) || 12,
         current_saved: 0
     };
@@ -146,3 +153,63 @@ function createActivityItemHTML(item, isCompact = false) {
         </div>
     `;
 }
+async function handlePurchaseWithPhoto(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-save-purchase');
+    const name = document.getElementById('pur-name').value;
+    const amountStr = document.getElementById('pur-amount').value;
+    const photoInput = document.getElementById('pur-photo-input');
+    
+    const amount = parseSmartAmount(amountStr);
+    if (!amount || amount <= 0) return alert('Số tiền không hợp lệ!');
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+    btn.disabled = true;
+
+    try {
+        const formData = new FormData();
+        formData.append('item_name', name);
+        formData.append('amount', amount);
+        if (photoInput.files[0]) {
+            formData.append('photo', photoInput.files[0]);
+        }
+        
+        await fetchJSON(`${API_BASE}/purchases`, 'POST', formData);
+        alert('Đã lưu chi tiêu! 🍵');
+        location.reload();
+    } catch (err) {
+        alert('Lỗi: ' + err.message);
+    } finally {
+        btn.innerHTML = 'Lưu chi tiêu ngay';
+        btn.disabled = false;
+    }
+}
+
+// Bind events on load for finance.html
+document.addEventListener('DOMContentLoaded', () => {
+    const purchaseForm = document.getElementById('form-purchase-with-photo');
+    if (purchaseForm) purchaseForm.onsubmit = handlePurchaseWithPhoto;
+    
+    const purPhotoInput = document.getElementById('pur-photo-input');
+    if (purPhotoInput) {
+        purPhotoInput.onchange = function() {
+            const preview = document.getElementById('pur-preview-img');
+            const container = document.getElementById('pur-preview-container');
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    container.classList.add('hidden');
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        };
+    }
+
+    const financeForm = document.getElementById('form-finance');
+    if (financeForm) financeForm.onsubmit = handleFinanceSubmit;
+
+    const goalForm = document.getElementById('form-goals');
+    if (goalForm) goalForm.onsubmit = handleGoalSubmit;
+});
