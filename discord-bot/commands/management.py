@@ -22,17 +22,20 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
             import re
             with open(log_path, "r", encoding="utf-8") as f:
                 content = f.read()
-                match = re.search(r'(https://[a-zA-Z0-9-]+\.trycloudflare\.com)', content)
-                if match:
-                    url = match.group(1)
+                # Find all URLs and pick the LAST one (the newest session)
+                matches = re.findall(r'(https://[a-zA-Z0-9-]+\.trycloudflare\.com)', content)
+                if matches:
+                    url = matches[-1]
+
 
         pin = os.getenv("WEB_PIN", "1234")
         
         embed = discord.Embed(
             title="✨ Matcha Web Portal",
-            description=f"Truy cập vào trung tâm điều khiển của bạn tại đây:\n\n👉 **[{url}]({url})**",
+            description=f"Truy cập vào trung tâm điều khiển của bạn tại đây:\n\n👉 {url}",
             color=discord.Color.teal()
         )
+
         embed.add_field(name="🔒 Mã PIN Bảo Mật:", value=f"`{pin}`", inline=False)
         embed.set_footer(text="Nếu link lỗi, đợi 1-2 phút để Server tạo URL mới nhé!")
         
