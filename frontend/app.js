@@ -436,6 +436,7 @@ async function initDashboard() {
         renderTodayAgenda(tasks);
         renderCharts(stats, tasks);
         updateWorkingNow(tasks);
+        loadDashboardHistory(); // ✨ New: Load synced activities
     } catch (err) {
         console.error('Lỗi khởi tạo Dashboard:', err);
     }
@@ -816,23 +817,91 @@ function loadTasks() {
     } catch (err) { console.error('Lỗi tải lịch trình:', err); }
 }
 
-// --- Finance Purchase Feed ---
+// --- Unified Finance History Feed (Bot + Web Sync) ---
 async function loadPurchaseFeed() {
     const listEl = document.getElementById('finance-purchase-list');
     if (!listEl) return;
     try {
-        const purchases = await fetchJSON(`${API_BASE}/purchases`);
-        listEl.innerHTML = purchases.length > 0 ? purchases.map(p => `
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 items-center">
-                ${p.photo_path ? `<img src="${p.photo_path}" class="w-16 h-16 object-cover rounded-lg cursor-pointer flex-shrink-0" onclick="openImage('${p.photo_path}')">` : `<div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400"><i class="fas fa-tag"></i></div>`}
-                <div class="flex-1 overflow-hidden">
-                    <p class="font-bold truncate">${p.item_name}</p>
-                    <p class="text-xs text-gray-400">${new Date(p.created_at).toLocaleDateString()}</p>
-                </div>
-                <span class="text-red-500 font-bold">${formatVNĐ(p.amount)}</span>
+        const activities = await fetchJSON(`${API_BASE}/activities`);
+        const finActivities = activities.filter(a => ['income', 'expense', 'saving'].includes(a.type));
+        listEl.innerHTML = finActivities.length > 0 ? finActivities.map(item => createActivityItemHTML(item)).join('') : '<div class="text-center py-10 text-gray-400 italic">Chưa có biến động số dư nào...</div>';
+    } catch (err) { console.error('Lỗi tải lịch sử tài chính:', err); }
+}
+
+async function loadDashboardHistory() {
+    const listEl = document.getElementById('dash-recent-history');
+    if (!listEl) return;
+    try {
+        const activities = await fetchJSON(`${API_BASE}/activities`);
+        // Show only last 5 activities of any type on dashboard
+        const recent = activities.slice(0, 5);
+        listEl.innerHTML = recent.length > 0 ? recent.map(item => createActivityItemHTML(item, true)).join('') : '<div class="text-center py-8 text-gray-400 italic">Chưa có hoạt động mới. Hãy bắt đầu ngay!</div>';
+    } catch (err) { console.error('Lỗi tải lịch sử dashboard:', err); }
+}
+
+function createActivityItemHTML(item, isCompact = false) {
+    const isIncome = item.type === 'income';
+    const isSaving = item.type === 'saving';
+    const isExpense = item.type === 'expense';
+    const isTask = item.type.startsWith('task');
+    const amount = item.amount || 0;
+    const timeDisplay = formatRelativeTime(new Date(item.created_at));
+    
+    // Icon & Color Logic
+    let colorClass = 'text-blue-500';
+    let bgClass = 'bg-blue-50 dark:bg-blue-900/20';
+    let iconClass = 'fa-shopping-cart';
+    let sign = '-';
+    let label = 'Hoạt động';
+
+    if (isIncome) {
+        colorClass = 'text-green-500';
+        bgClass = 'bg-green-50 dark:bg-green-900/20';
+        iconClass = 'fa-plus-circle';
+        sign = '+';
+        label = 'Thu nhập';
+    } else if (isSaving) {
+        colorClass = 'text-teal-500';
+        bgClass = 'bg-teal-50 dark:bg-teal-900/20';
+        iconClass = 'fa-piggy-bank';
+        sign = '';
+        label = 'Tiết kiệm';
+    } else if (isTask) {
+        colorClass = 'text-purple-500';
+        bgClass = 'bg-purple-50 dark:bg-purple-900/20';
+        iconClass = item.type === 'task_done' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+        sign = '';
+        label = 'Công việc';
+    }
+
+    const amountHTML = amount > 0 || isExpense || isIncome ? `
+        <div class="text-right flex-shrink-0">
+            <p class="font-black ${isCompact ? 'text-xs' : 'text-sm'} ${colorClass}">${sign}${formatVNĐ(amount)}</p>
+        </div>
+    ` : '';
+
+    return `
+        <div class="glass-card bg-white dark:bg-gray-800 rounded-3xl ${isCompact ? 'p-3' : 'p-4'} shadow-sm border border-transparent hover:border-blue-500/20 transition-all duration-300 flex items-center gap-4 group">
+            <div class="${isCompact ? 'w-10 h-10' : 'w-12 h-12'} ${bgClass} ${colorClass} rounded-2xl flex items-center justify-center flex-shrink-0">
+                <i class="fas ${iconClass} ${isCompact ? 'text-lg' : 'text-xl'}"></i>
             </div>
-        `).join('') : '<p class="text-center py-4 text-gray-400 italic">Hôm nay bạn chưa tiêu gì. Thật giỏi!</p>';
-    } catch (err) { console.error('Lỗi tải danh mục thu chi:', err); }
+            
+            <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start">
+                    <div class="min-w-0 overflow-hidden">
+                        <h4 class="font-bold ${isCompact ? 'text-xs' : 'text-sm'} truncate pr-2 text-gray-900 dark:text-white">${item.title}</h4>
+                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">${label} • ${timeDisplay}</p>
+                    </div>
+                    ${amountHTML}
+                </div>
+                
+                ${!isCompact && item.photo_path ? `
+                <div class="mt-3 relative rounded-xl overflow-hidden cursor-zoom-in" onclick="openImage('${item.photo_path}')">
+                    <img src="${item.photo_path}" class="w-full h-24 object-cover transition-transform duration-500 group-hover:scale-105">
+                </div>` : ''}
+            </div>
+        </div>
+    `;
 }
 
 async function initAgenda() {
