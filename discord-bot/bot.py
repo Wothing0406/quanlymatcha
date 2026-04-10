@@ -58,6 +58,22 @@ class MatchaBot(commands.Bot):
     async def on_ready(self):
         logger.info(f"🤖 Bot đã kết nối Gateway: {self.user} (ID: {self.user.id})")
 
+        # Global interaction check: Only allow the authorized user
+        @self.tree.error
+        async def on_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+            if isinstance(error, discord.app_commands.CheckFailure):
+                await interaction.response.send_message("❌ Xin lỗi, bot này chỉ dành cho chủ sở hữu Matcha.", ephemeral=True)
+            else:
+                logger.error(f"AppCommand error: {error}")
+
+        async def owner_only_check(interaction: discord.Interaction) -> bool:
+            if interaction.user.id != USER_ID:
+                return False
+            return True
+        
+        # Apply the check to the tree
+        self.tree.interaction_check = owner_only_check
+
         if not self.synced:
             logger.info("⏳ Đang đồng bộ Slash Commands toàn cầu (có thể mất 1-5 phút)...")
             await self.tree.sync()

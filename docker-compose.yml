@@ -20,7 +20,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./backend/uploads:/app/uploads
+      - ./shared_uploads:/app/uploads
       - ./frontend:/app/frontend
     env_file:
       - .env
@@ -46,16 +46,15 @@ services:
     env_file:
       - .env
     volumes:
-      - ./discord-bot/uploads:/app/uploads
+      - ./shared_uploads:/app/uploads
     depends_on:
       - mysql
     restart: unless-stopped
 
   tunnel:
-    image: cloudflare/cloudflared:latest
+    image: efrecon/localtunnel
     container_name: matcha-tunnel
     restart: unless-stopped
-    # Quick Tunnel: Gives you a random trycloudflare.com URL for free, no domain needed!
-    command: tunnel --no-autoupdate --url http://backend:3000
+    command: --port 3000 --local-host backend --subdomain matcha-quanly
     depends_on:
       - backend
