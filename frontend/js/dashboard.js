@@ -20,8 +20,50 @@ function updateDashboardStats(stats) {
     if (incomeEl) incomeEl.innerText = formatVNĐ(stats.finance.income);
     if (expensesEl) expensesEl.innerText = formatVNĐ(stats.finance.expenses);
 
-    // Goal (First Goal Progress if exists)
-    // You can iterate through all or just the top one
+    // Chart data mapping
+    const spentData = [Math.max(stats.finance.income, 1), stats.finance.expenses, stats.finance.saving];
+    
+    // Rendering Spending Chart
+    const ctxSpend = document.getElementById('chart-spending');
+    if (ctxSpend && !window.spendingChart) {
+        window.spendingChart = new Chart(ctxSpend, {
+            type: 'doughnut',
+            data: {
+                labels: ['Thu nhập', 'Đã chi', 'Tiết kiệm'],
+                datasets: [{
+                    data: spentData,
+                    backgroundColor: ['#10b981', '#f43f5e', '#3b82f6'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: { cutout: '70%', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { family: 'Outfit' } } } } }
+        });
+    }
+
+    // Task Analytics
+    const tasksDone = stats.tasks.find(t => t.status === 'done')?.count || 0;
+    const tasksMissed = stats.tasks.find(t => t.status === 'skipped')?.count || 0;
+    const tasksPostponed = stats.tasks.find(t => t.status === 'postponed')?.count || 0;
+    const tasksOngoing = stats.tasks.find(t => t.status === 'ongoing')?.count || 0;
+    const tasksPending = stats.tasks.find(t => t.status === 'pending')?.count || 0;
+
+    const ctxTask = document.getElementById('chart-tasks');
+    if (ctxTask && !window.tasksChart) {
+        window.tasksChart = new Chart(ctxTask, {
+            type: 'bar',
+            data: {
+                labels: ['Thành công', 'Bị nhỡ', 'Đã dời', 'Đang làm', 'Chưa làm'],
+                datasets: [{
+                    label: 'Số lượng nhiệm vụ',
+                    data: [tasksDone, tasksMissed, tasksPostponed, tasksOngoing, tasksPending],
+                    backgroundColor: ['#10b981', '#f43f5e', '#f59e0b', '#3b82f6', '#9ca3af'],
+                    borderRadius: 8
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(156, 163, 175, 0.1)' } }, x: { grid: { display: false } } } }
+        });
+    }
 }
 
 async function loadDashboardHistory() {

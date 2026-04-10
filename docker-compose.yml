@@ -52,9 +52,9 @@ services:
     restart: unless-stopped
 
   tunnel:
-    image: efrecon/localtunnel
+    image: node:18-alpine
     container_name: matcha-tunnel
     restart: unless-stopped
-    command: --port 3000 --local-host backend --subdomain matcha-quanly
+    command: npx localtunnel --port 3000 --local-host backend --subdomain matcha-quanly
     depends_on:
       - backend
