@@ -23,11 +23,11 @@ def get_pool():
     return _pool
 
 def init_db():
-    """Đảm bảo các bảng dữ liệu tồn tại ngay khi bot khởi động."""
+    """V5.0 - Safe Initialization (No destructive drops)"""
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        logger.info("🚀 Kiểm tra và khởi tạo các bảng MySQL...")
+        logger.info("🚀 Khởi động Database V5.0 (Chế độ an toàn)...")
         
         # 1. monthly_finance
         cursor.execute("""CREATE TABLE IF NOT EXISTS monthly_finance (
@@ -36,7 +36,8 @@ def init_db():
             income DOUBLE DEFAULT 0,
             expenses DOUBLE DEFAULT 0,
             saving DOUBLE DEFAULT 0,
-            remaining DOUBLE DEFAULT 0
+            remaining DOUBLE DEFAULT 0,
+            score INT DEFAULT 0
         )""")
 
         # 2. saving_goals
@@ -46,7 +47,8 @@ def init_db():
             target_amount DOUBLE DEFAULT 0,
             deadline_months INT DEFAULT 0,
             current_saved DOUBLE DEFAULT 0,
-            progress DOUBLE DEFAULT 0
+            progress DOUBLE DEFAULT 0,
+            category VARCHAR(50) DEFAULT 'general'
         )""")
 
         # 3. tasks
@@ -64,55 +66,49 @@ def init_db():
             notified_15m TINYINT(1) DEFAULT 0,
             notified_45m TINYINT(1) DEFAULT 0,
             started_at DATETIME,
+            points_rewarded TINYINT(1) DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
 
-        # 4. purchases
-        cursor.execute("""CREATE TABLE IF NOT EXISTS purchases (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            item_name VARCHAR(255),
-            amount DOUBLE DEFAULT 0,
-            photo_path VARCHAR(500),
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )""")
-        
-        # 5. activity_log (Unified Feed V5.0)
+        # 4. activity_log
         cursor.execute("""CREATE TABLE IF NOT EXISTS activity_log (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            type ENUM('income', 'expense', 'saving', 'task_started', 'task_done', 'task_missed') NOT NULL,
+            type ENUM('income', 'expense', 'saving', 'task_started', 'task_done', 'task_missed', 'task_postponed', 'reward', 'penalty', 'ai_roast') NOT NULL,
             title VARCHAR(255),
             amount DOUBLE DEFAULT 0,
             photo_path VARCHAR(500),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
+
+        # 5. user_stats
+        cursor.execute("""CREATE TABLE IF NOT EXISTS user_stats (
+            id INT PRIMARY KEY DEFAULT 1,
+            current_points INT DEFAULT 0,
+            total_exp INT DEFAULT 0,
+            level INT DEFAULT 1,
+            pet_state VARCHAR(50) DEFAULT 'neutral',
+            last_roast_date DATE,
+            CHECK (id = 1)
+        )""")
+        cursor.execute("INSERT IGNORE INTO user_stats (id) VALUES (1)")
+
+        # 6. points_history
+        cursor.execute("""CREATE TABLE IF NOT EXISTS points_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            amount INT,
+            reason VARCHAR(255),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )""")
         
         conn.commit()
-        logger.info("✨ Khởi tạo bảng MySQL thành công.")
-        
-        # --- AUTO MIGRATION SECTION ---
-        # Kiểm tra và thêm các cột còn thiếu cho database cũ
-        tasks_columns = [
-            ("photo_start_path", "VARCHAR(500)"),
-            ("reason", "TEXT"),
-            ("notified_start", "TINYINT(1) DEFAULT 0"),
-            ("notified_15m", "TINYINT(1) DEFAULT 0"),
-            ("notified_45m", "TINYINT(1) DEFAULT 0"),
-            ("started_at", "DATETIME")
-        ]
-        
-        for col_name, col_type in tasks_columns:
-            try:
-                # Check if column exists
-                cursor.execute(f"SHOW COLUMNS FROM tasks LIKE '{col_name}'")
-                if not cursor.fetchone():
-                    logger.info(f"🛠️ Migration: Đang thêm cột '{col_name}' vào bảng tasks...")
-                    cursor.execute(f"ALTER TABLE tasks ADD COLUMN {col_name} {col_type}")
-                    conn.commit()
-            except Exception as migrate_err:
-                logger.error(f"⚠️ Lỗi migration cột {col_name}: {migrate_err}")
-
+        logger.info("✨ Database V5.0 Butler Edition đã sẵn sàng.")
     except Exception as e:
-        logger.error(f"❌ Lỗi khởi tạo MySQL từ Bot: {e}")
+        logger.error(f"❌ Lỗi khởi tạo MySQL V5.0: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        logger.error(f"❌ Lỗi khởi tạo MySQL V5.0: {e}")
     finally:
         cursor.close()
         conn.close()
@@ -181,3 +177,52 @@ def log_activity(activity_type, title, amount=0, photo_path=None):
         "INSERT INTO activity_log (type, title, amount, photo_path) VALUES (%s, %s, %s, %s)",
         (activity_type, title, amount, photo_path)
     )
+
+# --- V5.0 GAMIFICATION HELPERS ---
+
+def add_points(amount, reason):
+    """Cộng điểm cho user, tăng EXP và kiểm tra Level up."""
+    try:
+        stats = execute("SELECT * FROM user_stats WHERE id = 1", fetch='one')
+        if not stats: return
+        
+        new_points = stats['current_points'] + amount
+        new_exp = stats['total_exp'] + abs(amount)
+        # Level up logic: Level = 1 + floor(EXP / 1000)
+        new_level = 1 + (new_exp // 1000)
+        
+        execute(
+            "UPDATE user_stats SET current_points = %s, total_exp = %s, level = %s WHERE id = 1",
+            (new_points, new_exp, new_level)
+        )
+        execute(
+            "INSERT INTO points_history (amount, reason) VALUES (%s, %s)",
+            (amount, reason)
+        )
+        
+        # Log to activity feed
+        log_type = 'reward' if amount > 0 else 'penalty'
+        log_activity(log_type, f"{'Cộng' if amount > 0 else 'Trừ'} {abs(amount)} điểm: {reason}", amount=amount)
+        
+        # Automatically update pet state
+        update_pet_state()
+        
+        return {"points": new_points, "level": new_level, "leveled_up": new_level > stats['level']}
+    except Exception as e:
+        logger.error(f"❌ Lỗi add_points: {e}")
+
+def update_pet_state():
+    """Cập nhật trạng thái thú ảo dựa trên số điểm và tài chính."""
+    try:
+        stats = execute("SELECT * FROM user_stats WHERE id = 1", fetch='one')
+        # Simple logic: If points < 0 or remaining % < 10% -> Sad/Sick
+        # If level high -> Evolved?
+        state = 'neutral'
+        if stats['current_points'] > 500: state = 'happy'
+        if stats['current_points'] < 0: state = 'sad'
+        
+        execute("UPDATE user_stats SET pet_state = %s WHERE id = 1", (state,))
+    except: pass
+
+def get_user_stats():
+    return execute("SELECT * FROM user_stats WHERE id = 1", fetch='one')

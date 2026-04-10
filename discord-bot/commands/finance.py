@@ -118,9 +118,13 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
 
         row = db.execute("SELECT income, remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')
         logger.info(f"💵 Thu nhập mới: +{vnd(parsed_amount)}")
+        
+        # --- V5.0 Gamification ---
+        db.add_points(10, f"Ghi nhận thu nhập: {description}")
+        
         embed = discord.Embed(
             title="💵 Đã cộng thu nhập",
-            description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`",
+            description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`\n\n✨ +10đ Matcha!",
             color=discord.Color.green()
         )
         await interaction.response.send_message(embed=embed)
@@ -150,9 +154,13 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
 
         row = db.execute("SELECT remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')
         logger.info(f"🏦 Tiết kiệm mới: +{vnd(parsed_amount)}")
+        
+        # --- V5.0 Gamification ---
+        db.add_points(30, f"Tiết kiệm: {description}")
+        
         embed = discord.Embed(
             title="🏦 Đã cộng tiết kiệm",
-            description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`",
+            description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`\n\n🏆 +30đ Matcha (Chiến thần tích lũy!)",
             color=discord.Color.teal()
         )
         await interaction.response.send_message(embed=embed)

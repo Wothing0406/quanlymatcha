@@ -26,6 +26,7 @@ COGS = [
     "commands.tasks",
     "commands.management",
     "commands.chat_ai",
+    "commands.ocr",
 ]
 
 class MatchaBot(commands.Bot):

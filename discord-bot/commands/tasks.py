@@ -115,7 +115,13 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         db.execute("UPDATE tasks SET status = 'done' WHERE id = %s", (task_id,))
         db.log_activity('task_done', f"Đã hoàn thành: {task['task_name']}")
         
-        await interaction.response.send_message(f"✅ Đã đánh dấu `{task['task_name']}` là xong! Năng suất quá! 🚀")
+        # --- V5.0 Gamification ---
+        res = db.add_points(20, f"Hoàn thành task: {task['task_name']}")
+        msg = f"✅ Đã đánh dấu `{task['task_name']}` là xong! Năng suất quá! +20đ Matcha. 🚀"
+        if res and res.get('leveled_up'):
+            msg += f"\n🎊 CHÚC MỪNG! Bạn đã thăng cấp lên Level {res['level']}!"
+            
+        await interaction.response.send_message(msg)
 
     @task_group.command(name="missed", description="Đánh dấu công việc bị bỏ lỡ")
     @app_commands.describe(task_id="ID của công việc bị bỏ lỡ")
@@ -282,11 +288,17 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         db.log_activity('task_done', f"Đã hoàn thành: {task['task_name']}", photo_path=db_path)
         logger.info(f"📸 Finished task [{task_id}] with photo")
 
+        # --- V5.0 Gamification ---
+        res = db.add_points(50, f"Hoàn thành task kèm ảnh: {task['task_name']}")
+        
         embed = discord.Embed(
             title="🎉 Chúc mừng bạn đã xong việc!",
-            description=f"**{task['task_name']}** - Kỷ niệm hoàn thành đã được lưu! ✨",
+            description=f"**{task['task_name']}** - Kỷ niệm đã được lưu! +50đ Matcha. ✨",
             color=discord.Color.green()
         )
+        if res and res.get('leveled_up'):
+            embed.description += f"\n🎊 **LEVEL UP!** Bạn đã đạt Level {res['level']}!"
+            
         embed.set_image(url=attachment.url)
         await interaction.followup.send(embed=embed)
 

@@ -116,9 +116,27 @@
 
         <!-- Page Content -->
         <main class="p-6 main-content-p space-y-8 flex-1">
-            <div data-aos="fade-down">
-                <h1 class="text-3xl font-black tracking-tight mb-2 responsive-title">Bảng điều khiển</h1>
-                <p class="text-sm text-gray-500 font-medium">Chào buổi sáng! Hãy cùng điểm qua vài mốc thống kê nhé.</p>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6" data-aos="fade-down">
+                <div>
+                    <h1 class="text-3xl font-black tracking-tight mb-2 responsive-title">Bảng điều khiển</h1>
+                    <p class="text-sm text-gray-500 font-medium italic">"Chăm chỉ làm việc, đừng để Matcha mắng nhé! 🍵"</p>
+                </div>
+                <!-- Matcha Pet & Stats Widget -->
+                <div class="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div id="pet-avatar" class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-4xl animate-bounce-slow">
+                        🍵
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="user-level" class="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest">Level 1</span>
+                            <span id="pet-status-text" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest italic">Đang ổn</span>
+                        </div>
+                        <p id="user-points" class="text-xl font-black text-gray-700 dark:text-gray-200">0 pts</p>
+                        <div class="w-32 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
+                            <div id="exp-bar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Focus Center / Working Now Widget -->

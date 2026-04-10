@@ -55,6 +55,7 @@ app.use('/api', (req, res, next) => {
 // ================= ROUTES =================
 app.use('/api/finance', require('./routes/finance'));
 app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/user', require('./routes/user'));
 app.use('/api', require('./routes/general')); // Activities, Purchases, etc.
 
 // START

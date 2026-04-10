@@ -7,11 +7,47 @@ async function initDashboard() {
         const stats = await fetchJSON(`${API_BASE}/finance/stats`);
         updateDashboardStats(stats);
         loadDashboardHistory();
+        initGamification(); // New for V5.0
     } catch (err) { 
         console.error('Lỗi dashboard:', err);
         const gridEl = document.getElementById('agenda-task-grid');
         if (gridEl) gridEl.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Không thể kết nối Database. Vui lòng kiểm tra lại Bot!</div>`;
     }
+}
+
+async function initGamification() {
+    try {
+        const stats = await fetchJSON(`${API_BASE}/user/stats`);
+        renderGamification(stats);
+    } catch (err) {
+        console.error('Lỗi lấy stats gamification:', err);
+    }
+}
+
+function renderGamification(stats) {
+    const levelEl = document.getElementById('user-level');
+    const pointsEl = document.getElementById('user-points');
+    const expBarEl = document.getElementById('exp-bar');
+    const petAvatarEl = document.getElementById('pet-avatar');
+    const petStatusEl = document.getElementById('pet-status-text');
+
+    if (levelEl) levelEl.innerText = `Level ${stats.level}`;
+    if (pointsEl) pointsEl.innerText = `${stats.current_points} pts`;
+    
+    // Calculate EXP progress (0-1000)
+    const expProgress = (stats.total_exp % 1000) / 10;
+    if (expBarEl) expBarEl.style.width = `${expProgress}%`;
+
+    // Pet State UI
+    const states = {
+        'happy': { emoji: '🍵', text: 'Đang rất vui!' },
+        'sad': { emoji: '🍶', text: 'Đang giận dỗi...' },
+        'neutral': { emoji: '🍵', text: 'Đang theo dõi bạn' },
+        'sick': { emoji: '🔥', text: 'Đang bốc hỏa!' }
+    };
+    const current = states[stats.pet_state] || states['neutral'];
+    if (petAvatarEl) petAvatarEl.innerText = current.emoji;
+    if (petStatusEl) petStatusEl.innerText = current.text;
 }
 
 function updateDashboardStats(stats) {
