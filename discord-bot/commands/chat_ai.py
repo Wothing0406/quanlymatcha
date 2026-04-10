@@ -25,10 +25,11 @@ class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
         if self.api_key and self.api_key.strip() != "":
             try:
                 genai.configure(api_key=self.api_key)
-                # Using the canonical model name
-                self.model = genai.GenerativeModel('gemini-1.5-flash')
+                # Using the latest model name to avoid 404 errors
+                self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
                 self.ai_enabled = True
-                logger.info("🧠 Generative AI đã được kích hoạt (Gemini 1.5 Flash).")
+                logger.info("🧠 Generative AI đã được kích hoạt (Gemini 1.5 Flash Latest).")
+
             except Exception as e:
                 logger.error(f"❌ Lỗi khi khởi tạo Gemini Model: {e}")
                 self.ai_enabled = False
