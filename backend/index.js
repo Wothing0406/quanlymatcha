@@ -31,7 +31,9 @@ app.use('/uploads', express.static(uploadsDir));
 // ================= AUTH API (Public) =================
 app.post('/api/auth/verify', (req, res) => {
     const { pin } = req.body;
-    if (pin === WEB_PIN) {
+    // Strip accidental quotes or spaces from the env var just in case
+    const validPin = WEB_PIN.toString().replace(/^["']|["']$/g, '').trim();
+    if (pin.trim() === validPin) {
         res.json({ success: true });
     } else {
         res.status(401).json({ success: false, error: 'Mã PIN không chính xác!' });
@@ -42,8 +44,9 @@ app.post('/api/auth/verify', (req, res) => {
 app.use('/api', (req, res, next) => {
     if (req.path === '/auth/verify') return next();
     
-    const pin = req.headers['x-pin'];
-    if (pin !== WEB_PIN) {
+    const pin = (req.headers['x-pin'] || '').trim();
+    const validPin = WEB_PIN.toString().replace(/^["']|["']$/g, '').trim();
+    if (pin !== validPin) {
         return res.status(401).json({ error: 'Unauthorized. Vui lòng đăng nhập.' });
     }
     next();

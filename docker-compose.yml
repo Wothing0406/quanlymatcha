@@ -55,6 +55,6 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: matcha-tunnel
     restart: unless-stopped
-    command: tunnel --no-autoupdate --url http://backend:3000
+    command: tunnel --no-autoupdate --url http://matcha-backend:3000
     depends_on:
       - backend
