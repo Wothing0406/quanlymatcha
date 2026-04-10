@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY bot.py .
 COPY database.py .
 COPY scheduler.py .
+COPY reset_v5.py .
 COPY commands/ ./commands/
 
 # Create uploads dir
