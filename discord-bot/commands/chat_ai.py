@@ -23,11 +23,15 @@ class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
         self.ai_enabled = False
         
         if self.api_key and self.api_key.strip() != "":
-            genai.configure(api_key=self.api_key)
-            # Use gemini-1.5-flash for fast and free personal use
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
-            self.ai_enabled = True
-            logger.info("🧠 Generative AI đã được kích hoạt (Gemini 1.5 Flash).")
+            try:
+                genai.configure(api_key=self.api_key)
+                # Using explicit model name and newest flash model
+                self.model = genai.GenerativeModel('models/gemini-1.5-flash')
+                self.ai_enabled = True
+                logger.info("🧠 Generative AI đã được kích hoạt (Gemini 1.5 Flash).")
+            except Exception as e:
+                logger.error(f"❌ Lỗi khi khởi tạo Gemini Model: {e}")
+                self.ai_enabled = False
         else:
             logger.warning("⚠️ Không tìm thấy GEMINI_API_KEY. Tính năng Chat AI bị tắt.")
 
