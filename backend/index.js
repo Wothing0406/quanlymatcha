@@ -186,11 +186,63 @@ app.get('/api/tasks', async (req, res) => {
 app.post('/api/tasks', async (req, res) => {
     const { task_name, weekday, start_time, end_time } = req.body;
     try {
-        const [result] = await db.query(
-            `INSERT INTO tasks (task_name, weekday, start_time, end_time) VALUES (?, ?, ?, ?)`,
-            [task_name, weekday, start_time, end_time]
+        // Handle both single string and array of weekdays
+        const weekdays = Array.isArray(weekday) ? weekday : [weekday];
+        const results = [];
+        
+        for (const day of weekdays) {
+            const [result] = await db.query(
+                `INSERT INTO tasks (task_name, weekday, start_time, end_time) VALUES (?, ?, ?, ?)`,
+                [task_name, day, start_time, end_time]
+            );
+            results.push({ day, id: result.insertId });
+        }
+        res.json({ success: true, count: results.length, tasks: results });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/tasks/:id', async (req, res) => {
+    const { id } = req.params;
+    const { task_name, start_time, end_time } = req.body;
+    try {
+        await db.query(
+            `UPDATE tasks SET task_name = ?, start_time = ?, end_time = ? WHERE id = ?`,
+            [task_name, start_time, end_time, id]
         );
-        res.json({ success: true, id: result.insertId });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query(`DELETE FROM tasks WHERE id = ?`, [id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/tasks/start', upload.single('photo'), async (req, res) => {
+    const { id } = req.body;
+    const photo_path = req.file ? '/uploads/' + req.file.filename : null;
+    try {
+        const [rows] = await db.query("SELECT task_name FROM tasks WHERE id = ?", [id]);
+        const taskName = rows[0] ? rows[0].task_name : 'Công việc';
+
+        await db.query(`UPDATE tasks SET status = 'ongoing', photo_start_path = ?, started_at = NOW() WHERE id = ?`, [photo_path, id]);
+        
+        // ✨ Log Activity Immediately
+        await db.query(
+            "INSERT INTO activity_log (type, title, photo_path) VALUES ('task_started', ?, ?)",
+            [`Đã bắt đầu: ${taskName}`, photo_path]
+        );
+
+        res.json({ success: true, photo_path });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -205,13 +257,13 @@ app.post('/api/tasks/complete', upload.single('photo'), async (req, res) => {
 
         await db.query(`UPDATE tasks SET status = 'done', photo_path = ? WHERE id = ?`, [photo_path, id]);
         
-        // ✨ Log Activity
+        // ✨ Log Completion
         await db.query(
             "INSERT INTO activity_log (type, title, photo_path) VALUES ('task_done', ?, ?)",
-            [taskName, photo_path]
+            [`Đã hoàn thành: ${taskName}`, photo_path]
         );
 
-        res.json({ success: true });
+        res.json({ success: true, photo_path });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

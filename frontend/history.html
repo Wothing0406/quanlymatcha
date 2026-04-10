@@ -9,8 +9,27 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
-        .transition-all {
-            transition: all 0.3s ease-in-out;
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .memory-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            aspect-ratio: 1/1;
+        }
+
+        .memory-card:hover {
+            transform: scale(1.02) rotate(1deg);
+        }
+
+        .locket-glow {
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .locket-glow {
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
         }
 
         .sidebar-item {
@@ -21,15 +40,15 @@
             transform: translateX(5px);
         }
 
-        .filter-btn.active {
-            background: white;
-            color: #3b82f6;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        .filter-btn {
+            transition: all 0.3s ease;
         }
 
-        .dark .filter-btn.active {
-            background: #374151;
-            color: #60a5fa;
+        .filter-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -126,10 +145,15 @@
                 </div>
             </div>
  
-            <!-- History Widgets Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="history-timeline">
-                <!-- Items will be injected here via app.js with glass-card class -->
-                <div class="col-span-full text-center py-20 opacity-50 italic">Đang tải nhật ký hành trình...</div>
+            <!-- Locket-Style Memory Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6" id="history-timeline">
+                <!-- Memories will be injected here via app.js -->
+                <div class="col-span-full text-center py-20">
+                    <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-camera text-2xl text-gray-300"></i>
+                    </div>
+                    <p class="text-gray-400 font-medium italic">Chưa có "kỷ niệm" nào được ghi lại... Hãy bắt đầu công việc ngay!</p>
+                </div>
             </div>
         </main>
 

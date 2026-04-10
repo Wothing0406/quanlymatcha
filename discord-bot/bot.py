@@ -25,11 +25,13 @@ COGS = [
     "commands.finance",
     "commands.tasks",
     "commands.management",
+    "commands.chat_ai",
 ]
 
 class MatchaBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
+        intents.message_content = True
         super().__init__(command_prefix="!", intents=intents)
         self.dm_channel = None
         self.synced = False

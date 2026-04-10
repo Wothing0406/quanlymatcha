@@ -347,7 +347,7 @@ function initSharedListeners() {
                 reader.onload = e => {
                     document.getElementById('verify-preview-img').src = e.target.result;
                     document.getElementById('verify-preview-img').classList.remove('hidden');
-                    document.getElementById('verify-preview-container').classList.add('hidden');
+                    document.getElementById('verify-preview-img').classList.remove('hidden');
                     document.getElementById('btn-confirm-done').disabled = false;
                 };
                 reader.readAsDataURL(this.files[0]);
@@ -357,23 +357,30 @@ function initSharedListeners() {
 
     const btnConfirmDone = document.getElementById('btn-confirm-done');
     if(btnConfirmDone) {
-        btnConfirmDone.addEventListener('click', async () => {
+        btnConfirmDone.onclick = async () => {
             const id = document.getElementById('verify-task-id').value;
+            const status = document.getElementById('verify-task-status')?.value || 'pending';
             const photo = document.getElementById('verify-photo-input').files[0];
+            const originalText = btnConfirmDone.innerText;
+            if(!photo) return;
+
             const formData = new FormData();
             formData.append('id', id);
             formData.append('photo', photo);
-            const originalText = btnConfirmDone.innerText;
+
             try {
-                btnConfirmDone.innerText = 'Đang gửi...'; btnConfirmDone.disabled = true;
-                await fetchJSON(`${API_BASE}/tasks/complete`, 'POST', formData);
-                alert('Tuyệt vời! Đã xác nhận hoàn thành công việc.');
+                btnConfirmDone.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang gửi...';
+                btnConfirmDone.disabled = true;
+                const endpoint = status === 'ongoing' ? '/api/tasks/complete' : '/api/tasks/start';
+                await fetchJSON(`${API_BASE}${endpoint}`, 'POST', formData);
+                
+                alert(status === 'ongoing' ? 'Tuyệt vời! Đã báo cáo hoàn thành kỷ niệm. ✨' : 'Hãy tập trung làm việc nhé! 💪 Kỷ niệm đã được đăng.');
                 location.reload();
             } catch (err) { 
-                alert('Lỗi xác nhận!'); 
+                alert('Lỗi gửi báo cáo!'); 
                 btnConfirmDone.innerText = originalText; btnConfirmDone.disabled = false; 
             }
-        });
+        };
     }
 }
 
@@ -658,45 +665,40 @@ async function loadHistory(filterType = 'all') {
             const timeDisplay = formatRelativeTime(new Date(item.created_at));
             const isTask = item.type.startsWith('task');
             const isIncome = item.type === 'income';
-            const isSaving = item.type === 'saving';
-            const isExpense = item.type === 'expense';
             
             // Icon & Color Logic
             let icon = 'fa-shopping-cart';
-            let colorClass = 'blue';
             let label = 'Hoạt động';
-
-            if (isTask) { icon = 'fa-check-circle'; colorClass = 'purple'; label = 'Công việc'; }
-            if (isIncome) { icon = 'fa-plus-circle'; colorClass = 'green'; label = 'Thu nhập'; }
-            if (isSaving) { icon = 'fa-piggy-bank'; colorClass = 'teal'; label = 'Tiết kiệm'; }
-            if (isExpense) { icon = 'fa-shopping-cart'; colorClass = 'red'; label = 'Chi tiêu'; }
+            if (isTask) { icon = 'fa-check-circle'; label = 'Công việc'; }
+            if (item.type === 'income') { icon = 'fa-plus-circle'; label = 'Thu nhập'; }
+            if (item.type === 'saving') { icon = 'fa-piggy-bank'; label = 'Tiết kiệm'; }
+            if (item.type === 'expense') { icon = 'fa-shopping-cart'; label = 'Chi tiêu'; }
 
             return `
-                <div class="glass-card bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-xl border border-white/20 dark:border-gray-700/30 hover:scale-[1.02] transition-all duration-300" 
-                     data-aos="fade-up">
-                    <div class="flex justify-between items-start gap-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 bg-${colorClass}-100 dark:bg-${colorClass}-900/30 text-${colorClass}-500 rounded-2xl flex items-center justify-center shadow-inner">
-                                <i class="fas ${icon} text-2xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-${colorClass}-500/80 uppercase font-black tracking-[0.2em] mb-1">${label}</p>
-                                <h4 class="font-bold text-lg leading-tight text-gray-900 dark:text-white">${item.title}</h4>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            ${item.amount ? `<p class="text-xl font-black ${isIncome ? 'text-green-500' : 'text-blue-500'}">${isIncome ? '+' : ''}${formatVNĐ(item.amount)}</p>` : ''}
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">${timeDisplay}</p>
-                        </div>
+                <div class="memory-card relative group rounded-[2.5rem] overflow-hidden locket-glow bg-white dark:bg-gray-800" data-aos="zoom-in">
+                    <!-- Photo -->
+                    <div class="w-full h-full relative cursor-zoom-in" onclick="openImage('${item.photo_path}')">
+                        <img src="${item.photo_path}" class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 opacity-80"></div>
                     </div>
-                    ${item.photo_path ? `
-                        <div class="mt-5 relative group overflow-hidden rounded-3xl shadow-lg cursor-zoom-in" onclick="openImage('${item.photo_path}')">
-                            <img src="${item.photo_path}" class="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
-                        </div>` : ''}
+                    
+                    <!-- Content Overlays -->
+                    <div class="absolute inset-x-0 bottom-0 p-5 text-white pointer-events-none">
+                        <p class="text-[9px] font-black uppercase tracking-widest opacity-80 mb-1">${label} • ${timeDisplay}</p>
+                        <h4 class="text-sm font-bold leading-tight">${item.title}</h4>
+                    </div>
+                    
+                    <div class="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white text-xs border border-white/30">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    
+                    ${item.amount > 0 ? `
+                    <div class="absolute top-4 left-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
+                        <p class="text-[10px] font-black text-white">${isIncome ? '+' : '-'}${formatVNĐ(item.amount)}</p>
+                    </div>` : ''}
                 </div>
             `;
-        }).join('') : '<div class="col-span-full text-center py-20 opacity-50 italic text-gray-500">Chưa có dấu chân nào trong nhật ký...</div>';
+        }).join('') : '<div class="col-span-full py-20 text-center text-gray-400 italic">Chưa có kỷ niệm nào ở đây...</div>';
     } catch (err) { console.error('Lỗi tải nhật ký:', err); }
 }
 
@@ -736,13 +738,25 @@ function parseSmartAmount(text) {
 }
 
 // Verification & Reports Logic
-function openVerifyModal(id, title) {
+function openVerifyModal(id, title, status = 'pending') {
     document.getElementById('verify-task-id').value = id;
-    document.getElementById('verify-task-title').innerText = title;
+    
+    // Create hidden status input if not exists
+    let statusInput = document.getElementById('verify-task-status');
+    if (!statusInput) {
+        statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.id = 'verify-task-status';
+        document.getElementById('form-verify-task').appendChild(statusInput);
+    }
+    statusInput.value = status;
+    
+    document.getElementById('verify-task-title').innerText = status === 'ongoing' ? 'Hoàn thành kỷ niệm' : 'Bắt đầu kỷ niệm';
     document.getElementById('modal-verify-task').classList.remove('hidden');
+    
     // Reset view
     document.getElementById('verify-preview-img').classList.add('hidden');
-    document.getElementById('verify-preview-container').classList.remove('hidden');
+    document.getElementById('verify-preview-placeholder').classList.remove('hidden');
     document.getElementById('btn-confirm-done').disabled = true;
     document.getElementById('verify-photo-input').value = '';
 }
@@ -785,19 +799,26 @@ function loadTasks() {
                 if (t.status === 'postponed') { badgeClass = 'bg-orange-100 text-orange-700'; statusText = 'Đang dời'; }
 
                 return `
-                    <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg p-8 space-y-6 border border-transparent hover:border-blue-500/20 transition-all duration-500 group">
+                    <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg p-8 space-y-6 border border-transparent hover:border-blue-500/20 transition-all duration-500 group relative">
                         <div class="flex justify-between items-start">
-                            <div class="space-y-1">
+                            <div class="space-y-1 pr-12">
                                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">${t.weekday} | ${t.start_time} - ${t.end_time}</p>
                                <h4 class="font-black text-xl">${t.task_name}</h4>
                             </div>
-                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${badgeClass}">${statusText}</span>
+                            <div class="flex flex-col items-end gap-2">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${badgeClass}">${statusText}</span>
+                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onclick="openEditModal(${t.id}, '${t.task_name}', '${t.start_time}', '${t.end_time}')" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-blue-500 flex items-center justify-center transition-all"><i class="fas fa-edit text-xs"></i></button>
+                                    <button onclick="deleteTask(${t.id})" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-red-500 flex items-center justify-center transition-all"><i class="fas fa-trash text-xs"></i></button>
+                                </div>
+                            </div>
                         </div>
+                        
                         ${isPending ? `
                             <div class="flex gap-3 pt-2">
                                <button onclick="${canDo ? `openVerifyModal(${t.id}, '${t.task_name}')` : ''}" 
                                        class="flex-1 ${canDo ? 'bg-blue-600 shadow-blue-200 dark:shadow-none translate-y-0 opacity-100' : 'bg-gray-100 text-gray-300 cursor-not-allowed opacity-50'} text-white rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95">
-                                       <i class="fas fa-camera mr-2"></i> Hoàn thành
+                                       <i class="fas fa-camera mr-2"></i> ${t.status === 'ongoing' ? 'Hoàn thành' : 'Bắt đầu làm'}
                                </button>
                                <button onclick="${canDo ? `openSkipModal(${t.id})` : ''}" 
                                        class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-gray-500 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-50 hover:text-red-500">
@@ -807,11 +828,12 @@ function loadTasks() {
                         ` : (t.photo_path ? `
                             <div class="relative overflow-hidden rounded-[1.5rem] border border-gray-100 dark:border-gray-700">
                                 <img src="${t.photo_path}" class="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer" onclick="openImage('${t.photo_path}')">
-                                <div class="absolute top-3 right-3 bg-white/80 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black uppercase text-blue-600">Đã chụp</div>
+                                <div class="absolute top-3 right-3 bg-white/80 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black uppercase text-blue-600">Xong</div>
                             </div>
                         ` : '')}
                     </div>
                 `;
+            }).join('') : '<div class="text-center py-20 text-gray-400 font-medium italic">Chưa có lịch trình được thiết lập. Hãy thêm mới ngay bên trên!</div>';
             }).join('') : '<div class="text-center py-20 text-gray-400 font-medium italic">Chưa có lịch trình được thiết lập. Hãy thêm mới ngay bên trên!</div>';
         });
     } catch (err) { console.error('Lỗi tải lịch trình:', err); }
@@ -867,16 +889,17 @@ function createActivityItemHTML(item, isCompact = false) {
         sign = '';
         label = 'Tiết kiệm';
     } else if (isTask) {
-        colorClass = 'text-purple-500';
-        bgClass = 'bg-purple-50 dark:bg-purple-900/20';
-        iconClass = item.type === 'task_done' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+        const isStarted = item.type === 'task_started';
+        colorClass = isStarted ? 'text-blue-500' : 'text-purple-500';
+        bgClass = isStarted ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-purple-50 dark:bg-purple-900/20';
+        iconClass = isStarted ? 'fa-hourglass-start' : (item.type === 'task_done' ? 'fa-check-double' : 'fa-check-circle');
         sign = '';
-        label = 'Công việc';
+        label = isStarted ? 'Bắt đầu việc' : 'Hoàn thành việc';
     }
 
     const amountHTML = amount > 0 || isExpense || isIncome ? `
         <div class="text-right flex-shrink-0">
-            <p class="font-black ${isCompact ? 'text-xs' : 'text-sm'} ${colorClass}">${sign}${formatVNĐ(amount)}</p>
+            <p class="font-black ${isCompact ? 'text-[10px]' : 'text-sm'} ${colorClass}">${sign}${formatVNĐ(amount)}</p>
         </div>
     ` : '';
 
@@ -888,16 +911,17 @@ function createActivityItemHTML(item, isCompact = false) {
             
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start">
-                    <div class="min-w-0 overflow-hidden">
-                        <h4 class="font-bold ${isCompact ? 'text-xs' : 'text-sm'} truncate pr-2 text-gray-900 dark:text-white">${item.title}</h4>
-                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">${label} • ${timeDisplay}</p>
+                    <div class="min-w-0 overflow-hidden pr-2">
+                        <h4 class="font-bold ${isCompact ? 'text-[11px]' : 'text-sm'} truncate text-gray-900 dark:text-white">${item.title}</h4>
+                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-none mt-1">${label} • ${timeDisplay}</p>
                     </div>
                     ${amountHTML}
                 </div>
                 
                 ${!isCompact && item.photo_path ? `
                 <div class="mt-3 relative rounded-xl overflow-hidden cursor-zoom-in" onclick="openImage('${item.photo_path}')">
-                    <img src="${item.photo_path}" class="w-full h-24 object-cover transition-transform duration-500 group-hover:scale-105">
+                    <img src="${item.photo_path}" class="w-full h-28 object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                 </div>` : ''}
             </div>
         </div>
@@ -952,14 +976,14 @@ function renderAgendaTasks(tasks) {
 
                 <div class="grid grid-cols-2 gap-3 mt-auto">
                     ${!done ? `
-                        <button onclick="openVerifyModal(${t.id}, '${t.task_name}')" class="col-span-2 px-6 py-4 bg-blue-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200 dark:shadow-none">
-                            <i class="fas fa-camera"></i> Xác thực ngay
+                        <button onclick="openVerifyModal(${t.id}, '${t.task_name}', '${t.status}')" class="col-span-2 px-6 py-4 bg-blue-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200 dark:shadow-none">
+                            <i class="fas fa-camera"></i> ${t.status === 'ongoing' ? 'Chụp ảnh HOÀN THÀNH' : 'Chụp ảnh BẮT ĐẦU'}
                         </button>
                         <button onclick="openSkipModal(${t.id})" class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-orange-500 transition-all">Báo bận</button>
                         <button onclick="postponeTask(${t.id})" class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-blue-500 transition-all">Dời lịch</button>
                     ` : `
                         <div class="col-span-2 py-4 text-center text-green-500 font-bold text-sm bg-green-50 dark:bg-green-900/10 rounded-2xl">
-                            <i class="fas fa-check-double mr-2"></i> Đã ghi nhận minh chứng
+                            <i class="fas fa-check-double mr-2"></i> Kỷ niệm đã được ghi lại ✨
                         </div>
                     `}
                 </div>
@@ -1128,17 +1152,60 @@ if (window.location.pathname.includes('goals.html')) {
     loadGoals();
 }
 if (window.location.pathname.includes('schedule.html')) {
-    const form = document.getElementById('form-schedule');
-    if (form) form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const task_name = document.getElementById('task-name').value;
-        const weekday = document.getElementById('task-weekday').value;
-        const start_time = document.getElementById('task-start').value;
-        const end_time = document.getElementById('task-end').value;
-        try {
-            await fetchJSON(`${API_BASE}/tasks`, 'POST', { task_name, weekday, start_time, end_time });
-            alert('Đã thêm công việc vào lịch trình!'); location.reload();
-        } catch (err) { alert('Lỗi lưu lịch trình!'); }
-    });
+    const formSch = document.getElementById('form-schedule');
+    if (formSch) {
+        formSch.onsubmit = async (e) => {
+            e.preventDefault();
+            const task_name = document.getElementById('task-name').value;
+            const start_time = document.getElementById('task-start').value;
+            const end_time = document.getElementById('task-end').value;
+            const weekday = Array.from(document.querySelectorAll('input[name="weekdays"]:checked')).map(cb => cb.value);
+
+            if (weekday.length === 0) return alert('Vui lòng chọn ít nhất một ngày!');
+
+            try {
+                await fetchJSON(`${API_BASE}/tasks`, 'POST', { task_name, weekday, start_time, end_time });
+                alert('Đã thêm lịch trình thành công! ✨');
+                location.reload();
+            } catch (err) { alert('Lỗi lưu lịch trình!'); }
+        };
+    }
+
+    const formEdit = document.getElementById('form-edit-task');
+    if (formEdit) {
+        formEdit.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-task-id').value;
+            const task_name = document.getElementById('edit-task-name').value;
+            const start_time = document.getElementById('edit-task-start').value;
+            const end_time = document.getElementById('edit-task-end').value;
+
+            try {
+                await fetchJSON(`${API_BASE}/tasks/${id}`, 'PUT', { task_name, start_time, end_time });
+                alert('Đã cập nhật lịch trình!');
+                location.reload();
+            } catch (err) { alert('Lỗi cập nhật lịch trình!'); }
+        };
+    }
     loadTasks();
+}
+// --- New Task Management Helpers ---
+function openEditModal(id, name, start, end) {
+    document.getElementById('edit-task-id').value = id;
+    document.getElementById('edit-task-name').value = name;
+    document.getElementById('edit-task-start').value = start;
+    document.getElementById('edit-task-end').value = end;
+    document.getElementById('modal-edit-task').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('modal-edit-task').classList.add('hidden');
+}
+
+async function deleteTask(id) {
+    if (!confirm('Bạn có chắc chắn muốn xóa lịch trình này không?')) return;
+    try {
+        await fetchJSON(`${API_BASE}/tasks/${id}`, { method: 'DELETE' });
+        loadTasks();
+    } catch (err) { alert('Lỗi khi xóa lịch trình'); }
 }

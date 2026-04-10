@@ -57,11 +57,13 @@ def init_db():
             start_time VARCHAR(10),
             end_time VARCHAR(10),
             status VARCHAR(50) DEFAULT 'pending',
+            photo_start_path VARCHAR(500),
             photo_path VARCHAR(500),
             reason TEXT,
             notified_start TINYINT(1) DEFAULT 0,
             notified_15m TINYINT(1) DEFAULT 0,
             notified_45m TINYINT(1) DEFAULT 0,
+            started_at DATETIME,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
 
@@ -77,7 +79,7 @@ def init_db():
         # 5. activity_log (Unified Feed V5.0)
         cursor.execute("""CREATE TABLE IF NOT EXISTS activity_log (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            type ENUM('income', 'expense', 'saving', 'task_done', 'task_missed') NOT NULL,
+            type ENUM('income', 'expense', 'saving', 'task_started', 'task_done', 'task_missed') NOT NULL,
             title VARCHAR(255),
             amount DOUBLE DEFAULT 0,
             photo_path VARCHAR(500),

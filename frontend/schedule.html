@@ -105,19 +105,59 @@
                             class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                             placeholder="VD: Tập Gym, Học Tiếng Anh..." required>
                     </div>
-                    <div>
-                        <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Thứ
-                            trong tuần</label>
-                        <select id="task-weekday"
-                            class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
-                            <option>Thứ 2</option>
-                            <option>Thứ 3</option>
-                            <option>Thứ 4</option>
-                            <option>Thứ 5</option>
-                            <option>Thứ 6</option>
-                            <option>Thứ 7</option>
-                            <option>Chủ Nhật</option>
-                        </select>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-4">Các ngày trong tuần</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3" id="weekday-checkboxes">
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                                <input type="checkbox" name="weekdays" value="Thứ 2" class="hidden peer">
+                                <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-600 transition-colors">T2</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-[10px] text-white opacity-0 peer-checked:opacity-100"></i>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                                <input type="checkbox" name="weekdays" value="Thứ 3" class="hidden peer">
+                                <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-600 transition-colors">T3</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-[10px] text-white opacity-0 peer-checked:opacity-100"></i>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                                <input type="checkbox" name="weekdays" value="Thứ 4" class="hidden peer">
+                                <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-600 transition-colors">T4</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-[10px] text-white opacity-0 peer-checked:opacity-100"></i>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                                <input type="checkbox" name="weekdays" value="Thứ 5" class="hidden peer">
+                                <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-600 transition-colors">T5</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-[10px] text-white opacity-0 peer-checked:opacity-100"></i>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                                <input type="checkbox" name="weekdays" value="Thứ 6" class="hidden peer">
+                                <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-600 transition-colors">T6</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-[10px] text-white opacity-0 peer-checked:opacity-100"></i>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                                <input type="checkbox" name="weekdays" value="Thứ 7" class="hidden peer">
+                                <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-600 transition-colors">T7</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-[10px] text-white opacity-0 peer-checked:opacity-100"></i>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                                <input type="checkbox" name="weekdays" value="Chủ Nhật" class="hidden peer">
+                                <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-600 transition-colors">CN</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-all">
+                                    <i class="fas fa-check text-[10px] text-white opacity-0 peer-checked:opacity-100"></i>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                     <div class="flex gap-4">
                         <div class="w-1/2">
@@ -189,29 +229,40 @@
         </div>
     </div>
 
-    <div id="modal-skip-task"
+    </div>
+
+    <div id="modal-edit-task"
         class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] w-full max-w-md p-8 relative overflow-hidden shadow-2xl">
-            <div class="absolute top-0 left-0 w-full h-2 bg-orange-500"></div>
-            <h3 class="text-2xl font-black mb-2">Báo bận / Dời lịch</h3>
-            <p class="text-sm text-gray-500 mb-6">Hãy cho mình biết lý do bạn chưa thể thực hiện nhé.</p>
-            <div class="space-y-6">
-                <textarea id="skip-reason"
-                    class="w-full h-32 p-4 rounded-2xl bg-gray-50 dark:bg-gray-700 border-none text-sm focus:ring-2 focus:ring-orange-500 transition-all outline-none resize-none"
-                    placeholder="Lý do bận hôm nay..."></textarea>
-                <div class="flex flex-col gap-3">
-                    <div class="flex gap-3">
-                        <button onclick="confirmSkipAction('skipped')"
-                            class="flex-1 px-6 py-4 bg-orange-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-orange-600 transition-all">Bỏ
-                            qua</button>
-                        <button onclick="confirmSkipAction('postponed')"
-                            class="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Dời
-                            lịch</button>
-                    </div>
-                    <button onclick="closeSkipModal()"
-                        class="w-full py-3 text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-gray-600 transition-all">Đóng</button>
+        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] w-full max-w-md p-8 relative overflow-hidden shadow-2xl animate-scale-in">
+            <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
+            <h3 class="text-2xl font-black mb-2">Chỉnh sửa công việc</h3>
+            <p class="text-sm text-gray-500 mb-6">Cập nhật thông tin cho lịch trình của bạn.</p>
+            <form id="form-edit-task" class="space-y-6">
+                <input type="hidden" id="edit-task-id">
+                <div>
+                    <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Tên công việc</label>
+                    <input type="text" id="edit-task-name"
+                        class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
                 </div>
-            </div>
+                <div class="flex gap-4">
+                    <div class="w-1/2">
+                        <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Bắt đầu</label>
+                        <input type="time" id="edit-task-start"
+                            class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Kết thúc</label>
+                        <input type="time" id="edit-task-end"
+                            class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" onclick="closeEditModal()"
+                        class="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-400 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Hủy</button>
+                    <button type="submit"
+                        class="flex-1 px-6 py-4 bg-blue-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-blue-100">Lưu thay đổi</button>
+                </div>
+            </form>
         </div>
     </div>
 
