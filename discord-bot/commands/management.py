@@ -3,6 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 import logging
 import database as db
+import os
 
 logger = logging.getLogger('MatchaBot.Management')
 
@@ -11,6 +12,22 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @app_commands.command(name="web", description="Lấy đường link truy cập trang quản lý Web Dashboard")
+    async def get_web(self, interaction: discord.Interaction):
+        url = "https://matcha-quanly.loca.lt"
+        pin = os.getenv("WEB_PIN", "1234")
+        
+        embed = discord.Embed(
+            title="✨ Matcha Web Portal",
+            description=f"Truy cập vào trung tâm điều khiển của bạn tại đây:\n\n👉 **[{url}]({url})**",
+            color=discord.Color.teal()
+        )
+        embed.add_field(name="🔒 Mã PIN Bảo Mật:", value=f"`{pin}`", inline=False)
+        embed.set_footer(text="Lưu ý: Bạn phải nhấn 'Click to Continue' ở màn hình LocalTunnel!")
+        
+        # Tin nhắn dạng ephemeral tức là chỉ bạn nhìn thấy, người khác trong channel không thấy PIN
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="help", description="Xem toàn bộ danh sách lệnh")
     async def help_cmd(self, interaction: discord.Interaction):

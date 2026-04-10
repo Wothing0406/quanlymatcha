@@ -46,29 +46,24 @@
             <p class="text-sm text-gray-400 font-medium">Nhập mã PIN để truy cập trợ lý của bạn.</p>
         </div>
 
-        <!-- PIN Dots Display -->
-        <div class="flex justify-center gap-4 mb-8" id="pin-dots">
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
-        </div>
-
-        <!-- Numbers Grid -->
-        <div class="grid grid-cols-3 gap-4">
-            <button onclick="pressKey('1')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">1</button>
-            <button onclick="pressKey('2')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">2</button>
-            <button onclick="pressKey('3')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">3</button>
-            <button onclick="pressKey('4')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">4</button>
-            <button onclick="pressKey('5')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">5</button>
-            <button onclick="pressKey('6')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">6</button>
-            <button onclick="pressKey('7')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">7</button>
-            <button onclick="pressKey('8')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">8</button>
-            <button onclick="pressKey('9')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">9</button>
-            <button onclick="clearKey()" class="h-16 rounded-2xl bg-red-50 text-red-500 font-bold text-xl hover:bg-red-100 transition-all active:scale-90"><i class="fas fa-backspace"></i></button>
-            <button onclick="pressKey('0')" class="h-16 rounded-2xl bg-white dark:bg-gray-800 dark:text-white font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-90">0</button>
-            <button onclick="submitPin()" class="h-16 rounded-2xl bg-blue-500 text-white font-bold text-xl hover:bg-blue-600 transition-all active:scale-90"><i class="fas fa-arrow-right"></i></button>
-        </div>
+        <!-- Password Input Box -->
+        <form id="login-form" autocomplete="off" class="space-y-6" onsubmit="submitPin(event)">
+            <div class="relative">
+                <input type="password" id="password-input" 
+                    class="w-full bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl px-6 py-4 text-center text-xl font-bold tracking-widest text-gray-800 dark:text-white focus:outline-none focus:ring-4 focus:ring-blue-500/30 transition-all placeholder-gray-400"
+                    placeholder="Nhập mật khẩu..." required>
+                <div class="absolute inset-y-0 right-4 flex items-center">
+                    <button type="button" onclick="togglePassword()" class="text-gray-400 hover:text-blue-500 transition-colors">
+                        <i id="eye-icon" class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" 
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-2xl py-4 font-black uppercase tracking-widest shadow-xl shadow-blue-500/30 hover:scale-[1.02] active:scale-95 transition-all">
+                Mở Khoá <i class="fas fa-unlock ml-2"></i>
+            </button>
+        </form>
 
         <p id="error-msg" class="text-xs text-red-500 font-bold italic h-4 opacity-0 transition-opacity"></p>
 
@@ -77,38 +72,30 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
     <script>
         initDarkMode();
-        let currentPin = "";
-        const dots = document.querySelectorAll('.pin-dot');
         const errorEl = document.getElementById('error-msg');
+        const passInput = document.getElementById('password-input');
 
-        function updateDots() {
-            dots.forEach((dot, idx) => {
-                if (idx < currentPin.length) dot.classList.add('filled');
-                else dot.classList.remove('filled');
-            });
-        }
-
-        function pressKey(num) {
-            if (currentPin.length < 4) {
-                currentPin += num;
-                updateDots();
-                errorEl.style.opacity = "0";
-                if (currentPin.length === 4) {
-                    setTimeout(submitPin, 300);
-                }
+        function togglePassword() {
+            const icon = document.getElementById('eye-icon');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                passInput.type = "password";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             }
         }
 
-        function clearKey() {
-            currentPin = currentPin.slice(0, -1);
-            updateDots();
-        }
-
-        async function submitPin() {
-            if (currentPin.length < 4) return;
+        async function submitPin(e) {
+            e.preventDefault();
+            const currentPin = passInput.value.trim();
+            if (!currentPin) return;
             
             try {
                 const res = await fetch(`${API_BASE}/auth/verify`, {
@@ -121,10 +108,10 @@
                     localStorage.setItem('matcha_pin', currentPin);
                     window.location.href = 'dashboard.html';
                 } else {
-                    currentPin = "";
-                    updateDots();
-                    errorEl.textContent = "Mã PIN không chính xác. Thử lại!";
+                    passInput.value = "";
+                    errorEl.textContent = "Mật khẩu không chính xác. Thử lại!";
                     errorEl.style.opacity = "1";
+                    setTimeout(() => errorEl.style.opacity = "0", 3000);
                 }
             } catch (err) {
                 errorEl.textContent = "Lỗi kết nối Server.";
