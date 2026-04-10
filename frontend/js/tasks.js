@@ -243,3 +243,33 @@ window.submitEditTask = async function(e) {
         await loadScheduleTasks();
     } catch (err) { alert('Lỗi: ' + err.message); }
 }
+
+// Báo Bận / Dời Lịch Logic
+window.openSkipModal = function(id) {
+    const modal = document.getElementById('modal-skip');
+    if (!modal) return;
+    document.getElementById('skip-task-id').value = id;
+    document.getElementById('skip-reason').value = '';
+    modal.classList.remove('hidden', 'opacity-0');
+}
+
+window.closeSkipModal = function() {
+    document.getElementById('modal-skip').classList.add('hidden', 'opacity-0');
+}
+
+window.confirmSkipAction = async function(status) {
+    const id = document.getElementById('skip-task-id').value;
+    const reason = document.getElementById('skip-reason').value;
+    const label = status === 'postponed' ? 'Dời lịch' : 'Bỏ qua luôn';
+
+    if (!confirm(`Bạn xác nhận [${label}] công việc này?`)) return;
+
+    try {
+        await fetchJSON(`${API_BASE}/tasks/skip`, 'POST', { id, reason, status });
+        closeSkipModal();
+        initAgenda();
+        if (typeof initDashboard === 'function') initDashboard();
+    } catch (err) {
+        alert('Lỗi: ' + err.message);
+    }
+}
