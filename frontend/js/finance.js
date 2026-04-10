@@ -44,7 +44,12 @@ async function handleGoalSubmit(e) {
 
     try {
         await fetchJSON(`${API_BASE}/goals`, 'POST', data);
-    } catch (err) { alert('Lỗi: ' + err.message); }
+        alert('🎯 Matcha đã ghi nhận mục tiêu mới! Cố gắng tiết kiệm nhé.');
+        e.target.reset(); // Clear form
+        if (typeof loadGoalsList === 'function') loadGoalsList(); // Refresh list
+    } catch (err) { 
+        alert('Lỗi: ' + err.message); 
+    }
 }
 
 async function loadGoalsList() {

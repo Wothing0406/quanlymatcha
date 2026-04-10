@@ -6,14 +6,26 @@ async function initDashboard() {
     try {
         const stats = await fetchJSON(`${API_BASE}/finance/stats`);
         updateDashboardStats(stats);
+        
+        // Load Today's Agenda (from tasks.js)
+        if (typeof initAgenda === 'function') {
+            await initAgenda();
+            const weekdayEl = document.getElementById('current-weekday-label');
+            if (weekdayEl) {
+                const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                weekdayEl.innerText = days[new Date().getDay()];
+            }
+        }
+
         loadDashboardHistory();
-        initGamification(); // New for V5.0
+        initGamification(); 
     } catch (err) { 
         console.error('Lỗi dashboard:', err);
         const gridEl = document.getElementById('agenda-task-grid');
         if (gridEl) gridEl.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Không thể kết nối Database. Vui lòng kiểm tra lại Bot!</div>`;
     }
 }
+
 
 async function initGamification() {
     try {
@@ -52,16 +64,38 @@ function renderGamification(stats) {
 
 function updateDashboardStats(stats) {
     // Current Finance Balance
-    const balanceEl = document.getElementById('dash-balance');
-    const incomeEl = document.getElementById('dash-income');
-    const expensesEl = document.getElementById('dash-expenses');
+    const incomeEl = document.getElementById('stat-income');
+    const expensesEl = document.getElementById('stat-expenses');
+    const savingEl = document.getElementById('stat-saving');
+    const remainingEl = document.getElementById('stat-remaining');
     
-    if (balanceEl) balanceEl.innerText = formatVNĐ(stats.finance.remaining);
     if (incomeEl) incomeEl.innerText = formatVNĐ(stats.finance.income);
     if (expensesEl) expensesEl.innerText = formatVNĐ(stats.finance.expenses);
+    if (savingEl) savingEl.innerText = formatVNĐ(stats.finance.saving);
+    if (remainingEl) remainingEl.innerText = formatVNĐ(stats.finance.remaining);
+
+    // Also populate Budget Health (ProgressBar)
+    const healthContainer = document.getElementById('dash-budget-health');
+    if (healthContainer && stats.finance.income > 0) {
+        const spentRatio = Math.min((stats.finance.expenses / stats.finance.income) * 100, 100);
+        const colorClass = spentRatio > 80 ? 'bg-red-500' : (spentRatio > 50 ? 'bg-orange-500' : 'bg-blue-500');
+        healthContainer.innerHTML = `
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <h4 class="text-xs font-black uppercase text-gray-400 mb-1">Hạn mức chi tiêu</h4>
+                    <p class="text-lg font-black">${spentRatio.toFixed(1)}% đã dùng</p>
+                </div>
+                <p class="text-[10px] font-bold text-gray-400 italic">Mục tiêu: < 80%</p>
+            </div>
+            <div class="w-full h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden border border-gray-100 dark:border-gray-800">
+                <div class="h-full ${colorClass} transition-all duration-1000" style="width: ${spentRatio}%"></div>
+            </div>
+        `;
+    }
 
     // Chart data mapping
     const spentData = [Math.max(stats.finance.income, 1), stats.finance.expenses, stats.finance.saving];
+
     
     // Rendering Spending Chart
     const ctxSpend = document.getElementById('chart-spending');
@@ -115,14 +149,14 @@ async function loadDashboardHistory() {
     } catch (err) { console.error('Lỗi tải lịch sử dashboard:', err); }
 }
 
-async function loadHistory(limit = 15, offset = 0, append = false) {
+async function loadHistory(type = 'all', limit = 15, offset = 0, append = false) {
     const gridEl = document.getElementById('history-memory-grid');
     if (!gridEl) return;
     
     if (!append) gridEl.innerHTML = '<div class="col-span-full text-center py-20 opacity-50"><i class="fas fa-spinner fa-spin text-3xl mb-4"></i><p>Đang tìm lại kỷ niệm...</p></div>';
 
     try {
-        const activities = await fetchJSON(`${API_BASE}/activities?limit=${limit}&offset=${offset}`);
+        const activities = await fetchJSON(`${API_BASE}/activities?type=${type}&limit=${limit}&offset=${offset}`);
         
         if (activities.length === 0 && !append) {
             gridEl.innerHTML = '<div class="col-span-full text-center py-20 opacity-50 italic">Bạn chưa có kỷ niệm nào được lưu lại.</div>';
@@ -145,11 +179,12 @@ async function loadHistory(limit = 15, offset = 0, append = false) {
             if (activities.length < limit) loadMoreBtn.classList.add('hidden');
             else {
                 loadMoreBtn.classList.remove('hidden');
-                loadMoreBtn.onclick = () => loadHistory(limit, offset + limit, true);
+                loadMoreBtn.onclick = () => loadHistory(type, limit, offset + limit, true);
             }
         }
     } catch (err) { console.error('Lỗi tải lịch sử:', err); }
 }
+
 
 function createLocketCardHTML(item) {
     const timeDisplay = formatRelativeTime(new Date(item.created_at));

@@ -11,20 +11,36 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Unified Activity Log with Pagination
+// Unified Activity Log with Pagination & Filtering
 router.get('/activities', async (req, res) => {
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
+    const filterType = req.query.type; // 'all', 'task', 'purchase'
+    
     try {
-        const [rows] = await db.query(
-            "SELECT * FROM activity_log ORDER BY created_at DESC LIMIT ? OFFSET ?",
-            [limit, offset]
-        );
+        let sql = "SELECT * FROM activity_log WHERE 1=1";
+        const params = [];
+
+        if (filterType && filterType !== 'all') {
+            if (filterType === 'task') {
+                sql += " AND type LIKE 'task_%'";
+            } else if (filterType === 'purchase') {
+                sql += " AND type IN ('expense', 'income', 'saving')";
+            }
+        }
+
+        sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        params.push(limit, offset);
+
+        const [rows] = await db.query(sql, params);
         res.json(rows);
     } catch (err) {
+        console.error("Lỗi /activities:", err);
         res.status(500).json({ error: err.message });
     }
 });
+
+
 
 // Purchases
 router.post('/purchases', upload.single('photo'), async (req, res) => {
@@ -35,6 +51,20 @@ router.post('/purchases', upload.single('photo'), async (req, res) => {
             `INSERT INTO purchases (item_name, amount, photo_path) VALUES (?, ?, ?)`,
             [item_name, amount, photo_path]
         );
+        
+        // --- V5.0 Persistence: Update monthly_finance ---
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const amountNum = Number(amount);
+        const updateFinanceSql = `
+            INSERT INTO monthly_finance (month, income, expenses, saving, remaining) 
+            VALUES (?, 0, ?, 0, ?) 
+            ON DUPLICATE KEY UPDATE 
+            expenses = expenses + ?, 
+            remaining = remaining - ?
+        `;
+        await db.query(updateFinanceSql, [currentMonth, amountNum, -amountNum, amountNum, amountNum]);
+
+
         await db.query(
             "INSERT INTO activity_log (type, title, amount, photo_path) VALUES ('expense', ?, ?, ?)",
             [item_name, amount, photo_path]
@@ -43,6 +73,7 @@ router.post('/purchases', upload.single('photo'), async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+
 });
 
 router.get('/purchases', async (req, res) => {

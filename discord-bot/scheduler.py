@@ -118,7 +118,10 @@ async def check_weekly_roast(bot, dm_channel):
         logger.error(f"Lỗi Weekly Roast: {e}")
 
 async def spending_watchdog(bot, dm_channel):
-    """Cảnh báo khi tiêu quá 80% thu nhập (Tối đa 1 lần/ngày)"""
+    """
+    Cảnh báo khi tiêu quá 80% thu nhập.
+    CHƯA BÁO THÌ BÁO (Tối đa 1 lần/ngày).
+    """
     try:
         now = datetime.now()
         month = now.strftime("%Y-%m")
@@ -130,13 +133,23 @@ async def spending_watchdog(bot, dm_channel):
 
         # 2. Lấy dữ liệu tài chính tháng này
         finance = db.execute("SELECT * FROM monthly_finance WHERE month = %s", (month,), fetch='one')
-        if not finance or finance['income'] == 0:
+        if not finance or not finance.get('income') or finance['income'] == 0:
             return
             
         remaining_ratio = finance['remaining'] / finance['income']
         
-        # 3. Nếu còn dưới 20%
+        # 3. Chỉ cảnh báo nếu còn dưới 20% THU NHẬP
         if remaining_ratio < 0.2:
+            # KIỂM TRA: Có tiêu xài mới trong 1h qua không? 
+            # (Để tránh spam khi không làm gì)
+            recent_expense = db.execute(
+                "SELECT id FROM activity_log WHERE type = 'expense' AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR) LIMIT 1",
+                fetch='one'
+            )
+            
+            if not recent_expense:
+                return # Không có chi tiêu mới trong 1h qua -> Đừng làm phiền
+
             import discord
             embed = discord.Embed(
                 title="⚠️ CẢNH BÁO: CHÁY TÚI TỚI NƠI!",
@@ -145,8 +158,9 @@ async def spending_watchdog(bot, dm_channel):
             )
             if dm_channel:
                 await dm_channel.send(embed=embed)
-                # Cập nhật ngày để không spam nữa
+                # Cập nhật ngày ngay lập tức để không spam nữa
                 db.execute("UPDATE user_stats SET last_watchdog_date = %s WHERE id = 1", (now.date(),))
-                logger.info(f"🚨 Sent spending alert once for today")
+                logger.info(f"🚨 Sent spending alert (Low: {remaining_ratio*100:.1f}%)")
     except Exception as e:
         logger.error(f"Lỗi Spending Watchdog: {e}")
+

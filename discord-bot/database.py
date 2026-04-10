@@ -168,11 +168,32 @@ def parse_amount(text):
     return val * multipliers.get(unit, 1)
 
 def log_activity(activity_type, title, amount=0, photo_path=None):
-    """Ghi log hoạt động tập trung vào bảng activity_log."""
+    """Ghi log hoạt động và đồng bộ bảng monthly_finance nếu cần."""
     execute(
         "INSERT INTO activity_log (type, title, amount, photo_path) VALUES (%s, %s, %s, %s)",
         (activity_type, title, amount, photo_path)
     )
+    
+    # --- V5.0 Persistence: Update monthly_finance for income/expense ---
+    if activity_type in ['income', 'expense']:
+        from datetime import datetime
+        current_month = datetime.now().strftime("%Y-%m")
+        income_val = amount if activity_type == 'income' else 0
+        expense_val = amount if activity_type == 'expense' else 0
+        remaining_change = income_val - expense_val
+        
+        sql = """
+            INSERT INTO monthly_finance (month, income, expenses, saving, remaining) 
+            VALUES (%s, %s, %s, 0, %s) 
+            ON DUPLICATE KEY UPDATE 
+            income = income + VALUES(income),
+            expenses = expenses + VALUES(expenses), 
+            remaining = remaining + %s
+        """
+        execute(sql, (current_month, income_val, expense_val, remaining_change, remaining_change))
+
+
+
 
 # --- V5.0 GAMIFICATION HELPERS ---
 

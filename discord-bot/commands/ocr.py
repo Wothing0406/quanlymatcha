@@ -106,17 +106,35 @@ class ReceiptConfirmView(discord.ui.View):
     @discord.ui.button(label="Xác nhận & Ghi sổ", style=discord.ButtonStyle.green, emoji="✅")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
-            # 1. Save to activity_log and finance
-            # (Note: In a real app we'd also update monthly_finance table here)
-            # For simplicity, we trigger the log and point gain
-            db.log_activity('expense', f"Quét bill: {self.item}", amount=self.amount, photo_path=self.photo_url)
+            # 1. Download and save image to local server (Consistent with tasks)
+            from commands.tasks import UPLOAD_DIR
+            os.makedirs(UPLOAD_DIR, exist_ok=True)
             
-            # 2. Add Gamification Points
+            # Generate local filename
+            ext = ".jpg" # Default or extract from URL
+            filename = f"ocr_{int(datetime.now().timestamp())}{ext}"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self.photo_url) as resp:
+                    if resp.status == 200:
+                        with open(filepath, 'wb') as f:
+                            f.write(await resp.read())
+                        local_path = f"/uploads/{filename}"
+                    else:
+                        local_path = self.photo_url # Fallback
+
+            # 2. Save to activity_log and finance
+            db.log_activity('expense', f"Quét bill: {self.item}", amount=self.amount, photo_path=local_path)
+            
+            # 3. Add Gamification Points
             db.add_points(10, f"Nhập chi tiêu từ hóa đơn: {self.item}")
             
             await interaction.response.edit_message(content=f"✅ Đã ghi sổ chi tiêu: **{self.item} - {self.amount:,} VNĐ**. Bạn được cộng **10 điểm** Matcha! 🍵", embed=None, view=None)
         except Exception as e:
+            logger.error(f"Lỗi lưu OCR: {e}")
             await interaction.response.send_message(f"❌ Lỗi khi lưu: {e}", ephemeral=True)
+
 
     @discord.ui.button(label="Hủy", style=discord.ButtonStyle.secondary)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):

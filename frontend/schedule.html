@@ -97,7 +97,8 @@
             <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl p-8 md:p-10 max-w-2xl border border-blue-500/10 relative overflow-hidden"
                 data-aos="fade-up">
                 <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
-                <form id="form-schedule" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <form id="form-schedule" onsubmit="handleTaskSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
                     <div class="md:col-span-2">
                         <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Tên
                             công việc</label>

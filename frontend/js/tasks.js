@@ -211,10 +211,11 @@ window.handleTaskSubmit = async function(e) {
     
     try {
         await fetchJSON(`${API_BASE}/tasks`, 'POST', { task_name, weekday: weekdays, start_time, end_time });
-        document.getElementById('schedule-form').reset();
+        document.getElementById('form-schedule').reset();
         await loadScheduleTasks();
     } catch (err) { alert('Lỗi: ' + err.message); }
 }
+
 
 window.deleteTask = async function(id) {
     if (!confirm('Bạn có chắc chắn muốn xóa công việc này khỏi lịch trình?')) return;
