@@ -51,6 +51,17 @@ services:
       - mysql
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: matcha-ollama
+    volumes:
+      - ./ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: matcha-tunnel

@@ -16,18 +16,13 @@ class OCRCog(commands.Cog, name="🧾 Quét Hóa Đơn"):
 
     def __init__(self, bot):
         self.bot = bot
-        self.api_key = os.getenv("GEMINI_API_KEY")
-        if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
-        else:
-            self.model = None
+        # Gemini disabled for self-hosted setup
+        self.model = None
 
-    @app_commands.command(name="receipt", description="Quét hóa đơn/ảnh chụp để tự động ghi sổ chi tiêu")
-    @app_commands.describe(attachment="Ảnh chụp hóa đơn hoặc màn hình chuyển khoản")
+    @app_commands.command(name="receipt", description="Quét hóa đơn (Hiện tại tính năng này đang bảo trì sau khi chuyển sang Gemma)")
+    @app_commands.describe(attachment="Ảnh chụp hóa đơn")
     async def scan_receipt(self, interaction: discord.Interaction, attachment: discord.Attachment):
-        if not self.model:
-            return await interaction.response.send_message("❌ AI chưa được cấu hình key.", ephemeral=True)
+        return await interaction.response.send_message("🚧 Tính năng quét hóa đơn đang được bảo trì để chuyển sang model Local. Hãy dùng `/expense add` tạm nhé!", ephemeral=True)
 
         if not attachment.content_type or not attachment.content_type.startswith('image/'):
             return await interaction.response.send_message("❌ Vui lòng gửi một tệp hình ảnh!", ephemeral=True)

@@ -77,6 +77,16 @@ def init_db():
             title VARCHAR(255),
             amount DOUBLE DEFAULT 0,
             photo_path VARCHAR(500),
+            is_roasted TINYINT(1) DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )""")
+
+        # 4b. chat_memory
+        cursor.execute("""CREATE TABLE IF NOT EXISTS chat_memory (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(50),
+            role ENUM('user', 'assistant', 'system') NOT NULL,
+            content TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
 

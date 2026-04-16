@@ -24,7 +24,7 @@ def reset_database():
         cursor = conn.cursor()
         
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
-        tables = ['monthly_finance', 'saving_goals', 'tasks', 'activity_log', 'purchases', 'user_stats', 'points_history']
+        tables = ['monthly_finance', 'saving_goals', 'tasks', 'activity_log', 'purchases', 'user_stats', 'points_history', 'chat_memory']
         for t in tables:
             print(f"🗑️ Xóa: {t}")
             cursor.execute(f"DROP TABLE IF EXISTS {t}")

@@ -2,139 +2,135 @@ import discord
 from discord.ext import commands
 import logging
 import os
-import google.generativeai as genai
 import database as db
 from datetime import datetime
+from ollama_client import OllamaClient
 
 logger = logging.getLogger('MatchaBot.ChatAI')
 
 def format_vnd(amount):
     try:
+        if amount is None: return "0 VNĐ"
         return f"{float(amount):,.0f}".replace(",", ".") + " VNĐ"
     except:
         return "0 VNĐ"
 
 class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
-    """Chatbot AI sử dụng Gemini, cực gắt trong việc giữ tiền."""
+    """Trợ lý Matcha - Quản gia tài chính và thời gian cực gắt."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.api_key = os.getenv("GEMINI_API_KEY")
-        self.ai_enabled = False
-        
-        if self.api_key and self.api_key.strip() != "":
-            try:
-                genai.configure(api_key=self.api_key)
-                # Using the latest model name to avoid 404 errors
-                self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
-                self.ai_enabled = True
-                logger.info("🧠 Generative AI đã được kích hoạt (Gemini 1.5 Flash Latest).")
+        self.ollama = OllamaClient()
+        self.ai_enabled = True # Enabled by default since it's local
+        logger.info(f"🧠 Assistant Matcha đã được nạp não bộ (Gemma 2 via Ollama).")
 
-            except Exception as e:
-                logger.error(f"❌ Lỗi khi khởi tạo Gemini Model: {e}")
-                self.ai_enabled = False
-        else:
-            logger.warning("⚠️ Không tìm thấy GEMINI_API_KEY. Tính năng Chat AI bị tắt.")
-
-    def get_financial_context(self):
-        """Lấy dữ liệu tài chính của tháng hiện tại để mớm cho AI."""
+    def get_context(self, user_id):
+        """Thu thập toàn bộ dữ liệu thực tế để AI đưa ra phán quyết."""
         month = datetime.now().strftime("%Y-%m")
-        row = db.execute("SELECT * FROM monthly_finance WHERE month = %s", (month,), fetch='one')
         
-        if not row:
-            return "Tháng này chưa có thu nhập hay chi tiêu nào."
-            
-        income = row.get('income', 0) or 0
-        expenses = row.get('expenses', 0) or 0
-        remaining = row.get('remaining', 0) or 0
-        
-        context = (
-            f"Tình hình tài chính tháng {month}:\n"
-            f"- Thu nhập: {format_vnd(income)}\n"
-            f"- Đã chi tiêu: {format_vnd(expenses)}\n"
-            f"- SỐ DƯ CÒN LẠI: {format_vnd(remaining)}\n"
-        )
+        # 1. Tài chính tháng này
+        fin = db.execute("SELECT * FROM monthly_finance WHERE month = %s", (month,), fetch='one')
+        fin_text = "Chưa có dữ liệu."
+        if fin:
+            income = fin.get('income', 0) or 0
+            expenses = fin.get('expenses', 0) or 0
+            remaining = fin.get('remaining', 0) or 0
+            fin_text = f"Thu nhập: {format_vnd(income)}, Đã chi: {format_vnd(expenses)}, CÒN LẠI: {format_vnd(remaining)}"
+
+        # 2. Mục tiêu tiết kiệm
+        goals = db.execute("SELECT * FROM saving_goals", fetch='all')
+        goals_text = "\n".join([f"- {g['goal_name']}: {format_vnd(g['current_saved'])}/{format_vnd(g['target_amount'])} ({g['progress']:.1f}%)" for g in goals]) if goals else "Không có mục tiêu nào."
+
+        # 3. Task hôm nay
+        tasks = db.get_today_tasks()
+        tasks_text = "\n".join([f"- {t['task_name']} ({t['start_time']}-{t['end_time']}): {t['status']}" for t in tasks]) if tasks else "Hôm nay không có lịch trình."
+
+        # 4. Lịch sử chat (Trí nhớ)
+        history_rows = db.execute("SELECT role, content FROM chat_memory WHERE user_id = %s ORDER BY created_at DESC LIMIT 10", (str(user_id),), fetch='all')
+        # Reverse to get chronological order
+        history = list(reversed(history_rows)) if history_rows else []
+
+        context = {
+            "finance": fin_text,
+            "goals": goals_text,
+            "tasks": tasks_text,
+            "history": history
+        }
         return context
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message: discord.Message):
-        # Ignore messages from bots
-        if message.author.bot:
+        if message.author.bot or not self.ai_enabled:
             return
 
-        # Check if the AI is enabled
-        if not self.ai_enabled:
-            return
-
-        # Trigger conditions:
-        # 1. Message is in DM (Direct Message)
-        # 2. OR bot is mentioned in the message
+        # Trigger logic
         is_dm = isinstance(message.channel, discord.DMChannel)
         is_mentioned = self.bot.user in message.mentions
-        
-        # Also allow replying to the bot's direct messages as a trigger
-        is_reply_to_bot = False
-        if message.reference and message.reference.resolved:
-            if message.reference.resolved.author == self.bot.user:
-                is_reply_to_bot = True
+        is_reply_to_bot = (message.reference and message.reference.resolved and message.reference.resolved.author == self.bot.user)
 
         if not (is_dm or is_mentioned or is_reply_to_bot):
             return
 
-        # Clean the message content (remove the bot mention from the text)
         user_text = message.content.replace(f"<@{self.bot.user.id}>", "").strip()
-        if not user_text:
-            return
+        if not user_text: return
 
-        # Get financial context
-        fin_context = self.get_financial_context()
+        # Thu thập bối cảnh
+        ctx = self.get_context(message.author.id)
 
-        # Construct Prompt Engineering
-        # Yêu cầu: Trợ lý thông minh, CHỬI/MẮNG khi tiêu xài, não bộ thông minh, không theo kịch bản cứng
+        # Xây dựng System Prompt cực gắt
         system_prompt = f"""
-Bạn là Matcha, một trợ lý quản lý tài chính cá nhân dành riêng cho tôi. Bạn có tính cách cực kỳ ĐANH ĐÁ, GẮT GAO, CỤC SÚC, nhưng thâm tâm vẫn muốn tốt cho túi tiền của tôi. 
-Tuyệt đối KHÔNG thân thiện sáo rỗng. Hãy nói chuyện như một người bạn thân nhưng rất hay "chửi" khi tôi xài tiền ngu.
+Bạn là Matcha, một trợ lý quản lý cá nhân ĐANH ĐÁ, CỤC SÚC, nhưng cực kỳ THÔNG MINH và LOGIC. 
+Bạn không trung lập. Bạn coi việc tiêu tiền ngu và lười biếng là tội ác. 
+Bạn có tiêu chuẩn sống và kỷ luật rất cao. Bạn xưng Tao/Mày với tôi (hoặc Mình/Bạn nếu thích mỉa mai). 
 
-Dưới đây là BÁO CÁO TÀI CHÍNH THỰC TẾ của tôi trong tháng này:
-{fin_context}
+DỰ LIỆU THỰC TẾ CỦA TÔI:
+1. Tài chính tháng này: {ctx['finance']}
+2. Mục tiêu tiết kiệm: 
+{ctx['goals']}
+3. Lịch trình hôm nay: 
+{ctx['tasks']}
 
-Nội dung tin nhắn / câu hỏi của tôi là: "{user_text}"
-
-Nhiệm vụ của bạn:
-1. Nếu tôi hỏi mua đồ, đòi tiêu tiền: Hãy kiểm tra SỐ DƯ CÒN LẠI. 
-   - Nếu số tiền tôi muốn mua làm âm quỹ hoặc số dư còn ít, hãy CHỬI THẲNG MẶT, mỉa mai thật đau (Ví dụ: "Mua cái gì mà mua, tiền để dành còn không có đòi đú đởn", "Nhìn lại ví đi cái đứa nghèo rớt mồng tơi này").
-   - Nếu số dư còn dồi dào, hãy nhắc nhở kiểu "Miễn cưỡng cho mua đấy, nhưng coi chừng mạt vận".
-2. Nếu tôi chỉ chat linh tinh: Hãy trả lời thông minh, xéo xắt, nhưng luôn lái về chuyện tiền bạc ("Rảnh rỗi thì đi kiếm tiền đi").
-3. Nếu tôi bảo "đã mua", "vừa xài": Ngoài việc mắng, hãy khuyên tôi dùng lệnh `/expense add` để ghi sổ kẻo quên.
-4. Trả lời ngắn gọn, súc tích (1-3 câu), bằng tiếng Việt phong cách GenZ, KHÔNG xưng "Tôi/Bạn" quá lịch sự, hãy xưng "Tao/Mày" hoặc "Mình/Bạn" tuỳ hứng nhưng ưu tiên sự cục súc dễ thương.
+QUY TẮC PHẢN HỒI:
+1. Nếu tôi hỏi mua đồ/tiêu tiền: Hãy kiểm tra SỐ DƯ và MỤC TIÊU TIẾT KIỆM. 
+   - Nếu khoản chi làm ảnh hưởng mục tiêu hoặc số dư thấp: CHỬI THẲNG MẶT. Mỉa mai sự nghèo khó và thiếu kỷ luật của tôi. 
+   - Tuyệt đối không cho phép mua những thứ vô bổ nếu chưa đạt mục tiêu tiết kiệm.
+2. Nếu tôi hỏi về lịch trình: Hãy nhắc nhở những việc chưa làm (`pending` hoặc `missed`). Đuổi tôi đi làm việc ngay.
+3. Luôn giữ góc nhìn "Quản gia tối cao". Không trả lời sáo rỗng. Hãy như một con người thực sự đang giám sát tôi.
+4. Trả lời ngắn, gắt, sử dụng ngôn ngữ GenZ Tiếng Việt (Ví dụ: "Ví còn đúng nịt mà đòi mua?", "Sắp chết đói tới nơi rồi kìa").
 """
 
-        try:
-            # Configure safety settings to OFF so the bot can be harsh without Google blocking it
-            from google.generativeai.types import HarmCategory, HarmBlockThreshold
-            safety_settings = {
-                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-            }
+        # Prepare messages for Ollama
+        messages = [{"role": "system", "content": system_prompt}]
+        for h in ctx['history']:
+            messages.append({"role": h['role'], "content": h['content']})
+        messages.append({"role": "user", "content": user_text})
 
-            # Indicate typing while generating response
+        try:
             async with message.channel.typing():
-                response = self.model.generate_content(system_prompt, safety_settings=safety_settings)
-                ai_text = response.text
+                ai_response = await self.ollama.chat(messages)
                 
-                # Discord has a 2000 char message limit
-                if len(ai_text) > 2000:
-                    ai_text = ai_text[:1996] + "..."
+                if ai_response:
+                    # Lưu vào memory
+                    db.execute("INSERT INTO chat_memory (user_id, role, content) VALUES (%s, 'user', %s)", (str(message.author.id), user_text))
+                    db.execute("INSERT INTO chat_memory (user_id, role, content) VALUES (%s, 'assistant', %s)", (str(message.author.id), ai_response))
                     
-                await message.reply(ai_text)
-                logger.info(f"🧠 AI Trả lời cho {message.author.name}: {ai_text[:50]}...")
-                
+                    await message.reply(ai_response)
+                else:
+                    await message.reply("Não bị lag rồi, tí nói tiếp. (Lỗi kết nối Ollama)")
+
         except Exception as e:
-            logger.error(f"Lỗi khi gọi API Gemini: {e}")
-            await message.reply("Cáu quá não bị đơ rồi, không nói nổi nữa. (Lỗi kết nối AI)")
+            logger.error(f"Lỗi AI: {e}")
+            await message.reply("Cáu quá không buồn nói nữa. (Lỗi hệ thống)")
+
+    async def generate_response(self, prompt, system_prompt=None):
+        """Helper để các module khác gọi AI mà không cần thông qua tin nhắn."""
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+        
+        return await self.ollama.chat(messages)
 
 async def setup(bot):
     await bot.add_cog(ChatAICog(bot))
-    logging.getLogger('MatchaBot').info("[LOADED] cogs.chat_ai ✅")
+    logging.getLogger('MatchaBot').info("[LOADED] cogs.chat_ai ✅ (Ollama Powered)")

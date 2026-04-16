@@ -79,6 +79,7 @@ async def check_tasks(bot, dm_channel):
     # Trigger Proactive features
     await check_weekly_roast(bot, dm_channel)
     await spending_watchdog(bot, dm_channel)
+    await auto_roast_watchdog(bot, dm_channel)
 
 async def check_weekly_roast(bot, dm_channel):
     """Monday Morning Roast: 08:00 AM"""
@@ -105,15 +106,15 @@ async def check_weekly_roast(bot, dm_channel):
         """
         
         chat_cog = bot.get_cog("🧠 Trợ lý AI")
-        if chat_cog and chat_cog.ai_enabled:
-            response = chat_cog.model.generate_content(prompt)
-            roast_text = response.text
+        if chat_cog:
+            roast_text = await chat_cog.generate_response(prompt)
             
-            import discord
-            embed = discord.Embed(title="🔥 BẢN TIN SẤY TUẦN MỚI", description=roast_text, color=discord.Color.red())
-            if dm_channel: await dm_channel.send(embed=embed)
-            db.execute("UPDATE user_stats SET last_roast_date = %s WHERE id = 1", (now.date(),))
-            db.log_activity('ai_roast', "Matcha đã sấy bạn")
+            if roast_text:
+                import discord
+                embed = discord.Embed(title="🔥 BẢN TIN SẤY TUẦN MỚI", description=roast_text, color=discord.Color.red())
+                if dm_channel: await dm_channel.send(embed=embed)
+                db.execute("UPDATE user_stats SET last_roast_date = %s WHERE id = 1", (now.date(),))
+                db.log_activity('ai_roast', "Matcha đã sấy bạn")
     except Exception as e:
         logger.error(f"Lỗi Weekly Roast: {e}")
 
@@ -163,4 +164,61 @@ async def spending_watchdog(bot, dm_channel):
                 logger.info(f"🚨 Sent spending alert (Low: {remaining_ratio*100:.1f}%)")
     except Exception as e:
         logger.error(f"Lỗi Spending Watchdog: {e}")
+
+async def auto_roast_watchdog(bot, dm_channel):
+    """
+    Theo dõi activity_log để 'nhảy vào' chửi hoặc khen ngay khi có hoạt động mới.
+    """
+    try:
+        # Lấy các hoạt động chưa được AI sấy
+        new_activities = db.execute(
+            "SELECT * FROM activity_log WHERE is_roasted = 0 AND type IN ('income', 'expense', 'saving', 'task_done', 'task_missed') LIMIT 3",
+            fetch='all'
+        )
+        
+        if not new_activities:
+            return
+
+        chat_cog = bot.get_cog("🧠 Trợ lý AI")
+        if not chat_cog:
+            return
+
+        for act in new_activities:
+            logger.info(f"🔥 [AUTO ROAST] Phát hiện hoạt động mới: {act['title']}")
+            
+            # Get financial context for better roasting
+            month = datetime.now().strftime("%Y-%m")
+            fin = db.execute("SELECT * FROM monthly_finance WHERE month = %s", (month,), fetch='one')
+            fin_info = f"Ví hiện tại: {fin['remaining']:,}đ" if fin else ""
+
+            prompt = f"""
+            Tôi vừa thực hiện hoạt động này: {act['type']} - {act['title']} với số tiền {act['amount']:,}đ.
+            {fin_info}
+            
+            Hãy đưa ra phản hồi (chửi hoặc khen) THỰC TẾ và KHÔNG TRUNG LẬP. 
+            - Nếu là chi tiêu vô bổ: Chửi sấp mặt.
+            - Nếu là thu nhập: Khen mỉa mai hoặc bảo lo mà giữ tiền.
+            - Nếu là hoàn thành task: Khen nhưng đừng để tôi kiêu ngạo.
+            
+            Trả lời cực ngắn (1-2 câu), phong cách Matcha đanh đá.
+            """
+            
+            roast_text = await chat_cog.generate_response(prompt)
+            
+            if roast_text:
+                import discord
+                color = discord.Color.red() if act['type'] in ['expense', 'task_missed'] else discord.Color.green()
+                embed = discord.Embed(
+                    title="🍵 Matcha lên tiếng...",
+                    description=roast_text,
+                    color=color
+                )
+                if dm_channel:
+                    await dm_channel.send(embed=embed)
+                
+            # Đánh dấu đã sấy
+            db.execute("UPDATE activity_log SET is_roasted = 1 WHERE id = %s", (act['id'],))
+
+    except Exception as e:
+        logger.error(f"Lỗi Auto Roast Watchdog: {e}")
 
