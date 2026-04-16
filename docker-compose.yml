@@ -50,7 +50,17 @@ services:
       - ./discord-bot:/app
     depends_on:
       - mysql
+      - ollama
     restart: unless-stopped
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - TZ=Asia/Ho_Chi_Minh
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=gemma2:2b
+      - AI_PROVIDER=ollama
 
   ollama:
     image: ollama/ollama:latest
