@@ -38,7 +38,7 @@ def fetch_context(user_id) -> dict:
     tasks_text = "\n".join([f"- {t['task_name']} ({t['start_time']}-{t['end_time']}): {t['status']}" for t in tasks]) if tasks else "chưa có"
 
     # 4. Lịch sử chat
-    history_rows = db.execute("SELECT role, content FROM chat_memory WHERE user_id = %s ORDER BY created_at DESC LIMIT 10", (str(user_id),), fetch='all')
+    history_rows = db.execute("SELECT role, content FROM chat_memory WHERE user_id = %s ORDER BY created_at DESC LIMIT 4", (str(user_id),), fetch='all')
     history = list(reversed(history_rows)) if history_rows else []
     
     # 5. Recent behavior
