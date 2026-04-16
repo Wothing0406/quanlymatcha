@@ -15,7 +15,7 @@ class OllamaClient:
         logger.debug(f"Connecting to Ollama at: {url}")
         
         try:
-            timeout = aiohttp.ClientTimeout(total=60)
+            timeout = aiohttp.ClientTimeout(total=300)
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.post(url, json={
                     "model": self.model,
