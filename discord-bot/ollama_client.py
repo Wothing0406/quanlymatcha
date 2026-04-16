@@ -12,37 +12,35 @@ class OllamaClient:
 
     async def chat(self, messages, stream=False):
         urls_to_try = [self.base_url]
-        # Nếu đang để URL mặc định của docker (ollama), hãy thử thêm localhost phòng khi chạy ngoài Docker
-        if "ollama" in self.base_url and "localhost" not in self.base_url:
+        # Thêm các địa chỉ dự phòng phổ biến
+        if "localhost" not in self.base_url and "127.0.0.1" not in self.base_url:
+            urls_to_try.append("http://127.0.0.1:11434")
             urls_to_try.append("http://localhost:11434")
 
         last_error = None
         for url_base in urls_to_try:
             url = f"{url_base}/api/chat"
-            payload = {
-                "model": self.model,
-                "messages": messages,
-                "stream": stream
-            }
+            logger.debug(f"Attempting Ollama connection: {url}")
             
             try:
                 async with aiohttp.ClientSession() as session:
-                    async with session.post(url, json=payload, timeout=10) as resp:
-                        if resp.status != 200:
-                            error_text = await resp.text()
-                            logger.error(f"Ollama API Error ({resp.status}) at {url_base}: {error_text}")
-                            continue # Thử URL tiếp theo
-                        
-                        if stream:
-                            return resp
-                        else:
+                    async with session.post(url, json={
+                        "model": self.model,
+                        "messages": messages,
+                        "stream": stream
+                    }, timeout=15) as resp:
+                        if resp.status == 200:
+                            if stream: return resp
                             result = await resp.json()
                             return result.get('message', {}).get('content', '')
+                        else:
+                            err = await resp.text()
+                            logger.error(f"Ollama Error at {url_base} (Status {resp.status}): {err}")
             except Exception as e:
                 last_error = e
-                logger.debug(f"Failed to connect to Ollama at {url_base}: {e}")
+                logger.warning(f"Connection failed to {url_base}: {str(e)}")
 
-        logger.error(f"All Ollama connection attempts failed. Last error: {last_error}")
+        logger.error(f"❌ ALL OLLAMA ATTEMPTS FAILED. Last error: {last_error}")
         return None
 
     async def generate(self, prompt, system=None):
