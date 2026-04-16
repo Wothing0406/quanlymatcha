@@ -112,6 +112,15 @@ def init_db():
         )""")
         
         conn.commit()
+        
+        # 7. Migration: Add is_roasted if it doesn't exist
+        try:
+            cursor.execute("ALTER TABLE activity_log ADD COLUMN is_roasted TINYINT(1) DEFAULT 0")
+            conn.commit()
+            logger.info("✅ Migration: Added 'is_roasted' to activity_log.")
+        except:
+            pass # Already exists
+            
         logger.info("✨ Database V5.0 Butler Edition đã sẵn sàng.")
     except Exception as e:
         logger.error(f"❌ Lỗi khởi tạo MySQL V5.0: {e}")
@@ -253,3 +262,11 @@ def update_pet_state():
 
 def get_user_stats():
     return execute("SELECT * FROM user_stats WHERE id = 1", fetch='one')
+
+def get_today_tasks():
+    """Lấy danh sách task của ngày hôm nay."""
+    from datetime import datetime
+    now = datetime.now()
+    days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7']
+    today = days[int(now.strftime("%w"))]
+    return execute("SELECT * FROM tasks WHERE weekday = %s", (today,), fetch='all')
