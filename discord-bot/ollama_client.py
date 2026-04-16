@@ -15,23 +15,27 @@ class OllamaClient:
         logger.debug(f"Connecting to Ollama at: {url}")
         
         try:
-            timeout = aiohttp.ClientTimeout(total=30)
+            timeout = aiohttp.ClientTimeout(total=60)
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.post(url, json={
                     "model": self.model,
                     "messages": messages,
-                    "stream": stream
+                    "stream": False,
+                    "options": {
+                        "num_ctx": 2048,
+                        "temperature": 0.8,
+                        "num_predict": 300
+                    }
                 }) as resp:
                     if resp.status == 200:
-                        if stream: return resp
                         result = await resp.json()
                         return result.get('message', {}).get('content', '')
                     else:
                         err = await resp.text()
-                        logger.error(f"Ollama Error (Status {resp.status}): {err}")
+                        logger.error(f"Ollama Error (Status {resp.status}): {err[:200]}")
                         return None
         except Exception as e:
-            logger.error(f"❌ Cannot reach Ollama at {self.base_url}: {e}")
+            logger.error(f"Cannot reach Ollama at {self.base_url}: {e}")
             return None
 
     async def generate(self, prompt, system=None):
