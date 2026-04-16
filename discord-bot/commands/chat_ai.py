@@ -4,7 +4,10 @@ import logging
 import os
 import database as db
 from datetime import datetime
-from ollama_client import OllamaClient
+try:
+    from ollama_client import OllamaClient
+except ImportError:
+    from ..ollama_client import OllamaClient
 
 logger = logging.getLogger('MatchaBot.ChatAI')
 

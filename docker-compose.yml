@@ -47,6 +47,7 @@ services:
       - .env
     volumes:
       - ./shared_uploads:/app/uploads
+      - ./discord-bot:/app
     depends_on:
       - mysql
     restart: unless-stopped
