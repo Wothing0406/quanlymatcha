@@ -11,10 +11,10 @@ const roasts = [
     "Ví còn đéo tiền mà rảnh rỗi lôi kéo tao à?",
     "Học bài chưa mà ngồi đây nghịch?",
     "Tao đang theo dõi mọi khoản chi của mày đấy nhé!",
-    "Bớt tiêu hoang lại không tao vả cho đấy.",
+    "Bắt quả tang thằng lười biếng!",
     "Click nữa tao trừ điểm kỷ luật bây giờ!",
     "Bỏ tao ra! Tao không phải đồ chơi của mày!",
-    "Dừng lại ngay! Mày đang làm phiền giấc ngủ của tao.",
+    "Tao đang bận... thở, đừng làm phiền!",
 ];
 
 function initPet3D() {
@@ -24,10 +24,8 @@ function initPet3D() {
     // Load saved position with Safety Bounds Check
     const savedPos = JSON.parse(localStorage.getItem('matcha_pet_pos'));
     if (savedPos) {
-        // Ensure not off-screen (e.g. desktop to mobile switch)
         const maxX = window.innerWidth - container.offsetWidth;
         const maxY = window.innerHeight - container.offsetHeight;
-        
         container.style.left = Math.min(Math.max(0, savedPos.x), maxX) + 'px';
         container.style.top = Math.min(Math.max(0, savedPos.y), maxY) + 'px';
         container.style.bottom = 'auto';
@@ -37,24 +35,29 @@ function initPet3D() {
     // 1. Scene Setup
     scene = new THREE.Scene();
     
-    // Low-poly style optimization
     const width = canvasContainer.clientWidth;
     const height = canvasContainer.clientHeight;
-    camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 1000);
-    camera.position.z = 8;
+    camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 8);
 
-    // 3. Renderer Setup (Performance optimized)
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    // 3. Renderer Setup (High quality)
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
     canvasContainer.innerHTML = '';
     canvasContainer.appendChild(renderer.domElement);
 
-    // 4. Lighting (Flat look)
-    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-    const pointLight = new THREE.PointLight(0xffffff, 0.5);
-    pointLight.position.set(0, 5, 10);
-    scene.add(pointLight);
+    // 4. Lighting (WARM & SOFT - NOT SCARY)
+    scene.add(new THREE.AmbientLight(0xffffff, 1.3)); // Bright global light
+    
+    // Hemisphere light for soft shadows
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+    hemiLight.position.set(0, 20, 0);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    dirLight.position.set(5, 5, 5);
+    scene.add(dirLight);
 
     // 5. Load Model
     const loader = new THREE.GLTFLoader();
@@ -63,25 +66,35 @@ function initPet3D() {
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
-        model.scale.set(1.3, 1.3, 1.3); 
-        model.rotation.y = 0; 
+        
+        model.scale.set(1.1, 1.1, 1.1); // Small & Cute
+        model.rotation.set(0, 0.2, 0); // Slight fixed angle
         scene.add(model);
     });
 
-    // 6. Animation Loop (Higher FPS orientation)
+    // 6. Animation Loop (Expressive Idle)
     function animate() {
         requestAnimationFrame(animate);
         if (model && !isDragging) {
-            // Very subtle breathing instead of spinning
-            model.position.y = Math.sin(Date.now() * 0.001) * 0.1;
-            model.rotation.y = 0; // FORCE STAND STILL
-            model.rotation.z *= 0.95; // Smooth jiggle return
-            model.rotation.x *= 0.95;
+            const time = Date.now();
+            
+            // 1. "Hopping" Idle gesture
+            model.position.y = Math.abs(Math.sin(time * 0.003)) * 0.2; 
+            
+            // 2. "Breathing" scale gesture
+            const pulse = 1 + Math.sin(time * 0.002) * 0.05;
+            model.scale.set(1.1 * pulse, 1.1 * pulse, 1.1 * pulse);
+            
+            // 3. Reset rotations from any leftover spin
+            model.rotation.y = 0.2; // Fixed front-right pose
+            model.rotation.z *= 0.9; 
+            model.rotation.x *= 0.9;
         }
         renderer.render(scene, camera);
     }
     animate();
 
+    // 7. Interaction Helpers
     const startDrag = (clientX, clientY) => {
         isDragging = true;
         startX = clientX - container.offsetLeft;
@@ -89,30 +102,24 @@ function initPet3D() {
         lastX = clientX;
         lastY = clientY;
         container.style.transition = 'none';
-        if (model) model.scale.set(1.5, 1.5, 1.5);
     };
 
     const moveDrag = (clientX, clientY) => {
         if (!isDragging) return;
-        
         let x = clientX - startX;
         let y = clientY - startY;
-
-        // Screen Boundaries
         const maxX = window.innerWidth - container.offsetWidth;
         const maxY = window.innerHeight - container.offsetHeight;
         x = Math.min(Math.max(0, x), maxX);
         y = Math.min(Math.max(0, y), maxY);
-
         container.style.left = x + 'px';
         container.style.top = y + 'px';
         container.style.bottom = 'auto';
         container.style.right = 'auto';
 
         if (model) {
-            const velX = clientX - lastX;
-            model.rotation.z = -velX * 0.03; 
-            model.rotation.x = (clientY - lastY) * 0.03;
+            model.rotation.z = -(clientX - lastX) * 0.05;
+            model.rotation.x = (clientY - lastY) * 0.05;
         }
         lastX = clientX;
         lastY = clientY;
@@ -122,26 +129,13 @@ function initPet3D() {
         if (!isDragging) return;
         isDragging = false;
         container.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.3s ease, left 0.3s ease';
-        if (model) {
-            model.scale.set(1.3, 1.3, 1.3);
-            model.rotation.y = 0;
-        }
         localStorage.setItem('matcha_pet_pos', JSON.stringify({
             x: container.offsetLeft,
             y: container.offsetTop
         }));
     };
 
-    // Responsive Support
-    window.addEventListener('resize', () => {
-        const newWidth = canvasContainer.clientWidth;
-        const newHeight = canvasContainer.clientHeight;
-        camera.aspect = newWidth / newHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(newWidth, newHeight);
-    });
-
-    // Events...
+    // Events
     container.onmousedown = (e) => (e.target.closest('#pet-speech-bubble') ? null : startDrag(e.clientX, e.clientY));
     document.onmousemove = (e) => moveDrag(e.clientX, e.clientY);
     document.onmouseup = () => endDrag();

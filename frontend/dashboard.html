@@ -66,7 +66,7 @@
             right: 1.5rem;
             width: 150px;
             height: 150px;
-            z-index: 9999;
+            z-index: 10000;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -131,23 +131,27 @@
         /* Responsive overrides for Mobile */
         @media (max-width: 768px) {
             #pet-companion-container {
-                width: 150px;
-                height: 150px;
-                bottom: 1rem;
+                width: 100px;
+                height: 100px;
+                bottom: 100px;
                 right: 1rem;
             }
             #pet-speech-bubble {
-                width: 140px;
-                font-size: 0.65rem;
-                padding: 0.75rem;
+                width: 120px;
+                font-size: 0.6rem;
+                padding: 0.5rem;
             }
             #pet-companion-container .level-badge {
-                font-size: 8px;
-                padding: 2px 8px;
+                font-size: 7px;
+                padding: 1px 6px;
             }
             #pet-companion-container .rank-title {
-                font-size: 8px;
-                top: -20px;
+                font-size: 7px;
+                top: -15px;
+            }
+            #pet-companion-container .points-text {
+                font-size: 9px;
+                bottom: -10px;
             }
         }
     </style>
@@ -504,7 +508,7 @@
     <script src="js/finance.js"></script>
     <script src="js/tasks.js"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/pet3d.js?v=1.0.2"></script>
+    <script src="js/pet3d.js?v=1.0.5"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initDashboard();
