@@ -38,24 +38,24 @@ function initPet3D() {
     const width = canvasContainer.clientWidth;
     const height = canvasContainer.clientHeight;
     camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 8);
+    camera.position.set(0, 0, 5); 
 
-    // 3. Renderer Setup (High quality)
+    // 3. Renderer Setup (Color optimized)
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputEncoding = THREE.sRGBEncoding; // Better color accuracy
     canvasContainer.innerHTML = '';
     canvasContainer.appendChild(renderer.domElement);
 
-    // 4. Lighting (WARM & SOFT - NOT SCARY)
-    scene.add(new THREE.AmbientLight(0xffffff, 1.3)); // Bright global light
+    // 4. Balanced Lighting (FIXED OVEREXPOSURE)
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7)); // Moderate ambient
     
-    // Hemisphere light for soft shadows
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
     hemiLight.position.set(0, 20, 0);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6); // Soft side light for depth
     dirLight.position.set(5, 5, 5);
     scene.add(dirLight);
 
@@ -67,34 +67,47 @@ function initPet3D() {
         const center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
         
-        model.scale.set(1.1, 1.1, 1.1); // Small & Cute
-        model.rotation.set(0, 0.2, 0); // Slight fixed angle
+        // Entrance Animation State
+        model.scale.set(0, 0, 0); 
+        model.rotation.set(0, 0.2, 0); 
         scene.add(model);
+        
+        // POP-IN GESTURE
+        let scaleVal = 0;
+        const popIn = setInterval(() => {
+            scaleVal += 0.1;
+            if (scaleVal >= 1.8) {
+                model.scale.set(1.8, 1.8, 1.8);
+                clearInterval(popIn);
+            } else {
+                model.scale.set(scaleVal, scaleVal, scaleVal);
+            }
+        }, 30);
     });
 
-    // 6. Animation Loop (Expressive Idle)
+    // 6. Animation Loop
     function animate() {
         requestAnimationFrame(animate);
         if (model && !isDragging) {
             const time = Date.now();
             
-            // 1. "Hopping" Idle gesture
-            model.position.y = Math.abs(Math.sin(time * 0.003)) * 0.2; 
+            // 1. "Hopping" Idle
+            model.position.y = Math.abs(Math.sin(time * 0.003)) * 0.15; 
             
-            // 2. "Breathing" scale gesture
-            const pulse = 1 + Math.sin(time * 0.002) * 0.05;
-            model.scale.set(1.1 * pulse, 1.1 * pulse, 1.1 * pulse);
+            // 2. "Breathing" pulse
+            const pulse = 1 + Math.sin(time * 0.002) * 0.03;
+            if (model.scale.x > 1.5) { // Only pulse after pop-in
+                model.scale.set(1.8 * pulse, 1.8 * pulse, 1.8 * pulse);
+            }
             
-            // 3. Reset rotations from any leftover spin
-            model.rotation.y = 0.2; // Fixed front-right pose
-            model.rotation.z *= 0.9; 
-            model.rotation.x *= 0.9;
+            model.rotation.y = 0.2; 
+            model.rotation.z *= 0.92; 
+            model.rotation.x *= 0.92;
         }
         renderer.render(scene, camera);
     }
     animate();
 
-    // 7. Interaction Helpers
     const startDrag = (clientX, clientY) => {
         isDragging = true;
         startX = clientX - container.offsetLeft;
@@ -135,7 +148,7 @@ function initPet3D() {
         }));
     };
 
-    // Events
+    // Events (Full parity between mouse & touch)
     container.onmousedown = (e) => (e.target.closest('#pet-speech-bubble') ? null : startDrag(e.clientX, e.clientY));
     document.onmousemove = (e) => moveDrag(e.clientX, e.clientY);
     document.onmouseup = () => endDrag();

@@ -62,10 +62,10 @@
         /* NEW Floating Companion Styles */
         #pet-companion-container {
             position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            width: 150px;
-            height: 150px;
+            bottom: 2rem;
+            right: 2rem;
+            width: 220px;
+            height: 220px;
             z-index: 10000;
             display: flex;
             flex-direction: column;
@@ -131,27 +131,27 @@
         /* Responsive overrides for Mobile */
         @media (max-width: 768px) {
             #pet-companion-container {
-                width: 100px;
-                height: 100px;
-                bottom: 100px;
+                width: 140px;
+                height: 140px;
+                bottom: 2rem;
                 right: 1rem;
             }
             #pet-speech-bubble {
-                width: 120px;
-                font-size: 0.6rem;
-                padding: 0.5rem;
+                width: 140px;
+                font-size: 0.65rem;
+                padding: 0.6rem;
             }
             #pet-companion-container .level-badge {
-                font-size: 7px;
-                padding: 1px 6px;
+                font-size: 8px;
+                padding: 2px 8px;
             }
             #pet-companion-container .rank-title {
-                font-size: 7px;
-                top: -15px;
+                font-size: 8px;
+                top: -20px;
             }
             #pet-companion-container .points-text {
-                font-size: 9px;
-                bottom: -10px;
+                font-size: 10px;
+                bottom: -15px;
             }
         }
     </style>
@@ -508,7 +508,7 @@
     <script src="js/finance.js"></script>
     <script src="js/tasks.js"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/pet3d.js?v=1.0.5"></script>
+    <script src="js/pet3d.js?v=1.0.8"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initDashboard();
