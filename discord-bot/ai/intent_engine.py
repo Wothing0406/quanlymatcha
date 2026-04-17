@@ -1,6 +1,8 @@
 def detect_intent(text: str) -> str:
     """A specialized engine to process raw text and detect core user intent."""
     text = text.lower()
+    if any(word in text for word in ['khám', 'bệnh', 'đau', 'phổi', 'thuốc', 'sức khỏe', 'bác sĩ', 'viêm']):
+        return "health_priority"
     if any(word in text for word in ['học', 'bài', 'study', 'ôn']):
         return "study planning"
     if any(word in text for word in ['lịch', 'hôm nay', 'schedule', 'task', 'làm gì', 'thời gian']):

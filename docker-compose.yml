@@ -44,7 +44,7 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - TZ=Asia/Ho_Chi_Minh
       - OLLAMA_BASE_URL=http://ollama:11434
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:1.5b}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:3b}
       - AI_PROVIDER=ollama
     env_file:
       - .env
