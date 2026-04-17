@@ -14,6 +14,8 @@ const roasts = [
     "Click nữa tao trừ điểm kỷ luật bây giờ!",
     "Bỏ tao ra! Tao không phải đồ chơi của mày!",
     "Tao đang bận... thở, đừng làm phiền!",
+    "Mẹ mày Péo!",
+    "Người Tày
 ];
 
 function initPet3D() {
