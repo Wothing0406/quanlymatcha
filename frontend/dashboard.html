@@ -127,6 +127,29 @@
             letter-spacing: 0.2em;
             pointer-events: none;
         }
+
+        /* Responsive overrides for Mobile */
+        @media (max-width: 768px) {
+            #pet-companion-container {
+                width: 150px;
+                height: 150px;
+                bottom: 1rem;
+                right: 1rem;
+            }
+            #pet-speech-bubble {
+                width: 140px;
+                font-size: 0.65rem;
+                padding: 0.75rem;
+            }
+            #pet-companion-container .level-badge {
+                font-size: 8px;
+                padding: 2px 8px;
+            }
+            #pet-companion-container .rank-title {
+                font-size: 8px;
+                top: -20px;
+            }
+        }
     </style>
 </head>
 
