@@ -186,24 +186,31 @@ async def auto_roast_watchdog(bot, dm_channel):
         for act in new_activities:
             logger.info(f"🔥 [AUTO ROAST] Phát hiện hoạt động mới: {act['title']}")
             
-            # Get financial context for better roasting
+            # Get financial context and goals for better roasting
             month = datetime.now().strftime("%Y-%m")
             fin = db.execute("SELECT * FROM monthly_finance WHERE month = %s", (month,), fetch='one')
-            fin_info = f"Ví hiện tại: {fin['remaining']:,}đ" if fin else ""
+            goals = db.execute("SELECT * FROM saving_goals", fetch='all')
+            goals_text = "\n".join([f"- {g['goal_name']}: {g['current_saved']:,}/{g['target_amount']:,}đ" for g in goals]) if goals else "Không có"
+            
+            fin_info = f"Ví hiện tại: {fin['remaining']:,}đ" if fin and fin.get('remaining') else "Không rõ số dư"
 
-            prompt = f"""
-            Tôi vừa thực hiện hoạt động này: {act['type']} - {act['title']} với số tiền {act['amount']:,}đ.
-            {fin_info}
+            prompt = f"""Tôi vừa thực hiện hoạt động: [{act['type']}] "{act['title']}" số tiền {act['amount']:,}đ.
+
+[THÔNG TIN TÀI CHÍNH CỦA TÔI]
+- {fin_info}
+- Mục tiêu đang tích luỹ: {goals_text}
+
+[YÊU CẦU CHO MATCHA]
+Đánh giá khoản tiền {act['amount']:,}đ cho "{act['title']}" này là HỢP LÝ hay HOANG PHÍ dựa trên số dư và mục tiêu.
+- Nếu là HOANG PHÍ / VÔ BỔ: Chửi gắt, xéo xắt, khinh bỉ.
+- Nếu là HỢP LÝ / THIẾT YẾU: Khen ngợi ngắn gọn.
+- Nếu là Thu nhập/Lương: Vui vẻ, nhắc nhở giữ tiền.
+
+Trả lời cực ngắn (1-2 câu), xưng "tao/mày" và đúng chuẩn phong cách Matcha."""
             
-            Hãy đưa ra phản hồi (chửi hoặc khen) THỰC TẾ và KHÔNG TRUNG LẬP. 
-            - Nếu là chi tiêu vô bổ: Chửi sấp mặt.
-            - Nếu là thu nhập: Khen mỉa mai hoặc bảo lo mà giữ tiền.
-            - Nếu là hoàn thành task: Khen nhưng đừng để tôi kiêu ngạo.
-            
-            Trả lời cực ngắn (1-2 câu), phong cách Matcha đanh đá.
-            """
-            
-            roast_text = await chat_cog.generate_response(prompt)
+            # Sử dụng parameter system_prompt để tiêm tính cách
+            system_p = "MÀY LÀ MATCHA, QUẢN GIA TÀI CHÍNH XÉO XẮT NHẤT HỆ MẶT TRỜI. CẤM XƯNG TÔI/BẠN."
+            roast_text = await chat_cog.generate_response(prompt, system_prompt=system_p)
             
             if roast_text:
                 import discord
