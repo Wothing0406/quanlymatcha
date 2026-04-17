@@ -214,18 +214,21 @@ def log_activity(activity_type, title, amount=0, photo_path=None):
 
 
 
+import math
+
 # --- V5.0 GAMIFICATION HELPERS ---
 
-def add_points(amount, reason):
-    """Cộng điểm cho user, tăng EXP và kiểm tra Level up."""
+def add_points(points, exp, reason):
+    """Cộng điểm cho user, tăng EXP và kiểm tra Level up (RPG Style)."""
     try:
         stats = execute("SELECT * FROM user_stats WHERE id = 1", fetch='one')
         if not stats: return
         
-        new_points = stats['current_points'] + amount
-        new_exp = stats['total_exp'] + abs(amount)
-        # Level up logic: Level = 1 + floor(EXP / 1000)
-        new_level = 1 + (new_exp // 1000)
+        new_points = stats['current_points'] + points
+        new_exp = stats['total_exp'] + exp
+        
+        # Level = floor(sqrt(EXP / 100)) + 1
+        new_level = int(math.sqrt(max(0, new_exp) / 100)) + 1
         
         execute(
             "UPDATE user_stats SET current_points = %s, total_exp = %s, level = %s WHERE id = 1",
@@ -233,12 +236,12 @@ def add_points(amount, reason):
         )
         execute(
             "INSERT INTO points_history (amount, reason) VALUES (%s, %s)",
-            (amount, reason)
+            (points, reason)
         )
         
         # Log to activity feed
-        log_type = 'reward' if amount > 0 else 'penalty'
-        log_activity(log_type, f"{'Cộng' if amount > 0 else 'Trừ'} {abs(amount)} điểm: {reason}", amount=amount)
+        log_type = 'reward' if points > 0 else 'penalty'
+        log_activity(log_type, f"{'Cộng' if points > 0 else 'Trừ'} {abs(points)} điểm: {reason}", amount=points)
         
         # Automatically update pet state
         update_pet_state()

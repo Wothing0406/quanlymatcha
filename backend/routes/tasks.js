@@ -5,7 +5,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Use the same uploads directory defined in index.js
 const uploadsDir = path.join(__dirname, '../uploads');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadsDir),
@@ -13,6 +12,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// Get all tasks
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query("SELECT * FROM tasks ORDER BY start_time ASC");
@@ -22,6 +22,7 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Create task(s)
 router.post('/', async (req, res) => {
     const { task_name, weekday, start_time, end_time } = req.body;
     try {
@@ -40,6 +41,7 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Update task
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { task_name, start_time, end_time } = req.body;
@@ -51,6 +53,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// Delete task
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -61,6 +64,7 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Start task
 router.post('/start', upload.single('photo'), async (req, res) => {
     const { id } = req.body;
     const photo_path = req.file ? '/uploads/' + req.file.filename : null;
@@ -75,30 +79,51 @@ router.post('/start', upload.single('photo'), async (req, res) => {
     }
 });
 
+// Complete task with Points/EXP
 router.post('/complete', upload.single('photo'), async (req, res) => {
     const { id } = req.body;
     const photo_path = req.file ? '/uploads/' + req.file.filename : null;
     try {
         const [rows] = await db.query("SELECT task_name FROM tasks WHERE id = ?", [id]);
-        const taskName = rows[0] ? rows[0].task_name : 'Công việc';
+        if (!rows[0]) return res.status(404).json({ error: "Task not found" });
+        
+        const taskName = rows[0].task_name;
         await db.query(`UPDATE tasks SET status = 'done', photo_path = ? WHERE id = ?`, [photo_path, id]);
         await db.query("INSERT INTO activity_log (type, title, photo_path) VALUES ('task_done', ?, ?)", [`Đã hoàn thành: ${taskName}`, photo_path]);
-        res.json({ success: true, photo_path });
+        
+        // Gamification: +50 PTS, +100 EXP
+        const stats = await db.updateUserStats(50, 100, `Hoàn thành: ${taskName}`);
+        
+        res.json({ 
+            success: true, 
+            photo_path, 
+            msg: `Perfect! +50 PTS. ${stats?.leveledUp ? 'LEVEL UP!' : ''}`,
+            stats: stats 
+        });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
 
+// Skip task with Penalty
 router.post('/skip', async (req, res) => {
     const { id, reason, status } = req.body;
     const finalStatus = status || 'skipped';
     try {
         const [rows] = await db.query("SELECT task_name FROM tasks WHERE id = ?", [id]);
-        const taskName = rows[0] ? rows[0].task_name : 'Công việc';
+        if (!rows[0]) return res.status(404).json({ error: "Task not found" });
+        
+        const taskName = rows[0].task_name;
         await db.query(`UPDATE tasks SET status = ?, reason = ? WHERE id = ?`, [finalStatus, reason, id]);
         await db.query("INSERT INTO activity_log (type, title) VALUES ('task_missed', ?)", [taskName]);
-        res.json({ success: true });
+
+        // Gamification: -20 PTS, -50 EXP
+        const stats = await db.updateUserStats(-20, -50, `Bỏ lỡ: ${taskName}`);
+
+        res.json({ success: true, stats: stats });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });

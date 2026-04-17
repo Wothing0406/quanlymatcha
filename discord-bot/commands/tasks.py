@@ -105,7 +105,7 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         db.execute("DELETE FROM tasks WHERE id = %s", (id,))
         await interaction.response.send_message(f"🗑️ Đã xóa lịch trình `{task['task_name']}` (ID: {id}).")
 
-    @task_group.command(name="done", description="Hoàn thành công việc (Nên dùng /task finish kèm ảnh)")
+    @task_group.command(name="done", description="Hoàn thành công việc nhanh (Không cần ảnh)")
     @app_commands.describe(task_id="ID của công việc cần đánh dấu hoàn thành")
     async def task_done_simple(self, interaction: discord.Interaction, task_id: int):
         task = db.execute("SELECT * FROM tasks WHERE id = %s", (task_id,), fetch='one')
@@ -115,15 +115,15 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         db.execute("UPDATE tasks SET status = 'done' WHERE id = %s", (task_id,))
         db.log_activity('task_done', f"Đã hoàn thành: {task['task_name']}")
         
-        # --- V5.0 Gamification ---
-        res = db.add_points(20, f"Hoàn thành task: {task['task_name']}")
-        msg = f"✅ Đã đánh dấu `{task['task_name']}` là xong! Năng suất quá! +20đ Matcha. 🚀"
+        # --- V5.0 Gamification Sync ---
+        res = db.add_points(50, 100, f"Hoàn thành task: {task['task_name']}")
+        msg = f"✅ Đã đánh dấu `{task['task_name']}` là xong! +50 PTS. 🚀"
         if res and res.get('leveled_up'):
-            msg += f"\n🎊 CHÚC MỪNG! Bạn đã thăng cấp lên Level {res['level']}!"
+            msg += f"\n🎊 **LEVEL UP!** Bạn đã thăng cấp lên Level {res['level']}!"
             
         await interaction.response.send_message(msg)
 
-    @task_group.command(name="missed", description="Đánh dấu công việc bị bỏ lỡ")
+    @task_group.command(name="missed", description="Đánh dấu công việc bị bỏ lỡ hoặc Skip (Có trừ điểm)")
     @app_commands.describe(task_id="ID của công việc bị bỏ lỡ")
     async def task_missed(self, interaction: discord.Interaction, task_id: int):
         task = db.execute("SELECT * FROM tasks WHERE id = %s", (task_id,), fetch='one')
@@ -131,15 +131,14 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
             return await interaction.response.send_message(f"❌ Không tìm thấy task ID `{task_id}`.", ephemeral=True)
 
         db.execute("UPDATE tasks SET status = 'missed' WHERE id = %s", (task_id,))
-
-        # ✨ ĐỒNG BỘ: Ghi log hoạt động
         db.log_activity('task_missed', task['task_name'])
 
-        logger.info(f"❌ Task missed: [{task_id}] {task['task_name']}")
+        # --- V5.0 Gamification Sync ---
+        db.add_points(-20, -50, f"Bỏ lỡ/Skip task: {task['task_name']}")
 
         embed = discord.Embed(
             title="😔 Đã ghi nhận bỏ lỡ",
-            description=f"**{task['task_name']}** được đánh dấu là **missed**.\n\nKhông sao, hãy cố gắng hơn vào lần sau nhé! 🍃",
+            description=f"**{task['task_name']}** được đánh dấu là **missed**.\n\nBạn bị trừ **-20 PTS**. Đừng nản lòng, cố gắng hơn nhé! 🍃",
             color=discord.Color.red()
         )
         await interaction.response.send_message(embed=embed)
@@ -288,12 +287,12 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         db.log_activity('task_done', f"Đã hoàn thành: {task['task_name']}", photo_path=db_path)
         logger.info(f"📸 Finished task [{task_id}] with photo")
 
-        # --- V5.0 Gamification ---
-        res = db.add_points(50, f"Hoàn thành task kèm ảnh: {task['task_name']}")
+        # --- V5.0 Gamification Sync ---
+        res = db.add_points(50, 100, f"Hoàn thành task kèm ảnh: {task['task_name']}")
         
         embed = discord.Embed(
             title="🎉 Chúc mừng bạn đã xong việc!",
-            description=f"**{task['task_name']}** - Kỷ niệm đã được lưu! +50đ Matcha. ✨",
+            description=f"**{task['task_name']}** - Kỷ niệm đã được lưu! **+50 PTS**. ✨",
             color=discord.Color.green()
         )
         if res and res.get('leveled_up'):
@@ -302,10 +301,6 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         embed.set_image(url=attachment.url)
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="upload", description="[Cũ] Upload ảnh hoàn thành (Khuyên dùng /task finish)")
-    @app_commands.describe(task_id="ID công việc muốn upload ảnh")
-    async def upload(self, interaction: discord.Interaction, task_id: int, attachment: discord.Attachment):
-        await self.task_finish.callback(self, interaction, task_id, attachment)
 
 
 async def setup(bot):

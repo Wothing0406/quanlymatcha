@@ -108,9 +108,47 @@ async function initDb() {
     }
 }
 
+async function updateUserStats(pointsChange, expChange, reason) {
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const [stats] = await conn.query("SELECT * FROM user_stats WHERE id = 1");
+        if (!stats[0]) return;
+
+        const currentPoints = (stats[0].current_points || 0) + pointsChange;
+        const totalExp = (stats[0].total_exp || 0) + expChange;
+
+        // Level = floor(sqrt(EXP / 100)) + 1
+        const newLevel = Math.floor(Math.sqrt(totalExp / 100)) + 1;
+
+        await conn.query(
+            "UPDATE user_stats SET current_points = ?, total_exp = ?, level = ? WHERE id = 1",
+            [currentPoints, totalExp, newLevel]
+        );
+
+        await conn.query(
+            "INSERT INTO points_history (amount, reason) VALUES (?, ?)",
+            [pointsChange, reason]
+        );
+
+        // Optional: Update Pet State here
+        let state = 'neutral';
+        if (currentPoints > 500) state = 'happy';
+        if (currentPoints < 0) state = 'sad';
+        await conn.query("UPDATE user_stats SET pet_state = ? WHERE id = 1", [state]);
+
+        return { points: currentPoints, level: newLevel, leveledUp: newLevel > stats[0].level };
+    } catch (err) {
+        console.error('❌ Error updating user stats:', err);
+    } finally {
+        if (conn) conn.release();
+    }
+}
+
 module.exports = {
     pool,
     initDb,
+    updateUserStats,
     query: (sql, params) => pool.query(sql, params),
     execute: (sql, params) => pool.execute(sql, params)
 };

@@ -48,14 +48,14 @@ function initPet3D() {
     canvasContainer.innerHTML = '';
     canvasContainer.appendChild(renderer.domElement);
 
-    // 4. Balanced Lighting (FIXED OVEREXPOSURE)
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7)); // Moderate ambient
+    // 4. Balanced Lighting (LOWERED TO PREVENT CHÓI SÁNG)
+    scene.add(new THREE.AmbientLight(0xffffff, 0.45)); 
     
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
     hemiLight.position.set(0, 20, 0);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6); // Soft side light for depth
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.4); 
     dirLight.position.set(5, 5, 5);
     scene.add(dirLight);
 
@@ -67,15 +67,15 @@ function initPet3D() {
         const center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
         
-        // Entrance Animation State
+        // Face FORWARD directly
         model.scale.set(0, 0, 0); 
-        model.rotation.set(0, 0.2, 0); 
+        model.rotation.set(0, 0, 0); 
         scene.add(model);
         
         // POP-IN GESTURE
         let scaleVal = 0;
         const popIn = setInterval(() => {
-            scaleVal += 0.1;
+            scaleVal += 0.12;
             if (scaleVal >= 1.8) {
                 model.scale.set(1.8, 1.8, 1.8);
                 clearInterval(popIn);
@@ -92,17 +92,17 @@ function initPet3D() {
             const time = Date.now();
             
             // 1. "Hopping" Idle
-            model.position.y = Math.abs(Math.sin(time * 0.003)) * 0.15; 
+            model.position.y = Math.abs(Math.sin(time * 0.003)) * 0.12; 
             
             // 2. "Breathing" pulse
-            const pulse = 1 + Math.sin(time * 0.002) * 0.03;
-            if (model.scale.x > 1.5) { // Only pulse after pop-in
+            const pulse = 1 + Math.sin(time * 0.002) * 0.02;
+            if (model.scale.x > 1.5) { 
                 model.scale.set(1.8 * pulse, 1.8 * pulse, 1.8 * pulse);
             }
             
-            model.rotation.y = 0.2; 
-            model.rotation.z *= 0.92; 
-            model.rotation.x *= 0.92;
+            model.rotation.y = 0; // FORCE FACE FORWARD
+            model.rotation.z *= 0.9; 
+            model.rotation.x *= 0.9;
         }
         renderer.render(scene, camera);
     }
