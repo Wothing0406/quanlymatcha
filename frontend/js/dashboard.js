@@ -47,7 +47,6 @@ function renderGamification(stats) {
     const totalExp = stats.total_exp || 0;
 
     // 1. GAME LOGIC: Level = floor(sqrt(EXP / 100)) + 1
-    // Example: 0 exp = lvl 1, 100 exp = lvl 2, 400 exp = lvl 3, 900 exp = lvl 4...
     const level = Math.floor(Math.sqrt(totalExp / 100)) + 1;
     
     // 2. XP Progress to next level
@@ -69,13 +68,9 @@ function renderGamification(stats) {
     if (pointsEl) pointsEl.innerText = `${currentPoints} PTS`;
     if (rankEl) rankEl.innerText = getRankTitle(level);
     if (expBarEl) expBarEl.style.width = `${Math.min(progress, 100)}%`;
-
-    // Pet State Effect
-    // (Optional: Change model color or emissive based on state later)
 }
 
 function updateDashboardStats(stats) {
-    // Current Finance Balance
     const incomeEl = document.getElementById('stat-income');
     const expensesEl = document.getElementById('stat-expenses');
     const savingEl = document.getElementById('stat-saving');
@@ -86,7 +81,6 @@ function updateDashboardStats(stats) {
     if (savingEl) savingEl.innerText = formatVNĐ(stats.finance.saving);
     if (remainingEl) remainingEl.innerText = formatVNĐ(stats.finance.remaining);
 
-    // Also populate Budget Health (ProgressBar)
     const healthContainer = document.getElementById('dash-budget-health');
     if (healthContainer && stats.finance.income > 0) {
         const spentRatio = Math.min((stats.finance.expenses / stats.finance.income) * 100, 100);
@@ -105,11 +99,7 @@ function updateDashboardStats(stats) {
         `;
     }
 
-    // Chart data mapping
     const spentData = [Math.max(stats.finance.income, 1), stats.finance.expenses, stats.finance.saving];
-
-    
-    // Rendering Spending Chart
     const ctxSpend = document.getElementById('chart-spending');
     if (ctxSpend && !window.spendingChart) {
         window.spendingChart = new Chart(ctxSpend, {
@@ -127,7 +117,6 @@ function updateDashboardStats(stats) {
         });
     }
 
-    // Task Analytics
     const tasksDone = stats.tasks.find(t => t.status === 'done')?.count || 0;
     const tasksMissed = stats.tasks.find(t => t.status === 'skipped')?.count || 0;
     const tasksPostponed = stats.tasks.find(t => t.status === 'postponed')?.count || 0;
@@ -185,7 +174,6 @@ async function loadHistory(type = 'all', limit = 15, offset = 0, append = false)
             gridEl.innerHTML = html;
         }
 
-        // Logic for "Load More" button
         const loadMoreBtn = document.getElementById('btn-load-more');
         if (loadMoreBtn) {
             if (activities.length < limit) loadMoreBtn.classList.add('hidden');
@@ -196,7 +184,6 @@ async function loadHistory(type = 'all', limit = 15, offset = 0, append = false)
         }
     } catch (err) { console.error('Lỗi tải lịch sử:', err); }
 }
-
 
 function createLocketCardHTML(item) {
     const timeDisplay = formatRelativeTime(new Date(item.created_at));
