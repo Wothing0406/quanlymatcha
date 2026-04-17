@@ -58,6 +58,75 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* NEW Floating Companion Styles */
+        #pet-companion-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 250px;
+            height: 250px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #pet-companion-container:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+        #pet-companion-container .level-badge {
+            position: absolute;
+            top: 0;
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            pointer-events: none;
+        }
+        #pet-companion-container .xp-container {
+            position: absolute;
+            bottom: 10px;
+            width: 60%;
+            height: 6px;
+            background: rgba(156, 163, 175, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        #pet-companion-container .xp-bar {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 1s ease;
+        }
+        #pet-companion-container .points-text {
+            position: absolute;
+            bottom: -15px;
+            font-size: 12px;
+            font-weight: 900;
+            color: #3b82f6;
+            pointer-events: none;
+        }
+        #pet-companion-container .rank-title {
+            position: absolute;
+            top: -25px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #9ca3af;
+            letter-spacing: 0.2em;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -168,27 +237,25 @@
                     <h1 class="text-3xl font-black tracking-tight mb-2 responsive-title">Bảng điều khiển</h1>
                     <p class="text-sm text-gray-500 font-medium italic">"Chăm chỉ làm việc, đừng để Matcha mắng nhé! 🍵"</p>
                 </div>
-                <!-- Matcha Pet & Stats Widget -->
-                <div class="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 relative">
-                    <!-- 3D Pet Container -->
-                    <div id="pet-avatar" class="w-24 h-24 bg-blue-50 dark:bg-blue-900/10 rounded-2xl flex items-center justify-center relative">
-                        <div id="pet-speech-bubble">Chào mày!</div>
-                        <div id="matcha-pet-canvas-container">
-                            <!-- Three.js will inject canvas here -->
-                            <div class="animate-pulse text-2xl">🍵</div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span id="user-level" class="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest">Level 1</span>
-                            <span id="pet-status-text" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest italic">Đang ổn</span>
-                        </div>
-                        <p id="user-points" class="text-xl font-black text-gray-700 dark:text-gray-200">0 pts</p>
-                        <div class="w-32 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
-                            <div id="exp-bar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
-                        </div>
+            </div>
+
+            <!-- New Floating Pet Companion -->
+            <div id="pet-companion-container">
+                <div class="rank-title" id="user-rank">Tập sự ham chơi</div>
+                <div class="level-badge" id="user-level">Level 1</div>
+                
+                <div id="pet-avatar" class="w-full h-full relative">
+                    <div id="pet-speech-bubble">Chào mày!</div>
+                    <div id="matcha-pet-canvas-container">
+                        <!-- Three.js will inject canvas here -->
+                        <div class="animate-pulse text-4xl">🍵</div>
                     </div>
                 </div>
+
+                <div class="xp-container">
+                    <div class="xp-bar" id="exp-bar"></div>
+                </div>
+                <div class="points-text" id="user-points">0 PTS</div>
             </div>
 
             <!-- Focus Center / Working Now Widget -->

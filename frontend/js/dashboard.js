@@ -40,26 +40,38 @@ function renderGamification(stats) {
     const levelEl = document.getElementById('user-level');
     const pointsEl = document.getElementById('user-points');
     const expBarEl = document.getElementById('exp-bar');
-    const petAvatarEl = document.getElementById('pet-avatar');
-    const petStatusEl = document.getElementById('pet-status-text');
+    const rankEl = document.getElementById('user-rank');
 
-    if (levelEl) levelEl.innerText = `Level ${stats.level}`;
-    if (pointsEl) pointsEl.innerText = `${stats.current_points} pts`;
+    // Stats might be snake_case from MySQL
+    const currentPoints = stats.current_points || 0;
+    const totalExp = stats.total_exp || 0;
+
+    // 1. GAME LOGIC: Level = floor(sqrt(EXP / 100)) + 1
+    // Example: 0 exp = lvl 1, 100 exp = lvl 2, 400 exp = lvl 3, 900 exp = lvl 4...
+    const level = Math.floor(Math.sqrt(totalExp / 100)) + 1;
     
-    // Calculate EXP progress (0-1000)
-    const expProgress = (stats.total_exp % 1000) / 10;
-    if (expBarEl) expBarEl.style.width = `${expProgress}%`;
+    // 2. XP Progress to next level
+    const currentLevelExpLimit = Math.pow(level - 1, 2) * 100;
+    const nextLevelExpLimit = Math.pow(level, 2) * 100;
+    const expInCurrentLevel = totalExp - currentLevelExpLimit;
+    const expNeededForNext = nextLevelExpLimit - currentLevelExpLimit;
+    const progress = (expInCurrentLevel / expNeededForNext) * 100;
 
-    // Pet State UI
-    const states = {
-        'happy': { emoji: '🍵', text: 'Đang rất vui!' },
-        'sad': { emoji: '🍶', text: 'Đang giận dỗi...' },
-        'neutral': { emoji: '🍵', text: 'Đang theo dõi bạn' },
-        'sick': { emoji: '🔥', text: 'Đang bốc hỏa!' }
+    // 3. RANK TITLES
+    const getRankTitle = (lvl) => {
+        if (lvl <= 3) return "Tập sự ham chơi";
+        if (lvl <= 7) return "Chiến binh kỷ luật";
+        if (lvl <= 12) return "Bậc thầy SIGMA";
+        return "Thánh tiết kiệm";
     };
-    const current = states[stats.pet_state] || states['neutral'];
-    if (petAvatarEl) petAvatarEl.innerText = current.emoji;
-    if (petStatusEl) petStatusEl.innerText = current.text;
+
+    if (levelEl) levelEl.innerText = `Level ${level}`;
+    if (pointsEl) pointsEl.innerText = `${currentPoints} PTS`;
+    if (rankEl) rankEl.innerText = getRankTitle(level);
+    if (expBarEl) expBarEl.style.width = `${Math.min(progress, 100)}%`;
+
+    // Pet State Effect
+    // (Optional: Change model color or emissive based on state later)
 }
 
 function updateDashboardStats(stats) {

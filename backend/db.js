@@ -70,10 +70,32 @@ async function initDb() {
         // 5. activity_log (Unified Feed V5.0)
         await conn.query(`CREATE TABLE IF NOT EXISTS activity_log (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            type ENUM('income', 'expense', 'saving', 'task_started', 'task_done', 'task_missed') NOT NULL,
+            type ENUM('income', 'expense', 'saving', 'task_started', 'task_done', 'task_missed', 'task_postponed', 'reward', 'penalty', 'ai_roast') NOT NULL,
             title VARCHAR(255),
             amount DOUBLE DEFAULT 0,
             photo_path VARCHAR(500),
+            is_roasted TINYINT(1) DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // 6. user_stats (Consistent with Bot)
+        await conn.query(`CREATE TABLE IF NOT EXISTS user_stats (
+            id INT PRIMARY KEY DEFAULT 1,
+            current_points INT DEFAULT 0,
+            total_exp INT DEFAULT 0,
+            level INT DEFAULT 1,
+            pet_state VARCHAR(50) DEFAULT 'neutral',
+            last_roast_date DATE,
+            last_watchdog_date DATE,
+            CHECK (id = 1)
+        )`);
+        await conn.query("INSERT IGNORE INTO user_stats (id) VALUES (1)");
+
+        // 7. points_history
+        await conn.query(`CREATE TABLE IF NOT EXISTS points_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            amount INT,
+            reason VARCHAR(255),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         
