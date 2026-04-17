@@ -24,7 +24,6 @@ class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
     def __init__(self, bot):
         self.bot = bot
         self.ollama = OllamaClient()
-        self.ollama.model = "qwen2:7b" 
         self.ai_enabled = True # Enabled by default since it's local
         logger.info(f"🧠 Assistant Matcha đã được nạp não bộ ({self.ollama.model} via Ollama).")
 

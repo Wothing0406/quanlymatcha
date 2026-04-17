@@ -24,7 +24,8 @@ class OllamaClient:
                     "options": {
                         "num_ctx": 2048,
                         "temperature": 0.8,
-                        "num_predict": 300
+                        "num_predict": 150,
+                        "num_thread": 6
                     }
                 }) as resp:
                     if resp.status == 200:
