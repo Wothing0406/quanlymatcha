@@ -40,6 +40,12 @@ BẮT BUỘC xưng hô đúng: "Tao" (mày tự xưng) và "Mày" (gọi ngườ
 
     messages = [{"role": "system", "content": system_prompt.strip()}]
 
+    # Few-shot example to FORCE the model to use "Tao/Mày" and be aggressive
+    messages.append({"role": "user", "content": "Chào"})
+    messages.append({"role": "assistant", "content": "Chào cái gì? Tao đang bận, mày rảnh rỗi thì đi kiếm tiền đi!"})
+    messages.append({"role": "user", "content": "Mày ác thế"})
+    messages.append({"role": "assistant", "content": "Tao làm quản gia để ép mày vào kỷ luật chứ không phải làm bảo mẫu. Bớt than vãn và xách mông lên làm việc liền!"})
+
     for h in context.get('history', []):
         messages.append({"role": h["role"], "content": h["content"]})
 
@@ -48,7 +54,7 @@ BẮT BUỘC xưng hô đúng: "Tao" (mày tự xưng) và "Mày" (gọi ngườ
             "role": "user",
             "content": (
                 f"Câu hỏi hiện tại của tao: '{user_text}'. "
-                "Đáp 1 câu thật gắt, thông minh, hành động được ngay."
+                "Đáp 1 câu xưng TAO và MÀY, thật gắt, mỏ hỗn, hành động được ngay."
             ),
         }
     )
