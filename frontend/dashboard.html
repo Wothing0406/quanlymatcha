@@ -11,6 +11,53 @@
         .transition-all {
             transition: all 0.2s ease-in-out;
         }
+        /* Custom styles for 3D Pet Bubble */
+        #pet-speech-bubble {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 200px;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #pet-speech-bubble.active {
+            transform: translateX(-50%) scale(1);
+        }
+        #pet-speech-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+        .dark #pet-speech-bubble {
+            background: #374151;
+            color: #f3f4f6;
+        }
+        .dark #pet-speech-bubble::after {
+            border-color: #374151 transparent transparent transparent;
+        }
+        #matcha-pet-canvas-container {
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -122,9 +169,14 @@
                     <p class="text-sm text-gray-500 font-medium italic">"Chăm chỉ làm việc, đừng để Matcha mắng nhé! 🍵"</p>
                 </div>
                 <!-- Matcha Pet & Stats Widget -->
-                <div class="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div id="pet-avatar" class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-4xl animate-bounce-slow">
-                        🍵
+                <div class="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 relative">
+                    <!-- 3D Pet Container -->
+                    <div id="pet-avatar" class="w-24 h-24 bg-blue-50 dark:bg-blue-900/10 rounded-2xl flex items-center justify-center relative">
+                        <div id="pet-speech-bubble">Chào mày!</div>
+                        <div id="matcha-pet-canvas-container">
+                            <!-- Three.js will inject canvas here -->
+                            <div class="animate-pulse text-2xl">🍵</div>
+                        </div>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
@@ -353,11 +405,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/finance.js"></script>
     <script src="js/tasks.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/pet3d.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initDashboard();

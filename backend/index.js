@@ -27,6 +27,7 @@ if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 app.use('/uploads', express.static(uploadsDir));
+app.use('/model3d', express.static(path.join(__dirname, '../model3d')));
 
 // ================= AUTH API (Public) =================
 app.post('/api/auth/verify', (req, res) => {
