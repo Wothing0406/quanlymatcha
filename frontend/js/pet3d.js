@@ -68,12 +68,14 @@ function initPet3D() {
         scene.add(model);
     });
 
-    // 6. Animation Loop
+    // 6. Animation Loop (Higher FPS orientation)
     function animate() {
         requestAnimationFrame(animate);
         if (model && !isDragging) {
+            // Very subtle breathing instead of spinning
             model.position.y = Math.sin(Date.now() * 0.001) * 0.1;
-            model.rotation.z *= 0.95; 
+            model.rotation.y = 0; // FORCE STAND STILL
+            model.rotation.z *= 0.95; // Smooth jiggle return
             model.rotation.x *= 0.95;
         }
         renderer.render(scene, camera);
