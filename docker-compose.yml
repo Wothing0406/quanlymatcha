@@ -22,6 +22,7 @@ services:
     volumes:
       - ./shared_uploads:/app/uploads
       - ./frontend:/app/frontend
+      - ./model3d:/app/model3d
     env_file:
       - .env
     environment:
