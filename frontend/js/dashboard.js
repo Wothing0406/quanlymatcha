@@ -59,8 +59,8 @@ function renderGamification(stats) {
 
     // 3. RANK TITLES
     const getRankTitle = (lvl) => {
-        if (lvl <= 3) return "niu bi
-        if (lvl <= 7) return "Người tày
+        if (lvl <= 3) return "Niu bi";
+        if (lvl <= 7) return "Người tày";
         if (lvl <= 12) return "Bậc thầy SIGMA";
         return "Thánh tiết kiệm";
     };
