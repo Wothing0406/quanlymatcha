@@ -12,7 +12,7 @@ async function initDashboard() {
             await initAgenda();
             const weekdayEl = document.getElementById('current-weekday-label');
             if (weekdayEl) {
-                const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                const days = ['Chu Nhat', 'Thu 2', 'Thu 3', 'Thu 4', 'Thu 5', 'Thu 6', 'Thu 7'];
                 weekdayEl.innerText = days[new Date().getDay()];
             }
         }
@@ -20,9 +20,9 @@ async function initDashboard() {
         loadDashboardHistory();
         initGamification(); 
     } catch (err) { 
-        console.error('Lỗi dashboard:', err);
+        console.error('Loi dashboard:', err);
         const gridEl = document.getElementById('agenda-task-grid');
-        if (gridEl) gridEl.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Không thể kết nối Database. Vui lòng kiểm tra lại Bot!</div>`;
+        if (gridEl) gridEl.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">Khong the ket noi Database. Vui lòng kiem tra lai Bot!</div>`;
     }
 }
 
@@ -32,7 +32,7 @@ async function initGamification() {
         const stats = await fetchJSON(`${API_BASE}/user/stats`);
         renderGamification(stats);
     } catch (err) {
-        console.error('Lỗi lấy stats gamification:', err);
+        console.error('Loi lay stats gamification:', err);
     }
 }
 
@@ -42,26 +42,22 @@ function renderGamification(stats) {
     const expBarEl = document.getElementById('exp-bar');
     const rankEl = document.getElementById('user-rank');
 
-    // Stats might be snake_case from MySQL
     const currentPoints = stats.current_points || 0;
     const totalExp = stats.total_exp || 0;
 
-    // 1. GAME LOGIC: Level = floor(sqrt(EXP / 100)) + 1
     const level = Math.floor(Math.sqrt(totalExp / 100)) + 1;
     
-    // 2. XP Progress to next level
     const currentLevelExpLimit = Math.pow(level - 1, 2) * 100;
     const nextLevelExpLimit = Math.pow(level, 2) * 100;
     const expInCurrentLevel = totalExp - currentLevelExpLimit;
     const expNeededForNext = nextLevelExpLimit - currentLevelExpLimit;
     const progress = (expInCurrentLevel / expNeededForNext) * 100;
 
-    // 3. RANK TITLES
     const getRankTitle = (lvl) => {
         if (lvl <= 3) return "Niu bi";
-        if (lvl <= 7) return "Người tày";
-        if (lvl <= 12) return "Bậc thầy SIGMA";
-        return "Thánh tiết kiệm";
+        if (lvl <= 7) return "Nguoi Tay";
+        if (lvl <= 12) return "Bac thay SIGMA";
+        return "Thanh tiet kiem";
     };
 
     if (levelEl) levelEl.innerText = `Level ${level}`;
@@ -88,10 +84,9 @@ function updateDashboardStats(stats) {
         healthContainer.innerHTML = `
             <div class="flex justify-between items-end mb-4">
                 <div>
-                    <h4 class="text-xs font-black uppercase text-gray-400 mb-1">Hạn mức chi tiêu</h4>
-                    <p class="text-lg font-black">${spentRatio.toFixed(1)}% đã dùng</p>
+                    <h4 class="text-xs font-black uppercase text-gray-400 mb-1">Han muc chi tieu</h4>
+                    <p class="text-lg font-black">${spentRatio.toFixed(1)}% da dung</p>
                 </div>
-                <p class="text-[10px] font-bold text-gray-400 italic">Mục tiêu: < 80%</p>
             </div>
             <div class="w-full h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden border border-gray-100 dark:border-gray-800">
                 <div class="h-full ${colorClass} transition-all duration-1000" style="width: ${spentRatio}%"></div>
@@ -105,7 +100,7 @@ function updateDashboardStats(stats) {
         window.spendingChart = new Chart(ctxSpend, {
             type: 'doughnut',
             data: {
-                labels: ['Thu nhập', 'Đã chi', 'Tiết kiệm'],
+                labels: ['Thu nhap', 'Da chi', 'Tiet kiem'],
                 datasets: [{
                     data: spentData,
                     backgroundColor: ['#10b981', '#f43f5e', '#3b82f6'],
@@ -128,9 +123,9 @@ function updateDashboardStats(stats) {
         window.tasksChart = new Chart(ctxTask, {
             type: 'bar',
             data: {
-                labels: ['Thành công', 'Bị nhỡ', 'Đã dời', 'Đang làm', 'Chưa làm'],
+                labels: ['Thanh cong', 'Bi nho', 'Da doi', 'Dang lam', 'Chua lam'],
                 datasets: [{
-                    label: 'Số lượng nhiệm vụ',
+                    label: 'So luong nhiem vu',
                     data: [tasksDone, tasksMissed, tasksPostponed, tasksOngoing, tasksPending],
                     backgroundColor: ['#10b981', '#f43f5e', '#f59e0b', '#3b82f6', '#9ca3af'],
                     borderRadius: 8
@@ -146,21 +141,21 @@ async function loadDashboardHistory() {
     if (!listEl) return;
     try {
         const activities = await fetchJSON(`${API_BASE}/activities?limit=5`);
-        listEl.innerHTML = activities.length > 0 ? activities.map(item => createActivityItemHTML(item, true)).join('') : '<div class="text-center py-8 text-gray-400 italic">Chưa có hoạt động mới. Hãy bắt đầu ngay!</div>';
-    } catch (err) { console.error('Lỗi tải lịch sử dashboard:', err); }
+        listEl.innerHTML = activities.length > 0 ? activities.map(item => createActivityItemHTML(item, true)).join('') : '<div class="text-center py-8 text-gray-400 italic">Chua co hoat dong moi.</div>';
+    } catch (err) { console.error('Loi tai lich su dashboard:', err); }
 }
 
 async function loadHistory(type = 'all', limit = 15, offset = 0, append = false) {
     const gridEl = document.getElementById('history-memory-grid');
     if (!gridEl) return;
     
-    if (!append) gridEl.innerHTML = '<div class="col-span-full text-center py-20 opacity-50"><i class="fas fa-spinner fa-spin text-3xl mb-4"></i><p>Đang tìm lại kỷ niệm...</p></div>';
+    if (!append) gridEl.innerHTML = '<div class="col-span-full text-center py-20 opacity-50"><i class="fas fa-spinner fa-spin text-3xl mb-4"></i><p>Dang tim lai ky niem...</p></div>';
 
     try {
         const activities = await fetchJSON(`${API_BASE}/activities?type=${type}&limit=${limit}&offset=${offset}`);
         
         if (activities.length === 0 && !append) {
-            gridEl.innerHTML = '<div class="col-span-full text-center py-20 opacity-50 italic">Bạn chưa có kỷ niệm nào được lưu lại.</div>';
+            gridEl.innerHTML = '<div class="col-span-full text-center py-20 opacity-50 italic">Chua co ky niem.</div>';
             return;
         }
 
@@ -182,7 +177,7 @@ async function loadHistory(type = 'all', limit = 15, offset = 0, append = false)
                 loadMoreBtn.onclick = () => loadHistory(type, limit, offset + limit, true);
             }
         }
-    } catch (err) { console.error('Lỗi tải lịch sử:', err); }
+    } catch (err) { console.error('Loi tai lich su:', err); }
 }
 
 function createLocketCardHTML(item) {
@@ -190,10 +185,10 @@ function createLocketCardHTML(item) {
     const isTask = item.type.startsWith('task');
     const isFin = ['income', 'expense', 'saving'].includes(item.type);
     
-    let label = 'Kỷ niệm';
+    let label = 'Ky niem';
     let icon = 'fa-leaf';
-    if (isTask) { label = 'Hoạt động'; icon = 'fa-calendar-check'; }
-    if (isFin) { label = 'Tài chính'; icon = 'fa-wallet'; }
+    if (isTask) { label = 'Hoat dong'; icon = 'fa-calendar-check'; }
+    if (isFin) { label = 'Tai chinh'; icon = 'fa-wallet'; }
 
     return `
         <div class="glass-card rounded-[2rem] overflow-hidden group hover:scale-[1.02] transition-all duration-500 shadow-xl relative">
