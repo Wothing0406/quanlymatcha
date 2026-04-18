@@ -83,7 +83,7 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
             ),
             inline=False
         )
-        embed.set_footer(text="Matcha Bot v4.0 (Python) | discord.py | MySQL ✨")
+        embed.set_footer(text=" ✨")
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="status", description="Kiểm tra trạng thái bot và database")

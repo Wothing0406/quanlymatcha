@@ -16,6 +16,9 @@
   --matcha-glass-border: rgba(255, 255, 255, 0.5);
   --matcha-shadow: 0 15px 35px -5px rgba(45, 36, 30, 0.05);
   --matcha-glow-shadow: 0 0 40px rgba(139, 168, 110, 0.1);
+  --matcha-sidebar-bg: #f3efe6;
+  --matcha-sidebar-text: #2d241e;
+  --matcha-sidebar-border: rgba(45, 36, 30, 0.05);
 }
 
 .dark {
@@ -33,6 +36,9 @@
   --matcha-glass-border: rgba(255, 255, 255, 0.05);
   --matcha-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7);
   --matcha-glow-shadow: 0 0 50px rgba(165, 199, 130, 0.15);
+  --matcha-sidebar-bg: #0d110c;
+  --matcha-sidebar-text: #f2efe8;
+  --matcha-sidebar-border: rgba(255, 255, 255, 0.05);
 }
 
 body {

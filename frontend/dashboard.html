@@ -193,8 +193,8 @@
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
-        <div class="h-16 flex items-center justify-center border-b border-gray-800">
+        class="fixed inset-y-0 left-0 w-64 bg-[var(--matcha-sidebar-bg)] text-[var(--matcha-sidebar-text)] transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-[var(--matcha-sidebar-border)]">
+        <div class="h-16 flex items-center justify-center border-b border-[var(--matcha-sidebar-border)]">
             <span class="text-xl font-bold text-[var(--matcha-main)] italic">Matcha Manager</span>
         </div>
         <nav class="mt-6 px-4 space-y-2">
@@ -203,11 +203,11 @@
                 <i class="fas fa-th-large w-6"></i> <span class="text-sm">Bảng điều khiển</span>
             </a>
             <a href="agenda.html"
-                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-[var(--matcha-main-glow)] transition-all font-bold">
                 <i class="fas fa-tasks w-6"></i> <span class="text-sm">Công việc hôm nay</span>
             </a>
             <a href="history.html"
-                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all font-bold">
+                class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-[var(--matcha-main-glow)] transition-all font-bold">
                 <i class="fas fa-history w-6"></i> <span class="text-sm">Nhật ký hoạt động</span>
             </a>
             <a href="finance.html"
