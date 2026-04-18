@@ -11,6 +11,16 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: rootpassword
       TZ: Asia/Ho_Chi_Minh
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./mysql_data:/var/lib/mysql
 
@@ -32,7 +42,8 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - TZ=Asia/Ho_Chi_Minh
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
 
   discord-bot:
@@ -53,8 +64,10 @@ services:
       - ./shared_uploads:/app/uploads
       - ./discord-bot:/app
     depends_on:
-      - mysql
-      - ollama
+      mysql:
+        condition: service_healthy
+      ollama:
+        condition: service_started
     restart: unless-stopped
 
   ollama:

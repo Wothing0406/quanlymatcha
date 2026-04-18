@@ -7,28 +7,55 @@ logger = logging.getLogger('MatchaBot.Database')
 
 _pool = None
 
+def get_connection():
+    import time
+    max_retries = 10
+    for i in range(max_retries):
+        try:
+            pool = get_pool()
+            return pool.get_connection()
+        except Exception as e:
+            if i == max_retries - 1:
+                raise
+            logger.warning(f"⚠️ [Attempt {i+1}/{max_retries}] Database chưa sẵn sàng... Đang thử lại trong 5s.")
+            time.sleep(5)
+
 def get_pool():
     global _pool
     if _pool is None:
-        _pool = mysql.connector.pooling.MySQLConnectionPool(
-            pool_name="matcha_pool",
-            pool_size=5,
-            host=os.getenv('MYSQL_HOST', 'mysql'),
-            user=os.getenv('MYSQL_USER', 'matcha_user'),
-            password=os.getenv('MYSQL_PASSWORD', 'matcha_pass'),
-            database=os.getenv('MYSQL_DATABASE', 'matcha_db'),
-        )
-        logger.info("✅ Database pool đã được khởi tạo.")
-        init_db()
+        try:
+            _pool = mysql.connector.pooling.MySQLConnectionPool(
+                pool_name="matcha_pool",
+                pool_size=5,
+                host=os.getenv('MYSQL_HOST', 'mysql'),
+                user=os.getenv('MYSQL_USER', 'matcha_user'),
+                password=os.getenv('MYSQL_PASSWORD', 'matcha_pass'),
+                database=os.getenv('MYSQL_DATABASE', 'matcha_db'),
+            )
+            logger.info("✅ Database pool đã được khởi tạo.")
+            # We don't call init_db() here anymore to avoid recursion; 
+            # the first get_connection call will handle it.
+        except Exception as e:
+            logger.error(f"❌ Không thể tạo pool: {e}")
+            raise
     return _pool
 
 def init_db():
-    """V5.0 - Safe Initialization (No destructive drops)"""
+    """V6.0 - Butler Edition: Tự động khởi tạo và đồng bộ cột còn thiếu."""
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        logger.info("🚀 Khởi động Database V5.0 (Chế độ an toàn)...")
+        logger.info("🚀 Khởi động Database V6.0 (Chế độ tự động)...")
         
+        def ensure_col(table, col, definition):
+            try:
+                cursor.execute(f"SHOW COLUMNS FROM {table} LIKE '{col}'")
+                if not cursor.fetchone():
+                    logger.info(f"🛠️ Migration: Thêm cột '{col}' vào bảng '{table}'...")
+                    cursor.execute(f"ALTER TABLE {table} ADD COLUMN {col} {definition}")
+            except Exception as e:
+                logger.error(f"❌ Lỗi migration {table}.{col}: {e}")
+
         # 1. monthly_finance
         cursor.execute("""CREATE TABLE IF NOT EXISTS monthly_finance (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,6 +66,7 @@ def init_db():
             remaining DOUBLE DEFAULT 0,
             score INT DEFAULT 0
         )""")
+        ensure_col('monthly_finance', 'score', 'INT DEFAULT 0')
 
         # 2. saving_goals
         cursor.execute("""CREATE TABLE IF NOT EXISTS saving_goals (
@@ -50,6 +78,7 @@ def init_db():
             progress DOUBLE DEFAULT 0,
             category VARCHAR(50) DEFAULT 'general'
         )""")
+        ensure_col('saving_goals', 'category', "VARCHAR(50) DEFAULT 'general'")
 
         # 3. tasks
         cursor.execute("""CREATE TABLE IF NOT EXISTS tasks (
@@ -69,6 +98,7 @@ def init_db():
             points_rewarded TINYINT(1) DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
+        ensure_col('tasks', 'points_rewarded', 'TINYINT(1) DEFAULT 0')
 
         # 4. activity_log
         cursor.execute("""CREATE TABLE IF NOT EXISTS activity_log (
@@ -80,6 +110,7 @@ def init_db():
             is_roasted TINYINT(1) DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )""")
+        ensure_col('activity_log', 'is_roasted', 'TINYINT(1) DEFAULT 0')
 
         # 4b. chat_memory
         cursor.execute("""CREATE TABLE IF NOT EXISTS chat_memory (
@@ -112,18 +143,9 @@ def init_db():
         )""")
         
         conn.commit()
-        
-        # 7. Migration: Add is_roasted if it doesn't exist
-        try:
-            cursor.execute("ALTER TABLE activity_log ADD COLUMN is_roasted TINYINT(1) DEFAULT 0")
-            conn.commit()
-            logger.info("✅ Migration: Added 'is_roasted' to activity_log.")
-        except:
-            pass # Already exists
-            
-        logger.info("✨ Database V5.0 Butler Edition đã sẵn sàng.")
+        logger.info("✨ Khởi tạo và đồng bộ DB V6.0 thành công.")
     except Exception as e:
-        logger.error(f"❌ Lỗi khởi tạo MySQL V5.0: {e}")
+        logger.error(f"❌ Lỗi khởi tạo DB: {e}")
     finally:
         cursor.close()
         conn.close()

@@ -61,15 +61,25 @@ app.use('/api', require('./routes/general')); // Activities, Purchases, etc.
 
 // START
 async function startServer() {
-    try {
-        await db.initDb();
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`Matcha API Server v6.0 running on http://0.0.0.0:${PORT}`);
-            console.log(`Security: PIN Code required for /api access.`);
-        });
-    } catch (err) {
-        console.error("❌ Failed to start server:", err);
-        process.exit(1);
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY = 5000; // 5 seconds
+
+    for (let i = 1; i <= MAX_RETRIES; i++) {
+        try {
+            await db.initDb();
+            app.listen(PORT, '0.0.0.0', () => {
+                console.log(`Matcha API Server v6.0 running on http://0.0.0.0:${PORT}`);
+                console.log(`Security: PIN Code required for /api access.`);
+            });
+            return; // Success!
+        } catch (err) {
+            console.error(`❌ Attempt ${i}/${MAX_RETRIES}: Database not ready (${err.message}). Retrying in ${RETRY_DELAY/1000}s...`);
+            if (i === MAX_RETRIES) {
+                console.error("❌ Failed to start server after maximum retries.");
+                process.exit(1);
+            }
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        }
     }
 }
 
