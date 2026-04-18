@@ -24,6 +24,7 @@ USER_ID = int(os.getenv('DISCORD_USER_ID', 0))
 # ─── Command Files (Cogs) tự động load ───────────────────────────────────────
 COGS = [
     "commands.finance",
+    "commands.pet",
     "commands.tasks",
     "commands.management",
     "commands.chat_ai",
