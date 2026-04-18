@@ -1,21 +1,32 @@
 :root {
+  /* Light Mode Palette */
+  --matcha-bg: #f8fafc;
+  --matcha-text: #1e293b;
   --matcha-main: #3b82f6;
   --matcha-success: #10b981;
   --matcha-warning: #f59e0b;
   --matcha-danger: #ef4444;
   --matcha-dark: #0f172a;
-  --matcha-light: #f8fafc;
+  --matcha-light: #ffffff;
   --matcha-card: #ffffff;
   --matcha-border: rgba(226, 232, 240, 0.8);
+  --matcha-glass: rgba(255, 255, 255, 0.7);
 }
 
 .dark {
-  --matcha-light: #0f172a;
+  /* Dark Mode Palette */
+  --matcha-bg: #0f172a;
+  --matcha-text: #f1f5f9;
+  --matcha-main: #3b82f6;
   --matcha-card: #1e293b;
   --matcha-border: rgba(51, 65, 85, 0.8);
+  --matcha-glass: rgba(30, 41, 59, 0.7);
+  --matcha-light: #1e293b;
 }
 
 body {
+  background-color: var(--matcha-bg);
+  color: var(--matcha-text);
   font-family: 'Outfit', sans-serif;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;

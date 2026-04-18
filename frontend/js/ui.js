@@ -3,14 +3,20 @@
  */
 
 function setTheme(theme) {
-    if (theme === 'dark') {
+    const isDark = theme === 'dark';
+    if (isDark) {
         document.documentElement.classList.add('dark');
         localStorage.theme = 'dark';
-        updateToggleState(true);
     } else {
         document.documentElement.classList.remove('dark');
         localStorage.theme = 'light';
-        updateToggleState(false);
+    }
+    
+    updateToggleState(isDark);
+    
+    // Notify 3D Pet if it exists
+    if (typeof updatePetTheme === 'function') {
+        updatePetTheme(isDark);
     }
 }
 
