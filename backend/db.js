@@ -155,10 +155,26 @@ async function updateUserStats(pointsChange, expChange, reason) {
     }
 }
 
+async function logActivity(type, title, amount = 0, photoPath = null) {
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        await conn.query(
+            "INSERT INTO activity_log (type, title, amount, photo_path, is_roasted) VALUES (?, ?, ?, ?, 0)",
+            [type, title, amount, photoPath]
+        );
+    } catch (err) {
+        console.error('❌ Error logging activity:', err);
+    } finally {
+        if (conn) conn.release();
+    }
+}
+
 module.exports = {
     pool,
     initDb,
     updateUserStats,
+    logActivity,
     query: (sql, params) => pool.query(sql, params),
     execute: (sql, params) => pool.execute(sql, params)
 };

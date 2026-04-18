@@ -65,10 +65,7 @@ router.post('/purchases', upload.single('photo'), async (req, res) => {
         await db.query(updateFinanceSql, [currentMonth, amountNum, -amountNum, amountNum, amountNum]);
 
 
-        await db.query(
-            "INSERT INTO activity_log (type, title, amount, photo_path) VALUES ('expense', ?, ?, ?)",
-            [item_name, amount, photo_path]
-        );
+        await db.logActivity('expense', item_name, amount, photo_path);
         res.json({ success: true, id: result.insertId, photo_path });
     } catch (err) {
         res.status(500).json({ error: err.message });

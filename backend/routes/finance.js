@@ -63,7 +63,7 @@ router.post('/income', async (req, res) => {
             ON DUPLICATE KEY UPDATE income = income + ?, remaining = remaining + ?
         `;
         await db.query(sql, [currentMonth, amount, amount, amount, amount]);
-        await db.query("INSERT INTO activity_log (type, title, amount) VALUES ('income', ?, ?)", [title || 'Thu nhập mới', amount]);
+        await db.logActivity('income', title || 'Thu nhập mới (từ Web)', amount);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -81,7 +81,7 @@ router.post('/saving', async (req, res) => {
             ON DUPLICATE KEY UPDATE saving = saving + ?, remaining = remaining - ?
         `;
         await db.query(sql, [currentMonth, amount, -amount, amount, amount]);
-        await db.query("INSERT INTO activity_log (type, title, amount) VALUES ('saving', ?, ?)", [title || 'Tiết kiệm mới', amount]);
+        await db.logActivity('saving', title || 'Tiết kiệm mới (từ Web)', amount);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });

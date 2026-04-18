@@ -194,19 +194,19 @@ async def auto_roast_watchdog(bot, dm_channel):
             
             fin_info = f"Ví hiện tại: {fin['remaining']:,}đ" if fin and fin.get('remaining') else "Không rõ số dư"
 
-            prompt = f"""Tôi vừa thực hiện hoạt động: [{act['type']}] "{act['title']}" số tiền {act['amount']:,}đ.
+            prompt = f"""Tôi vừa thực hiện hoạt động: [{act['type']}] "{act['title']}" với số tiền {act['amount']:,}đ.
 
 [THÔNG TIN TÀI CHÍNH CỦA TÔI]
 - {fin_info}
 - Mục tiêu đang tích luỹ: {goals_text}
 
 [YÊU CẦU CHO MATCHA]
-Đánh giá khoản tiền {act['amount']:,}đ cho "{act['title']}" này là HỢP LÝ hay HOANG PHÍ dựa trên số dư và mục tiêu.
-- Nếu là HOANG PHÍ / VÔ BỔ: Chửi gắt, xéo xắt, khinh bỉ.
-- Nếu là HỢP LÝ / THIẾT YẾU: Khen ngợi ngắn gọn.
-- Nếu là Thu nhập/Lương: Vui vẻ, nhắc nhở giữ tiền.
+Đánh giá hoạt động này dựa trên loại [{act['type']}]:
+1. Nếu type là 'income' (THU NHẬP): Tuyệt đối KHÔNG ĐƯỢC CHỬI. Phải vui vẻ, chúc mừng vì có tiền vào túi, nhắc nhở giữ tiền cho các mục tiêu tích luỹ. (Kể cả tên nội dung có chữ 'mua' hay gì cũng phải hiểu đây là tiền vào).
+2. Nếu type là 'expense' (CHI TIÊU): Đánh giá xem "{act['title']}" là HỢP LÝ hay HOANG PHÍ dựa trên số dư. Nếu hoang phí thì mới được chửi gắt, xéo xắt.
+3. Nếu là task_done/task_missed: Khen hoặc mắng dựa trên tính kỷ luật.
 
-Trả lời cực ngắn (1-2 câu), xưng "tao/mày" và đúng chuẩn phong cách Matcha."""
+Trả lời cực ngắn (1-2 câu), xưng "tao/mày" và đúng phong cách Matcha."""
             
             # Sử dụng parameter system_prompt để tiêm tính cách
             system_p = "MÀY LÀ MATCHA, QUẢN GIA TÀI CHÍNH XÉO XẮT NHẤT HỆ MẶT TRỜI. CẤM XƯNG TÔI/BẠN."
