@@ -272,19 +272,19 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
             await self.expense_add.callback(self, interaction, amount_str, clean_title or "Ghi chú Chi tiêu")
 
     # ─── TOP LEVEL SHORTCUTS ────────────────────────────────────────────────
-    @app_commands.command(name="income", description="Thêm nhanh thu nhập")
+    @app_commands.command(name="i", description="Thêm nhanh thu nhập (VD: /i 10tr)")
     @app_commands.describe(amount="Số tiền (VD: 10tr, 50k)", description="Mô tả")
     async def shortcut_income(self, interaction: discord.Interaction, amount: str, description: str = "Thu nhập"):
         await interaction.response.defer()
         await self.income_add.callback(self, interaction, amount, description)
 
-    @app_commands.command(name="expense", description="Thêm nhanh chi tiêu")
+    @app_commands.command(name="e", description="Thêm nhanh chi tiêu (VD: /e 30k)")
     @app_commands.describe(amount="Số tiền (VD: 30k, 1.5tr)", description="Mô tả khoản chi")
     async def shortcut_expense(self, interaction: discord.Interaction, amount: str, description: str):
         await interaction.response.defer()
         await self.expense_add.callback(self, interaction, amount, description)
 
-    @app_commands.command(name="saving", description="Thêm nhanh tiết kiệm")
+    @app_commands.command(name="s", description="Thêm nhanh tiết kiệm (VD: /s 2tr)")
     @app_commands.describe(amount="Số tiền (VD: 2tr)", description="Ghi chú")
     async def shortcut_saving(self, interaction: discord.Interaction, amount: str, description: str = "Tiết kiệm"):
         await interaction.response.defer()
