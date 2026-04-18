@@ -295,5 +295,7 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         await self.finance.callback(self, interaction)
 
 async def setup(bot):
-    await bot.add_cog(FinanceCog(bot))
-    logger.info("[LOADED] cogs.finance ✅")
+    cog = FinanceCog(bot)
+    await bot.add_cog(cog)
+    cmds = [c.name for c in cog.get_app_commands()]
+    logging.getLogger('MatchaBot').info(f"[LOADED] cogs.finance ✅ Lệnh: {', '.join(cmds)}")

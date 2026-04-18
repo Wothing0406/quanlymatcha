@@ -84,5 +84,7 @@ class PetCog(commands.Cog, name="🌿 Thú ảo Matcha"):
         await interaction.followup.send(embed=embed)
 
 async def setup(bot):
-    await bot.add_cog(PetCog(bot))
-    logger.info("[LOADED] cogs.pet ✅")
+    cog = PetCog(bot)
+    await bot.add_cog(cog)
+    cmds = [c.name for c in cog.get_app_commands()]
+    logging.getLogger('MatchaBot').info(f"[LOADED] cogs.pet ✅ Lệnh: {', '.join(cmds)}")

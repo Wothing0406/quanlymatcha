@@ -118,6 +118,24 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
         await interaction.followup.send(embed=embed)
 
 
+    @app_commands.command(name="sync", description="Cưỡng ép đồng bộ lại tất cả lệnh (Chỉ Admin)")
+    async def sync_commands(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        try:
+            # Sync to the current guild immediately
+            self.bot.tree.copy_global_to(guild=interaction.guild)
+            synced = await self.bot.tree.sync(guild=interaction.guild)
+            
+            # Global sync (takes longer)
+            await self.bot.tree.sync()
+            
+            await interaction.followup.send(f"✅ Đã đồng bộ thành công {len(synced)} lệnh cho Server này!", ephemeral=True)
+            logger.info(f"🔄 Manual Sync triggered by {interaction.user.name}")
+        except Exception as e:
+            await interaction.followup.send(f"❌ Lỗi đồng bộ: {e}", ephemeral=True)
+
 async def setup(bot):
-    await bot.add_cog(ManagementCog(bot))
-    logging.getLogger('MatchaBot').info("[LOADED] cogs.management ✅")
+    cog = ManagementCog(bot)
+    await bot.add_cog(cog)
+    cmds = [c.name for c in cog.get_app_commands()]
+    logging.getLogger('MatchaBot').info(f"[LOADED] cogs.management ✅ Lệnh: {', '.join(cmds)}")

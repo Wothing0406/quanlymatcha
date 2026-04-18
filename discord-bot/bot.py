@@ -52,12 +52,21 @@ class MatchaBot(commands.Bot):
             logger.error(f"❌ Không thể khởi tạo Database: {e}")
             # Vẫn cho bot chạy tiếp nhưng các lệnh DB sẽ lỗi
 
-        # 2. Load tất cả Cogs (file lệnh)
+        # 2. Load tất cả Cogs (file lệnh) với Log chi tiết
+        logger.info("📂 Đang nạp các module lệnh...")
+        loaded_count = 0
         for cog in COGS:
             try:
                 await self.load_extension(cog)
+                loaded_count += 1
+                logger.info(f"   [✅] {cog} - Sẵn sàng")
             except Exception as e:
-                logger.error(f"[FAILED] load {cog}: {e}")
+                logger.error(f"   [❌] Lỗi nạp {cog}: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
+
+        logger.info(f"✨ Tổng cộng đã nạp {loaded_count}/{len(COGS)} module.")
+        logger.info("=" * 50)
 
         logger.info("=" * 50)
         logger.info("✅ Đã load xong tất cả command files.")
