@@ -37,13 +37,13 @@ function renderAgendaTasks(tasks) {
         let statusBadge = '<span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-400 px-3 py-1 rounded-full uppercase tracking-widest font-black">Chưa đến</span>';
         if (done) statusBadge = '<span class="text-[10px] bg-green-100 text-green-600 px-3 py-1 rounded-full uppercase tracking-widest font-black">Hoàn thành</span>';
         if (postponed) statusBadge = '<span class="text-[10px] bg-orange-100 text-orange-500 px-3 py-1 rounded-full uppercase tracking-widest font-black">Đã dời lịch</span>';
-        if (active) statusBadge = '<span class="text-[10px] bg-blue-100 text-blue-600 px-3 py-1 rounded-full uppercase tracking-widest font-black animate-pulse">Đang diễn ra</span>';
+        if (active) statusBadge = '<span class="text-[10px] bg-[var(--matcha-main-glow)] text-[var(--matcha-main)] px-3 py-1 rounded-full uppercase tracking-widest font-black animate-pulse">Đang diễn ra</span>';
 
         return `
             <div data-aos="fade-up" data-aos-delay="${idx * 100}" 
-                 class="glass-card bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-sm border ${active ? 'border-blue-500/50 shadow-xl' : 'border-gray-100 dark:border-gray-700'} relative overflow-hidden group transition-all hover:scale-[1.02]">
+                 class="glass-card rounded-[2.5rem] p-8 shadow-sm ${active ? 'ring-2 ring-[var(--matcha-main)]/50 shadow-xl' : ''} relative overflow-hidden group transition-all hover:scale-[1.02]">
                 <div class="flex justify-between items-start mb-6">
-                    <div class="w-14 h-14 rounded-2xl ${active ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-blue-500'} flex items-center justify-center text-xl shadow-lg">
+                    <div class="w-14 h-14 rounded-2xl ${active ? 'bg-[var(--matcha-main)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-[var(--matcha-main)]'} flex items-center justify-center text-xl shadow-lg">
                         <i class="fas ${done ? 'fa-check-circle' : 'fa-calendar-check'}"></i>
                     </div>
                     ${statusBadge}
@@ -56,7 +56,7 @@ function renderAgendaTasks(tasks) {
 
                 <div class="grid grid-cols-2 gap-3 mt-auto">
                     ${!done ? `
-                        <button onclick="openVerifyModal(${t.id}, '${t.task_name}', '${t.status}')" class="col-span-2 px-6 py-4 bg-blue-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
+                        <button onclick="openVerifyModal(${t.id}, '${t.task_name}', '${t.status}')" class="col-span-2 px-6 py-4 bg-[var(--matcha-main)] text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--matcha-main-glow)]">
                             <i class="fas fa-camera"></i> ${t.status === 'ongoing' ? 'Chụp ảnh HOÀN THÀNH' : 'Chụp ảnh BẮT ĐẦU'}
                         </button>
                         <button onclick="openSkipModal(${t.id})" class="col-span-2 px-6 py-3 bg-gray-50 dark:bg-gray-700/50 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-orange-500 transition-all">Báo bận / Dời lịch</button> 
@@ -168,9 +168,9 @@ window.loadScheduleTasks = async function() {
         }
 
         listEl.innerHTML = tasks.map(t => `
-            <div data-aos="fade-up" class="glass-card bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm flex items-center justify-between group border border-gray-100 dark:border-gray-700 hover:border-blue-500/50 transition-all">
+            <div data-aos="fade-up" class="glass-card rounded-2xl p-4 shadow-sm flex items-center justify-between group transition-all">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-[var(--matcha-main-glow)] text-[var(--matcha-main)] rounded-xl flex items-center justify-center">
                         <i class="fas fa-calendar-check text-xl"></i>
                     </div>
                     <div>
@@ -181,7 +181,7 @@ window.loadScheduleTasks = async function() {
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="editTask(${t.id}, '${t.task_name}', '${t.start_time}', '${t.end_time}')" class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-400 flex items-center justify-center hover:bg-blue-50 hover:text-blue-500 transition-all">
+                    <button onclick="editTask(${t.id}, '${t.task_name}', '${t.start_time}', '${t.end_time}')" class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-400 flex items-center justify-center hover:bg-[var(--matcha-main-glow)] hover:text-[var(--matcha-main)] transition-all">
                         <i class="fas fa-edit text-sm"></i>
                     </button>
                     <button onclick="deleteTask(${t.id})" class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-400 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all">

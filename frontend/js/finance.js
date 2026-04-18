@@ -79,12 +79,12 @@ async function loadGoalsList() {
                     <p class="text-xs text-gray-500 font-medium mb-6">Mục tiêu: <span class="font-bold text-gray-900 dark:text-white">${formatVNĐ(g.target_amount)}</span></p>
                     
                     <div class="w-full bg-gray-100 dark:bg-gray-700 h-3 rounded-full overflow-hidden mb-3">
-                        <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-full rounded-full transition-all duration-1000 relative" style="width: ${percent}%">
+                        <div class="bg-gradient-to-r from-[var(--matcha-main)] to-[var(--matcha-text-muted)] h-full rounded-full transition-all duration-1000 relative" style="width: ${percent}%">
                             <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
                         </div>
                     </div>
                     <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                        <span class="text-blue-500">Đã gom: ${formatVNĐ(g.current_saved)}</span>
+                        <span class="text-[var(--matcha-main)]">Đã gom: ${formatVNĐ(g.current_saved)}</span>
                         <span class="text-gray-400">Còn: ${formatVNĐ(remaining > 0 ? remaining : 0)}</span>
                     </div>
                     <button onclick="deleteGoal(${g.id})" class="mt-6 w-full py-2 bg-red-50 dark:bg-red-900/10 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Xóa / Hủy Bỏ</button>
@@ -111,8 +111,8 @@ function createActivityItemHTML(item, isCompact = false) {
     const amount = item.amount || 0;
     const timeDisplay = formatRelativeTime(new Date(item.created_at));
     
-    let colorClass = 'text-blue-500';
-    let bgClass = 'bg-blue-50 dark:bg-blue-900/20';
+    let colorClass = 'text-[var(--matcha-main)]';
+    let bgClass = 'bg-[var(--matcha-main-glow)]';
     let iconClass = 'fa-shopping-cart';
     let sign = '-';
     let label = 'Hoạt động';
@@ -125,8 +125,8 @@ function createActivityItemHTML(item, isCompact = false) {
         iconClass = 'fa-piggy-bank'; sign = ''; label = 'Tiết kiệm';
     } else if (isTask) {
         const isStarted = item.type === 'task_started';
-        colorClass = isStarted ? 'text-blue-500' : 'text-purple-500';
-        bgClass = isStarted ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-purple-50 dark:bg-purple-900/20';
+        colorClass = isStarted ? 'text-[var(--matcha-main)]' : 'text-purple-500';
+        bgClass = isStarted ? 'bg-[var(--matcha-main-glow)]' : 'bg-purple-50 dark:bg-purple-900/20';
         iconClass = isStarted ? 'fa-hourglass-start' : (item.type === 'task_done' ? 'fa-check-double' : 'fa-check-circle');
         sign = ''; label = isStarted ? 'Bắt đầu việc' : 'Hoàn thành việc';
     }

@@ -96,7 +96,7 @@ function updateDashboardStats(stats) {
         ? "bg-red-500"
         : spentRatio > 50
           ? "bg-orange-500"
-          : "bg-blue-500";
+          : "bg-[var(--matcha-main)]";
     healthContainer.innerHTML = `
             <div class="flex justify-between items-end mb-4">
                 <div>
@@ -124,7 +124,7 @@ function updateDashboardStats(stats) {
         datasets: [
           {
             data: spentData,
-            backgroundColor: ["#10b981", "#f43f5e", "#3b82f6"],
+            backgroundColor: ["#8ba86e", "#bc4749", "#d4a373"],
             borderWidth: 0,
             hoverOffset: 4,
           },
@@ -171,11 +171,11 @@ function updateDashboardStats(stats) {
               tasksPending,
             ],
             backgroundColor: [
-              "#10b981",
-              "#f43f5e",
-              "#f59e0b",
-              "#3b82f6",
-              "#9ca3af",
+              "#8ba86e",
+              "#bc4749",
+              "#d4a373",
+              "#a5c782",
+              "#e8e2d2",
             ],
             borderRadius: 8,
           },
@@ -291,7 +291,7 @@ function createLocketCardHTML(item) {
                     <h4 class="text-white font-bold text-lg leading-tight mb-2">${item.title}</h4>
                     <div class="flex items-center gap-2 text-white/50 text-[10px] font-bold">
                         <i class="far fa-clock"></i> ${timeDisplay}
-                        ${item.amount ? `<span class="ml-auto text-blue-400 font-black">${formatVNĐ(item.amount)}</span>` : ""}
+                        ${item.amount ? `<span class="ml-auto text-[var(--matcha-main)] font-black">${formatVNĐ(item.amount)}</span>` : ""}
                     </div>
                 </div>
             </div>

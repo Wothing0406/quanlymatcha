@@ -230,19 +230,19 @@ function updatePetTheme(isDark) {
     if (!scene || !ambientLight || !hemiLight || !dirLight) return;
     
     if (isDark) {
-        // Cooler, slightly dimmer lighting for dark mode
+        // Cooler, slightly dimmer lighting for dark mode - Matcha Green tint
         ambientLight.intensity = 0.4;
         hemiLight.intensity = 0.3;
-        hemiLight.groundColor.setHex(0x1e293b);
+        hemiLight.groundColor.setHex(0x1a2416);
         dirLight.intensity = 0.6;
-        dirLight.color.setHex(0x93c5fd); // Slight blue tint
+        dirLight.color.setHex(0xa5c782); // Matcha green tint
     } else {
-        // Warmer, brighter lighting for light mode
+        // Warmer, brighter lighting for light mode - Creamy tint
         ambientLight.intensity = 0.5;
         hemiLight.intensity = 0.6;
-        hemiLight.groundColor.setHex(0x444444);
+        hemiLight.groundColor.setHex(0x8ba86e);
         dirLight.intensity = 0.4;
-        dirLight.color.setHex(0xffffff);
+        dirLight.color.setHex(0xfffdfa); // Creamy white
     }
 }
 

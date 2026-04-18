@@ -35,14 +35,14 @@ function updateToggleState(isDark) {
     if (!btnLight || !btnDark) return;
 
     if (isDark) {
-        btnDark.classList.add('bg-white', 'shadow-sm', 'text-blue-500');
+        btnDark.classList.add('bg-white', 'shadow-sm', 'text-[var(--matcha-main)]');
         btnDark.classList.remove('text-gray-400');
         btnLight.classList.remove('bg-white', 'shadow-sm', 'text-yellow-500');
         btnLight.classList.add('text-gray-400');
     } else {
         btnLight.classList.add('bg-white', 'shadow-sm', 'text-yellow-500');
         btnLight.classList.remove('text-gray-400');
-        btnDark.classList.remove('bg-white', 'shadow-sm', 'text-blue-500');
+        btnDark.classList.remove('bg-white', 'shadow-sm', 'text-[var(--matcha-main)]');
         btnDark.classList.add('text-gray-400');
     }
 }
@@ -151,16 +151,7 @@ function parseSmartAmount(val) {
 }
 
 function injectPremiumStyles() {
-    if (document.getElementById('matcha-premium-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'matcha-premium-styles';
-    style.innerHTML = `
-        .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); }
-        .dark .glass-card { background: rgba(31,41,55,0.6); border: 1px solid rgba(75,85,99,0.3); }
-        .hover-lift { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .hover-lift:hover { transform: translateY(-5px); }
-    `;
-    document.head.appendChild(style);
+    // Redundant - Styles are now managed in style.css
 }
 
 // Global openImage for modals

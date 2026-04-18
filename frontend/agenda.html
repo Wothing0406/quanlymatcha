@@ -33,20 +33,20 @@
     </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-all">
+<body class="min-h-screen transition-all">
 
     <!-- Sidebar -->
     <aside id="sidebar"
         class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
         <div class="h-16 flex items-center justify-center border-b border-gray-800">
-            <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
+            <span class="text-xl font-bold text-[var(--matcha-main)] italic">Matcha Manager</span>
         </div>
         <nav class="mt-6 px-4 space-y-2">
             <a href="dashboard.html"
                 class="sidebar-item flex items-center p-3 rounded-2xl hover:bg-gray-700 transition-all">
                 <i class="fas fa-th-large w-6"></i> <span class="text-sm font-bold">Bảng điều khiển</span>
             </a>
-            <a href="agenda.html" class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all">
+            <a href="agenda.html" class="sidebar-item flex items-center p-3 rounded-2xl bg-[var(--matcha-main)] transition-all">
                 <i class="fas fa-tasks w-6"></i> <span class="text-sm font-bold">Công việc hôm nay</span>
             </a>
             <a href="history.html"
@@ -84,7 +84,7 @@
                 </button>
                 <div class="hidden md:block">
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Kế hoạch ngày hôm nay</p>
-                    <div id="real-time-clock" class="text-sm font-bold text-blue-600"></div>
+                    <div id="real-time-clock" class="text-sm font-bold text-[var(--matcha-main)]"></div>
                 </div>
             </div>
 
@@ -108,7 +108,7 @@
                         thưởng.</p>
                 </div>
                 <div
-                    class="flex items-center gap-2 bg-blue-500/10 text-blue-600 px-4 py-2 rounded-2xl border border-blue-500/20">
+                    class="flex items-center gap-2 bg-[var(--matcha-main-glow)] text-[var(--matcha-main)] px-4 py-2 rounded-2xl border border-[var(--matcha-border)]">
                     <i class="fas fa-calendar-day"></i>
                     <span id="current-date-vi" class="text-sm font-bold">Thứ ..., ngày ...</span>
                 </div>
@@ -129,13 +129,13 @@
         <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 relative transform scale-95 transition-transform duration-300">
             <button onclick="document.getElementById('report-modal').classList.add('hidden', 'opacity-0')" class="absolute top-6 right-6 w-10 h-10 bg-gray-100 dark:bg-gray-700 text-gray-500 rounded-full hover:rotate-90 transition-transform"><i class="fas fa-times"></i></button>
             <h2 class="text-2xl font-black mb-2">📸 Xác nhận công việc</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">Tên việc: <span id="report-task-name" class="font-bold text-blue-500">...</span></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">Tên việc: <span id="report-task-name" class="font-bold text-[var(--matcha-main)]">...</span></p>
             
             <form id="report-form" onsubmit="submitReport(event)">
                 <input type="hidden" id="report-task-id">
                 <input type="hidden" id="report-task-status-hidden">
                 
-                <div class="mb-6 relative group cursor-pointer border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-3xl p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-500 transition-all">
+                <div class="mb-6 relative group cursor-pointer border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-3xl p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[var(--matcha-main)] transition-all">
                     <input type="file" id="report-photo" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewImage(this, 'report-image-preview')">
                     <div id="report-image-preview" class="w-full aspect-video bg-gray-100 dark:bg-gray-700 rounded-2xl flex flex-col items-center justify-center text-gray-400 overflow-hidden relative">
                         <i class="fas fa-camera text-4xl mb-3"></i>
@@ -143,7 +143,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-500 text-white rounded-2xl py-4 font-black uppercase tracking-widest hover:bg-blue-600 hover:scale-[1.02] shadow-xl shadow-blue-500/30 transition-all flex justify-center items-center gap-2">
+                <button type="submit" class="w-full bg-[var(--matcha-main)] text-white rounded-2xl py-4 font-black uppercase tracking-widest hover:brightness-110 hover:scale-[1.02] shadow-xl shadow-[var(--matcha-main-glow)] transition-all flex justify-center items-center gap-2">
                     <i class="fas fa-paper-plane"></i> Gửi Báo Cáo
                 </button>
             </form>

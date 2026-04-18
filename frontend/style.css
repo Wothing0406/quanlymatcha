@@ -1,48 +1,57 @@
 :root {
-  /* Light Mode Palette */
-  --matcha-bg: #f8fafc;
-  --matcha-text: #1e293b;
-  --matcha-main: #3b82f6;
-  --matcha-success: #10b981;
-  --matcha-warning: #f59e0b;
-  --matcha-danger: #ef4444;
-  --matcha-dark: #0f172a;
-  --matcha-light: #ffffff;
-  --matcha-card: #ffffff;
-  --matcha-border: rgba(226, 232, 240, 0.8);
-  --matcha-glass: rgba(255, 255, 255, 0.7);
+  /* True Matcha Latte - Light Mode */
+  --matcha-bg: #f9f7f2;
+  --matcha-bg-alt: #f3efe6;
+  --matcha-bg-gradient: radial-gradient(circle at top left, #fdfbfa 0%, #f9f7f2 50%, #eff3e6 100%);
+  --matcha-text: #2d241e; /* Deep Coffee Brown */
+  --matcha-text-muted: #7b6652;
+  --matcha-main: #8ba86e; /* Soft Matcha Green */
+  --matcha-main-glow: rgba(139, 168, 110, 0.2);
+  --matcha-success: #6b8e23;
+  --matcha-warning: #d4a373;
+  --matcha-danger: #bc4749;
+  --matcha-card: rgba(255, 255, 255, 0.9);
+  --matcha-border: rgba(139, 168, 110, 0.15);
+  --matcha-glass: rgba(255, 255, 255, 0.65);
+  --matcha-glass-border: rgba(255, 255, 255, 0.5);
+  --matcha-shadow: 0 15px 35px -5px rgba(45, 36, 30, 0.05);
+  --matcha-glow-shadow: 0 0 40px rgba(139, 168, 110, 0.1);
 }
 
 .dark {
-  /* Dark Mode Palette */
-  --matcha-bg: #0f172a;
-  --matcha-text: #f1f5f9;
-  --matcha-main: #3b82f6;
-  --matcha-card: #1e293b;
-  --matcha-border: rgba(51, 65, 85, 0.8);
-  --matcha-glass: rgba(30, 41, 59, 0.7);
-  --matcha-light: #1e293b;
+  /* Ceremonial Matcha - Dark Mode */
+  --matcha-bg: #0d110c;
+  --matcha-bg-alt: #161d14;
+  --matcha-bg-gradient: radial-gradient(circle at top left, #1a2416 0%, #0d110c 40%, #050705 100%);
+  --matcha-text: #f2efe8;
+  --matcha-text-muted: #a7c080;
+  --matcha-main: #a5c782; /* Vivid Matcha */
+  --matcha-main-glow: rgba(165, 199, 130, 0.3);
+  --matcha-card: rgba(26, 36, 22, 0.85);
+  --matcha-border: rgba(165, 199, 130, 0.08);
+  --matcha-glass: rgba(13, 17, 12, 0.7);
+  --matcha-glass-border: rgba(255, 255, 255, 0.05);
+  --matcha-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7);
+  --matcha-glow-shadow: 0 0 50px rgba(165, 199, 130, 0.15);
 }
 
 body {
-  background-color: var(--matcha-bg);
+  background: var(--matcha-bg-gradient);
+  background-attachment: fixed;
   color: var(--matcha-text);
   font-family: 'Outfit', sans-serif;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 /* Glassmorphism */
 .glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.dark .glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--matcha-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--matcha-glass-border);
+  box-shadow: var(--matcha-shadow), var(--matcha-glow-shadow);
 }
 
 /* AOS-style Micro-animations */

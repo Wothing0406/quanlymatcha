@@ -28,23 +28,23 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            border: 2px solid #3b82f6;
+            border: 2px solid var(--matcha-main);
             transition: all 0.2s ease;
         }
         .pin-dot.filled {
-            background: #3b82f6;
+            background: var(--matcha-main);
             transform: scale(1.2);
         }
     </style>
 </head>
-<body class="bg-[#f8fafc] dark:bg-gray-900 min-h-screen flex items-center justify-center p-6 overflow-hidden">
+<body class="min-h-screen flex items-center justify-center p-6 overflow-hidden">
     <!-- Abstract Background Blobs -->
-    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/20 blur-[120px] rounded-full animate-pulse"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/20 blur-[120px] rounded-full animate-pulse" style="animation-delay: 1s"></div>
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--matcha-main)] opacity-10 blur-[120px] rounded-full animate-pulse"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[var(--matcha-main)] opacity-10 blur-[120px] rounded-full animate-pulse" style="animation-delay: 1s"></div>
 
-    <div class="w-full max-w-sm glass rounded-[3rem] p-10 shadow-2xl relative z-10 text-center space-y-8 animate-in fade-in zoom-in duration-700">
+    <div class="glass-card w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl relative z-10 transition-all animate-in fade-in zoom-in duration-700">
         <div class="space-y-4">
-            <div class="w-20 h-20 bg-blue-500 rounded-3xl mx-auto flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-500/30">
+            <div class="w-20 h-20 bg-[var(--matcha-main)] rounded-3xl mx-auto flex items-center justify-center text-white text-3xl shadow-xl shadow-[var(--matcha-main-glow)]">
                 <i class="fas fa-leaf"></i>
             </div>
             <h1 class="text-3xl font-black tracking-tight dark:text-white">Matcha Portal</h1>
@@ -55,17 +55,17 @@
         <form id="login-form" autocomplete="off" class="space-y-6" onsubmit="submitPin(event)">
             <div class="relative">
                 <input type="password" id="password-input" 
-                    class="w-full bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl px-6 py-4 text-center text-xl font-bold tracking-widest text-gray-800 dark:text-white focus:outline-none focus:ring-4 focus:ring-blue-500/30 transition-all placeholder-gray-400"
+                    class="w-full bg-[var(--matcha-bg-alt)] dark:bg-gray-800/50 border border-[var(--matcha-border)] rounded-2xl px-6 py-4 text-center text-xl font-bold tracking-widest text-[var(--matcha-text)] dark:text-white focus:outline-none focus:ring-4 focus:ring-[var(--matcha-main)]/30 transition-all placeholder-gray-400"
                     placeholder="Nhập mật khẩu..." required>
                 <div class="absolute inset-y-0 right-4 flex items-center">
-                    <button type="button" onclick="togglePassword()" class="text-gray-400 hover:text-blue-500 transition-colors">
+                    <button type="button" onclick="togglePassword()" class="text-gray-400 hover:text-[var(--matcha-main)] transition-colors">
                         <i id="eye-icon" class="fas fa-eye-slash"></i>
                     </button>
                 </div>
             </div>
             
             <button type="submit" 
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-2xl py-4 font-black uppercase tracking-widest shadow-xl shadow-blue-500/30 hover:scale-[1.02] active:scale-95 transition-all">
+                class="w-full bg-[var(--matcha-main)] hover:brightness-110 text-white rounded-2xl py-4 font-black uppercase tracking-widest shadow-xl shadow-[var(--matcha-main-glow)] hover:scale-[1.02] active:scale-95 transition-all">
                 Mở Khoá <i class="fas fa-unlock ml-2"></i>
             </button>
         </form>
