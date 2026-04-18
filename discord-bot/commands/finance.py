@@ -59,12 +59,13 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     # ─── /expense ────────────────────────────────────────────────────────────
     expense_group = app_commands.Group(name="expense", description="Quản lý chi tiêu")
 
-    @expense_group.command(name="add", description="Thêm chi tiêu mới (Ví dụ: 30k, 1.5tr)")
-    @app_commands.describe(amount="Số tiền (VND, hỗ trợ k, tr, m)", description="Mô tả khoản chi")
+    @expense_group.command(name="add", description="Ghi nhận chi tiêu mới")
+    @app_commands.describe(amount="Số tiền (Ví dụ: 30k, 1.5tr)", description="Khoản chi cho việc gì?")
     async def expense_add(self, interaction: discord.Interaction, amount: str, description: str):
+        await interaction.response.defer()
         parsed_amount = db.parse_amount(amount)
         if parsed_amount <= 0:
-            return await interaction.response.send_message("❌ Số tiền không hợp lệ! Vui lòng nhập kiểu `30000`, `30k` hoặc `1.5tr`.", ephemeral=True)
+            return await interaction.followup.send("❌ Số tiền không hợp lệ! Vui lòng nhập kiểu `30000`, `30k` hoặc `1.5tr`.", ephemeral=True)
 
         month = get_current_month()
         db.execute(
@@ -91,7 +92,7 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
             description=f"**{description}**: `-{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(remaining)}`",
             color=discord.Color.orange()
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     # ─── /income ────────────────────────────────────────────────────────────
     income_group = app_commands.Group(name="income", description="Quản lý thu nhập")
@@ -99,9 +100,10 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     @income_group.command(name="add", description="Thêm thu nhập mới (Ví dụ: 10tr)")
     @app_commands.describe(amount="Số tiền thu nhập (VND, hỗ trợ k, tr, m)", description="Nguồn thu nhập")
     async def income_add(self, interaction: discord.Interaction, amount: str, description: str = "Thu nhập mới"):
+        await interaction.response.defer()
         parsed_amount = db.parse_amount(amount)
         if parsed_amount <= 0:
-            return await interaction.response.send_message("❌ Số tiền không hợp lệ!", ephemeral=True)
+            return await interaction.followup.send("❌ Số tiền không hợp lệ!", ephemeral=True)
 
         month = get_current_month()
         db.execute(
@@ -130,7 +132,7 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         if res and res.get('leveled_up'):
             embed.description += f"\n\n🎊 **LEVEL UP!** Bạn đã thăng cấp lên **Level {res['level']}**!"
             
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     # ─── /saving ────────────────────────────────────────────────────────────
     saving_group = app_commands.Group(name="saving", description="Quản lý tiết kiệm")
@@ -138,9 +140,10 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     @saving_group.command(name="add", description="Tiết kiệm tháng này (Ví dụ: 2tr)")
     @app_commands.describe(amount="Số tiền (VND, hỗ trợ k, tr, m)", description="Ghi chú tiết kiệm")
     async def saving_add(self, interaction: discord.Interaction, amount: str, description: str = "Tiết kiệm tháng"):
+        await interaction.response.defer()
         parsed_amount = db.parse_amount(amount)
         if parsed_amount <= 0:
-            return await interaction.response.send_message("❌ Số tiền không hợp lệ!", ephemeral=True)
+            return await interaction.followup.send("❌ Số tiền không hợp lệ!", ephemeral=True)
 
         month = get_current_month()
         db.execute(
@@ -169,7 +172,7 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         if res and res.get('leveled_up'):
             embed.description += f"\n\n🎊 **LEVEL UP!** Bạn đã thăng cấp lên **Level {res['level']}**!"
 
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     # ─── /goals ────────────────────────────────────────────────────────────
     @app_commands.command(name="goals", description="Xem tiến độ các mục tiêu tiết kiệm")

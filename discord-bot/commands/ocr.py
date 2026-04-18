@@ -123,9 +123,13 @@ class ReceiptConfirmView(discord.ui.View):
             db.log_activity('expense', f"Quét bill: {self.item}", amount=self.amount, photo_path=local_path)
             
             # 3. Add Gamification Points
-            db.add_points(10, 30, f"Nhập chi tiêu từ hóa đơn: {self.item}")
+            res = db.add_points(10, 30, f"Nhập chi tiêu từ hóa đơn: {self.item}")
             
-            await interaction.response.edit_message(content=f"✅ Đã ghi sổ chi tiêu: **{self.item} - {self.amount:,} VNĐ**. Bạn được cộng **10 điểm** Matcha! 🍵", embed=None, view=None)
+            msg = f"✅ Đã ghi sổ chi tiêu: **{self.item} - {self.amount:,} VNĐ**. Bạn được cộng **10 điểm** Matcha! 🍵"
+            if res and res.get('leveled_up'):
+                msg += f"\n🎊 **LEVEL UP!** Bạn đã thăng cấp lên **Level {res['level']}**!"
+
+            await interaction.response.edit_message(content=msg, embed=None, view=None)
         except Exception as e:
             logger.error(f"Lỗi lưu OCR: {e}")
             await interaction.response.send_message(f"❌ Lỗi khi lưu: {e}", ephemeral=True)

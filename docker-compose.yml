@@ -13,14 +13,10 @@ services:
       TZ: Asia/Ho_Chi_Minh
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      start_period: 30s
     volumes:
       - ./mysql_data:/var/lib/mysql
 
