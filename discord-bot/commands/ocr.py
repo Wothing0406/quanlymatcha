@@ -123,7 +123,7 @@ class ReceiptConfirmView(discord.ui.View):
             db.log_activity('expense', f"Quét bill: {self.item}", amount=self.amount, photo_path=local_path)
             
             # 3. Add Gamification Points
-            db.add_points(10, f"Nhập chi tiêu từ hóa đơn: {self.item}")
+            db.add_points(10, 30, f"Nhập chi tiêu từ hóa đơn: {self.item}")
             
             await interaction.response.edit_message(content=f"✅ Đã ghi sổ chi tiêu: **{self.item} - {self.amount:,} VNĐ**. Bạn được cộng **10 điểm** Matcha! 🍵", embed=None, view=None)
         except Exception as e:

@@ -120,13 +120,16 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         logger.info(f"💵 Thu nhập mới: +{vnd(parsed_amount)}")
         
         # --- V5.0 Gamification ---
-        db.add_points(10, f"Ghi nhận thu nhập: {description}")
+        res = db.add_points(10, 20, f"Ghi nhận thu nhập: {description}")
         
         embed = discord.Embed(
             title="💵 Đã cộng thu nhập",
             description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`\n\n✨ +10đ Matcha!",
             color=discord.Color.green()
         )
+        if res and res.get('leveled_up'):
+            embed.description += f"\n\n🎊 **LEVEL UP!** Bạn đã thăng cấp lên **Level {res['level']}**!"
+            
         await interaction.response.send_message(embed=embed)
 
     # ─── /saving ────────────────────────────────────────────────────────────
@@ -156,13 +159,16 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         logger.info(f"🏦 Tiết kiệm mới: +{vnd(parsed_amount)}")
         
         # --- V5.0 Gamification ---
-        db.add_points(30, f"Tiết kiệm: {description}")
+        res = db.add_points(30, 50, f"Tiết kiệm: {description}")
         
         embed = discord.Embed(
             title="🏦 Đã cộng tiết kiệm",
             description=f"**{description}**: `+{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(row.get('remaining', 0))}`\n\n🏆 +30đ Matcha (Chiến thần tích lũy!)",
             color=discord.Color.teal()
         )
+        if res and res.get('leveled_up'):
+            embed.description += f"\n\n🎊 **LEVEL UP!** Bạn đã thăng cấp lên **Level {res['level']}**!"
+
         await interaction.response.send_message(embed=embed)
 
     # ─── /goals ────────────────────────────────────────────────────────────
@@ -268,16 +274,19 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     @app_commands.command(name="income", description="Thêm nhanh thu nhập")
     @app_commands.describe(amount="Số tiền (VD: 10tr, 50k)", description="Mô tả")
     async def shortcut_income(self, interaction: discord.Interaction, amount: str, description: str = "Thu nhập"):
+        await interaction.response.defer()
         await self.income_add.callback(self, interaction, amount, description)
 
     @app_commands.command(name="expense", description="Thêm nhanh chi tiêu")
     @app_commands.describe(amount="Số tiền (VD: 30k, 1.5tr)", description="Mô tả khoản chi")
     async def shortcut_expense(self, interaction: discord.Interaction, amount: str, description: str):
+        await interaction.response.defer()
         await self.expense_add.callback(self, interaction, amount, description)
 
     @app_commands.command(name="saving", description="Thêm nhanh tiết kiệm")
     @app_commands.describe(amount="Số tiền (VD: 2tr)", description="Ghi chú")
     async def shortcut_saving(self, interaction: discord.Interaction, amount: str, description: str = "Tiết kiệm"):
+        await interaction.response.defer()
         await self.saving_add.callback(self, interaction, amount, description)
 
     @app_commands.command(name="wallet", description="Xem ví tiền và điểm Matcha")

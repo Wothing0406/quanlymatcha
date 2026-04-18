@@ -5,6 +5,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 import scheduler
+import database as db
 
 # Load .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../.env'))
@@ -39,10 +40,18 @@ class MatchaBot(commands.Bot):
 
     async def setup_hook(self):
         logger.info("=" * 50)
-        logger.info("🌿 Matcha Bot v4.0 - Đang khởi động...")
+        logger.info("🌿 Matcha Bot v5.0 - Đang khởi động...")
         logger.info("=" * 50)
 
-        # Load tất cả Cogs (file lệnh)
+        # 1. Khởi động Database trước (đã có retry logic)
+        try:
+            await asyncio.to_thread(db.init_db)
+            logger.info("✅ Database đã sẵn sàng.")
+        except Exception as e:
+            logger.error(f"❌ Không thể khởi tạo Database: {e}")
+            # Vẫn cho bot chạy tiếp nhưng các lệnh DB sẽ lỗi
+
+        # 2. Load tất cả Cogs (file lệnh)
         for cog in COGS:
             try:
                 await self.load_extension(cog)
@@ -76,10 +85,21 @@ class MatchaBot(commands.Bot):
         self.tree.interaction_check = owner_only_check
 
         if not self.synced:
-            logger.info("⏳ Đang đồng bộ Slash Commands toàn cầu (có thể mất 1-5 phút)...")
+            logger.info("⏳ Đang đồng bộ Slash Commands...")
+            # Đồng bộ toàn cầu (mất thời gian)
             await self.tree.sync()
+            
+            # Đồng bộ vào Guild hiện tại để hiện lệnh ngay lập tức
+            for guild in self.guilds:
+                try:
+                    self.tree.copy_global_to(guild=guild)
+                    await self.tree.sync(guild=guild)
+                    logger.info(f"✅ Đã đồng bộ lệnh vào Guild: {guild.name}")
+                except Exception as e:
+                    logger.warning(f"⚠️ Không thể đồng bộ vào Guild {guild.id}: {e}")
+
             self.synced = True
-            logger.info("✅ Slash Commands đã được đồng bộ thành công!")
+            logger.info("✨ Slash Commands đã sẵn sàng trên toàn hệ thống!")
 
         # Thiết lập kênh DM
         try:
