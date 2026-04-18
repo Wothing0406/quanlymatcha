@@ -115,7 +115,6 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
             (month, parsed_amount, parsed_amount, parsed_amount, parsed_amount)
         )
         
-        # ✨ ĐỒNG BỘ: Thêm vào nhật ký hoạt động
         db.log_activity('income', description, parsed_amount)
 
         row = db.execute("SELECT income, remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')
@@ -155,7 +154,6 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
             (month, parsed_amount, parsed_amount, parsed_amount, parsed_amount)
         )
         
-        # ✨ ĐỒNG BỘ: Thêm vào nhật ký hoạt động
         db.log_activity('saving', description, parsed_amount)
 
         row = db.execute("SELECT remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')

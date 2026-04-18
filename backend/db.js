@@ -76,15 +76,6 @@ async function initDb() {
         )`);
         await ensureColumnExists(conn, 'tasks', 'points_rewarded', 'TINYINT(1) DEFAULT 0');
 
-        // 4. purchases (Legacy compatibility)
-        await conn.query(`CREATE TABLE IF NOT EXISTS purchases (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            item_name VARCHAR(255),
-            amount DOUBLE DEFAULT 0,
-            photo_path VARCHAR(500),
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-
         // 5. activity_log
         await conn.query(`CREATE TABLE IF NOT EXISTS activity_log (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -122,13 +113,6 @@ async function initDb() {
     } catch (err) {
         console.error('❌ Lỗi khởi tạo MySQL:', err.message);
         throw err;
-    } finally {
-        if (conn) conn.release();
-    }
-}
-    } catch (err) {
-        console.error('❌ Lỗi khởi tạo MySQL:', err.message);
-        throw err; // Ném lỗi để index.js bắt được
     } finally {
         if (conn) conn.release();
     }
