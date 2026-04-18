@@ -10,6 +10,10 @@ backend/uploads/*
 !discord-bot/uploads/.gitkeep
 !backend/uploads/.gitkeep
 
+# Shared uploads (mounted Docker volume - images stored here)
+shared_uploads/*
+!shared_uploads/.gitkeep
+
 # Node.js
 node_modules/
 npm-debug.log*
