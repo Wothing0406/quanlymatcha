@@ -12,6 +12,7 @@
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         .transition-all {
@@ -34,7 +35,7 @@
     <aside id="sidebar"
         class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50 border-r border-gray-800">
         <div class="h-16 flex items-center justify-center border-b border-gray-800">
-            <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
+            <span class="text-xl font-bold text-[var(--matcha-main)] italic">Matcha Manager</span>
         </div>
         <nav class="mt-6 px-4 space-y-2">
             <a href="dashboard.html"
@@ -95,7 +96,7 @@
 
         <main class="p-6 md:p-10 space-y-12">
             <div class="text-center md:text-left space-y-2" data-aos="fade-down">
-                <p class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-2">Quản lý thời gian</p>
+                <p class="text-[10px] text-[var(--matcha-main)] font-black uppercase tracking-[0.3em] mb-2">Quản lý thời gian</p>
                 <h2 class="text-4xl font-black tracking-tight">🗓️ Lịch trình hàng tuần</h2>
             </div>
 
@@ -114,7 +115,7 @@
                     <div class="md:col-span-2">
                         <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-4">Các ngày trong tuần</label>
                         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3" id="weekday-checkboxes">
-                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group">
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900 cursor-pointer transition-all hover:bg-[var(--matcha-main-glow)] dark:hover:bg-[var(--matcha-main-glow)] group">
                                 <input type="checkbox" name="weekdays" value="Thứ 2" class="hidden peer">
                                 <span class="text-[10px] font-black uppercase text-gray-400 group-hover:text-[var(--matcha-main)] peer-checked:text-[var(--matcha-main)] transition-colors">T2</span>
                                 <div class="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-gray-700 peer-checked:border-[var(--matcha-main)] peer-checked:bg-[var(--matcha-main)] flex items-center justify-center transition-all">
@@ -170,14 +171,14 @@
                             <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Bắt
                                 đầu</label>
                             <input type="time" id="task-start"
-                                class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                                class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[var(--matcha-main)] transition-all outline-none"
                                 required>
                         </div>
                         <div class="w-1/2">
                             <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Kết
                                 thúc</label>
                             <input type="time" id="task-end"
-                                class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                                class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[var(--matcha-main)] transition-all outline-none"
                                 required>
                         </div>
                     </div>
@@ -212,7 +213,7 @@
             <form id="form-verify-task" class="space-y-6">
                 <input type="hidden" id="verify-task-id">
                 <div
-                    class="border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[2rem] p-10 text-center hover:border-blue-500 group transition-all cursor-pointer relative">
+                    class="border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[2rem] p-10 text-center hover:border-[var(--matcha-main)] group transition-all cursor-pointer relative">
                     <input type="file" id="verify-photo-input" accept="image/*" capture="environment" class="hidden"
                         required>
                     <label for="verify-photo-input" class="cursor-pointer">
@@ -248,18 +249,18 @@
                 <div>
                     <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Tên công việc</label>
                     <input type="text" id="edit-task-name"
-                        class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
+                        class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[var(--matcha-main)] transition-all outline-none" required>
                 </div>
                 <div class="flex gap-4">
                     <div class="w-1/2">
                         <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Bắt đầu</label>
                         <input type="time" id="edit-task-start"
-                            class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
+                            class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[var(--matcha-main)] transition-all outline-none" required>
                     </div>
                     <div class="w-1/2">
                         <label class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Kết thúc</label>
                         <input type="time" id="edit-task-end"
-                            class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none" required>
+                            class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[var(--matcha-main)] transition-all outline-none" required>
                     </div>
                 </div>
                 <div class="flex gap-4">

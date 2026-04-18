@@ -85,12 +85,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3b82f6;
+  background: var(--matcha-main);
   border-radius: 10px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #1e40af;
+  background: var(--matcha-success);
 }
 
 /* Sidebar Agenda Widget */

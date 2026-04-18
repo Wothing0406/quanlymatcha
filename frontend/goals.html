@@ -12,6 +12,7 @@
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         .animate-fade-in {
@@ -38,7 +39,7 @@
     <aside id="sidebar"
         class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 z-50">
         <div class="h-16 flex items-center justify-center border-b border-gray-800">
-            <span class="text-xl font-bold text-blue-500 italic">Matcha Manager</span>
+            <span class="text-xl font-bold text-[var(--matcha-main)] italic">Matcha Manager</span>
         </div>
         <nav class="mt-6 px-4 space-y-2">
             <a href="dashboard.html"
@@ -58,7 +59,7 @@
                 <i class="fas fa-wallet w-6"></i> <span class="text-sm font-bold">Theo dõi tài chính</span>
             </a>
             <a href="goals.html"
-                class="sidebar-item flex items-center p-3 rounded-2xl bg-blue-500 transition-all font-bold">
+                class="sidebar-item flex items-center p-3 rounded-2xl bg-[var(--matcha-main)] transition-all font-bold">
                 <i class="fas fa-bullseye w-6"></i> <span class="text-sm">Mục tiêu tiết kiệm</span>
             </a>
             <a href="schedule.html"
@@ -104,7 +105,7 @@
 
         <main class="p-6 md:p-10 space-y-12">
             <div class="text-center md:text-left space-y-2" data-aos="fade-down">
-                <p class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-2">Kiến tạo tương lai</p>
+                <p class="text-[10px] text-[var(--matcha-main)] font-black uppercase tracking-[0.3em] mb-2">Kiến tạo tương lai</p>
                 <h2 class="text-4xl font-black tracking-tight">🎯 Mục tiêu & Kế hoạch</h2>
             </div>
 
@@ -113,7 +114,7 @@
                 <div class="space-y-8" data-aos="fade-right">
                     <div
                         class="glass-card rounded-[2.5rem] p-8 md:p-10 space-y-8 relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
+                        <div class="absolute top-0 left-0 w-full h-2 bg-[var(--matcha-main)]"></div>
                         <h3 class="text-xl font-black flex items-center gap-3 text-[var(--matcha-main)]"><i
                                 class="fas fa-file-invoice-dollar"></i> Kế hoạch thu chi tháng</h3>
                         <form id="form-finance" class="space-y-6">
@@ -131,7 +132,7 @@
                                         class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Tổng
                                         chi tháng</label>
                                     <input type="text" id="fin-expenses"
-                                        class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none currency-input"
+                                        class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[var(--matcha-main)] transition-all outline-none currency-input"
                                         required placeholder="0">
                                 </div>
                                 <div>
@@ -139,7 +140,7 @@
                                         class="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Mục
                                         tiêu tiết kiệm</label>
                                     <input type="text" id="fin-saving"
-                                        class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none currency-input"
+                                        class="w-full border-none bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[var(--matcha-main)] transition-all outline-none currency-input"
                                         required placeholder="0">
                                 </div>
                             </div>
@@ -206,7 +207,7 @@
             </div>
 
             <div class="space-y-6" data-aos="fade-up">
-                <h3 class="text-2xl font-black flex items-center gap-3"><i class="fas fa-layer-group text-blue-500"></i>
+                <h3 class="text-2xl font-black flex items-center gap-3"><i class="fas fa-layer-group text-[var(--matcha-main)]"></i>
                     Danh sách mục tiêu của bạn</h3>
                 <div id="goals-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10">
                     <!-- Goals injected here -->

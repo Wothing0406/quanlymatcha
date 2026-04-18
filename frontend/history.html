@@ -12,6 +12,7 @@
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap');
@@ -187,10 +188,10 @@
 
         function filterHistory(type) {
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600');
+                btn.classList.remove('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-[var(--matcha-main)]');
                 btn.classList.add('text-gray-400');
             });
-            event.target.classList.add('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600');
+            event.target.classList.add('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-[var(--matcha-main)]');
             event.target.classList.remove('text-gray-400');
             if (typeof loadHistory === 'function') loadHistory(type);
         }
