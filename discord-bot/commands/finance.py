@@ -62,7 +62,8 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     @expense_group.command(name="add", description="Ghi nhận chi tiêu mới")
     @app_commands.describe(amount="Số tiền (Ví dụ: 30k, 1.5tr)", description="Khoản chi cho việc gì?")
     async def expense_add(self, interaction: discord.Interaction, amount: str, description: str):
-        await interaction.response.defer()
+        if not interaction.response.is_done():
+            await interaction.response.defer()
         parsed_amount = db.parse_amount(amount)
         if parsed_amount <= 0:
             return await interaction.followup.send("❌ Số tiền không hợp lệ! Vui lòng nhập kiểu `30000`, `30k` hoặc `1.5tr`.", ephemeral=True)
@@ -100,7 +101,8 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     @income_group.command(name="add", description="Thêm thu nhập mới (Ví dụ: 10tr)")
     @app_commands.describe(amount="Số tiền thu nhập (VND, hỗ trợ k, tr, m)", description="Nguồn thu nhập")
     async def income_add(self, interaction: discord.Interaction, amount: str, description: str = "Thu nhập mới"):
-        await interaction.response.defer()
+        if not interaction.response.is_done():
+            await interaction.response.defer()
         parsed_amount = db.parse_amount(amount)
         if parsed_amount <= 0:
             return await interaction.followup.send("❌ Số tiền không hợp lệ!", ephemeral=True)
@@ -139,7 +141,8 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
     @saving_group.command(name="add", description="Tiết kiệm tháng này (Ví dụ: 2tr)")
     @app_commands.describe(amount="Số tiền (VND, hỗ trợ k, tr, m)", description="Ghi chú tiết kiệm")
     async def saving_add(self, interaction: discord.Interaction, amount: str, description: str = "Tiết kiệm tháng"):
-        await interaction.response.defer()
+        if not interaction.response.is_done():
+            await interaction.response.defer()
         parsed_amount = db.parse_amount(amount)
         if parsed_amount <= 0:
             return await interaction.followup.send("❌ Số tiền không hợp lệ!", ephemeral=True)
