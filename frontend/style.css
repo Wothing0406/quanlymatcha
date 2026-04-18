@@ -1,14 +1,14 @@
 :root {
   /* True Matcha Latte - Light Mode */
   --matcha-bg: #f9f7f2;
-  --matcha-bg-alt: #f3efe6;
-  --matcha-bg-gradient: radial-gradient(circle at top left, #fdfbfa 0%, #f9f7f2 50%, #eff3e6 100%);
-  --matcha-text: #2d241e; /* Deep Coffee Brown */
-  --matcha-text-muted: #7b6652;
-  --matcha-main: #8ba86e; /* Soft Matcha Green */
-  --matcha-main-glow: rgba(139, 168, 110, 0.2);
-  --matcha-success: #6b8e23;
-  --matcha-warning: #d4a373;
+  --matcha-bg-alt: #f7f4ed;
+  --matcha-bg-gradient: radial-gradient(circle at top left, #fdfbfa 0%, #f9f7f2 50%, #f3f7ed 100%);
+  --matcha-text: #3d322a; /* Slightly softer brown */
+  --matcha-text-muted: #8c7a69;
+  --matcha-main: #a3c18b; /* Lighter Matcha Green */
+  --matcha-main-glow: rgba(163, 193, 139, 0.2);
+  --matcha-success: #8db35d;
+  --matcha-warning: #e6c097;
   --matcha-danger: #bc4749;
   --matcha-card: rgba(255, 255, 255, 0.9);
   --matcha-border: rgba(139, 168, 110, 0.15);
@@ -16,9 +16,9 @@
   --matcha-glass-border: rgba(255, 255, 255, 0.5);
   --matcha-shadow: 0 15px 35px -5px rgba(45, 36, 30, 0.05);
   --matcha-glow-shadow: 0 0 40px rgba(139, 168, 110, 0.1);
-  --matcha-sidebar-bg: #f3efe6;
-  --matcha-sidebar-text: #2d241e;
-  --matcha-sidebar-border: rgba(45, 36, 30, 0.05);
+  --matcha-sidebar-bg: #f7f4ed;
+  --matcha-sidebar-text: #3d322a;
+  --matcha-sidebar-border: rgba(61, 50, 42, 0.04);
 }
 
 .dark {

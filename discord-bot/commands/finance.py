@@ -261,6 +261,82 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
             clean_title = content.replace(amount_str, '').strip()
             await self.expense_add.callback(self, interaction, amount_str, clean_title or "Ghi chú Chi tiêu")
 
+            clean_title = content.replace(amount_str, '').strip()
+            await self.expense_add.callback(self, interaction, amount_str, clean_title or "Ghi chú Chi tiêu")
+
+    # ─── TOP LEVEL SHORTCUTS ────────────────────────────────────────────────
+    @app_commands.command(name="income", description="Thêm nhanh thu nhập")
+    @app_commands.describe(amount="Số tiền (VD: 10tr, 50k)", description="Mô tả")
+    async def shortcut_income(self, interaction: discord.Interaction, amount: str, description: str = "Thu nhập"):
+        await self.income_add.callback(self, interaction, amount, description)
+
+    @app_commands.command(name="expense", description="Thêm nhanh chi tiêu")
+    @app_commands.describe(amount="Số tiền (VD: 30k, 1.5tr)", description="Mô tả khoản chi")
+    async def shortcut_expense(self, interaction: discord.Interaction, amount: str, description: str):
+        await self.expense_add.callback(self, interaction, amount, description)
+
+    @app_commands.command(name="saving", description="Thêm nhanh tiết kiệm")
+    @app_commands.describe(amount="Số tiền (VD: 2tr)", description="Ghi chú")
+    async def shortcut_saving(self, interaction: discord.Interaction, amount: str, description: str = "Tiết kiệm"):
+        await self.saving_add.callback(self, interaction, amount, description)
+
+    @app_commands.command(name="wallet", description="Xem ví tiền và điểm Matcha")
+    async def wallet(self, interaction: discord.Interaction):
+        await self.finance.callback(self, interaction)
+
+    @app_commands.command(name="timeline", description="Xem 10 hoạt động gần nhất")
+    async def timeline(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        logs = db.execute("SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 10", fetch='all')
+        if not logs:
+            return await interaction.followup.send("📭 Chưa có hoạt động nào được ghi lại.")
+
+        embed = discord.Embed(title="📜 Nhật ký hoạt động gần đây", color=discord.Color.green())
+        
+        icons = {
+            'income': '💵', 'expense': '💸', 'saving': '🏦', 
+            'task_done': '✅', 'task_missed': '❌', 'reward': '✨', 'penalty': '⚠️'
+        }
+
+        for l in logs:
+            icon = icons.get(l['type'], '📝')
+            time_str = l['created_at'].strftime("%H:%M %d/%m")
+            amt_str = f" | `{vnd(l['amount'])}`" if l['amount'] != 0 else ""
+            embed.add_field(
+                name=f"{icon} {l['title']}",
+                value=f"⏱️ {time_str}{amt_str}",
+                inline=False
+            )
+        await interaction.followup.send(embed=embed)
+
+    @app_commands.command(name="pet", description="Xem trạng thái Thú ảo Matcha")
+    async def pet_status(self, interaction: discord.Interaction):
+        stats = db.get_user_stats()
+        if not stats:
+            return await interaction.response.send_message("❌ Không tìm thấy dữ liệu user.")
+
+        level = stats.get('level', 1)
+        exp = stats.get('total_exp', 0)
+        points = stats.get('current_points', 0)
+        state = stats.get('pet_state', 'neutral').capitalize()
+
+        # Simple mood mapping
+        moods = {"Happy": "😊 Hạnh phúc", "Neutral": "😐 Bình thường", "Sad": "😔 Buồn bã", "Sick": "🤢 Đang ốm"}
+        mood_str = moods.get(state, state)
+
+        embed = discord.Embed(title="🌿 Matcha Pet Status", color=discord.Color.green())
+        embed.add_field(name="🧬 Cấp độ", value=f"`Level {level}`", inline=True)
+        embed.add_field(name="✨ Điểm Matcha", value=f"`{points} PTS`", inline=True)
+        embed.add_field(name="🎭 Tâm trạng", value=mood_str, inline=True)
+        
+        # Progress bar for level
+        next_level_exp = (level ** 2) * 100
+        progress = min(100, round((exp / next_level_exp) * 100))
+        bar = "🟩" * (progress // 10) + "⬜" * (10 - (progress // 10))
+        embed.add_field(name="📈 Kinh nghiệm (EXP)", value=f"{bar} `{exp}/{next_level_exp}`", inline=False)
+
+        await interaction.response.send_message(embed=embed)
+
 async def setup(bot):
     await bot.add_cog(FinanceCog(bot))
     logging.getLogger('MatchaBot').info("[LOADED] cogs.finance ✅")

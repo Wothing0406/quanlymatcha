@@ -42,48 +42,54 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
         # Tin nhắn dạng ephemeral tức là chỉ bạn nhìn thấy, người khác trong channel không thấy PIN
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="help", description="Xem toàn bộ danh sách lệnh")
+    @app_commands.command(name="help", description="Xem toàn bộ danh sách lệnh cá nhân")
     async def help_cmd(self, interaction: discord.Interaction):
         embed = discord.Embed(
-            title="🌿 Matcha Bot - Trung tâm Lệnh",
-            description="Hệ thống quản lý cá nhân thông minh. Dưới đây là tất cả lệnh có sẵn:",
-            color=discord.Color.blue()
+            title="🌿 Matcha Bot - Personal Assistant",
+            description="Chào mừng bạn! Đây là danh sách các lệnh dành riêng cho bạn:",
+            color=discord.Color.green()
         )
 
         embed.add_field(
-            name="💰 Tài chính",
+            name="💰 Tài chính (Nhanh)",
             value=(
-                "`/finance` - Xem tóm tắt tháng này\n"
-                "`/expense add [tiền] [mô tả]` - Thêm chi tiêu\n"
-                "`/income add [tiền]` - Thêm thu nhập\n"
-                "`/saving add [tiền]` - Thêm tiết kiệm\n"
+                "`/income [số] [mô tả]` - Thêm thu nhập\n"
+                "`/expense [số] [mô tả]` - Thêm chi tiêu\n"
+                "`/saving [số] [mô tả]` - Thêm tiết kiệm\n"
+                "`/wallet` - Xem nhanh số dư & điểm\n"
+                "`/note [nội dung]` - Ghi chú thông minh (VD: `cafe 30k`)"
+            ),
+            inline=False
+        )
+        embed.add_field(
+            name="🎮 Cá nhân & Phát triển",
+            value=(
+                "`/pet` - Xem trạng thái thú ảo Matcha\n"
+                "`/timeline` - Xem 10 hoạt động gần nhất\n"
                 "`/goals` - Xem mục tiêu tiết kiệm\n"
-                "`/summary` - Tổng kết tất cả các tháng"
+                "`/summary` - Tổng kết tài chính 6 tháng"
             ),
             inline=False
         )
         embed.add_field(
             name="📋 Công việc",
             value=(
-                "`/task add [tên] [thứ] [giờ]` - Thêm công việc\n"
-                "`/task done [id]` - Đánh dấu hoàn thành\n"
-                "`/task missed [id]` - Đánh dấu bỏ lỡ\n"
-                "`/task list` - Xem danh sách hôm nay\n"
-                "`/upload [id] [ảnh]` - Upload ảnh minh chứng\n"
-                "`/weekly_report` - Báo cáo hiệu năng"
+                "`/task list` - Xem việc hôm nay\n"
+                "`/task add [tên] [thứ] [giờ]` - Lên lịch mới\n"
+                "`/task finish [id] [ảnh]` - Xong việc kèm ảnh kỷ niệm\n"
+                "`/weekly_report` - Báo cáo hiệu suất"
             ),
             inline=False
         )
         embed.add_field(
             name="🔧 Hệ thống",
             value=(
-                "`/help` - Xem danh sách lệnh\n"
-                "`/status` - Trạng thái bot và database\n"
-                "`/web` - Lấy link trang bảng điều khiển Web"
+                "`/web` - Lấy link truy cập Web Dashboard\n"
+                "`/status` - Kiểm tra Bot & Database"
             ),
             inline=False
         )
-        embed.set_footer(text=" ✨")
+        embed.set_footer(text="Matcha Bot v5.0 | Dành riêng cho chủ nhân ✨")
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="status", description="Kiểm tra trạng thái bot và database")
