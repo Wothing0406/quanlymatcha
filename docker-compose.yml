@@ -55,8 +55,7 @@ services:
       - ./discord-bot:/app
     depends_on:
       - mysql
-      ollama:
-        condition: service_started
+      - ollama
     restart: unless-stopped
 
   ollama:
