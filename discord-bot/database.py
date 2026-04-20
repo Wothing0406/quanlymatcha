@@ -150,8 +150,7 @@ def init_db():
         cursor.close()
         conn.close()
 
-def get_connection():
-    return get_pool().get_connection()
+
 
 def execute(sql, params=None, fetch=None):
     """
@@ -162,6 +161,11 @@ def execute(sql, params=None, fetch=None):
     cursor = None
     try:
         conn = get_connection()
+        try:
+            conn.ping(reconnect=True, attempts=3, delay=2)
+        except Exception as e:
+            logger.warning(f"⚠️ Không thể ping database: {e}")
+            
         cursor = conn.cursor(dictionary=True)
         cursor.execute(sql, params or ())
         if fetch == 'one':
