@@ -129,7 +129,7 @@ async function updateUserStats(pointsChange, expChange, reason) {
         const totalExp = (stats[0].total_exp || 0) + expChange;
 
         // Level = floor(sqrt(EXP / 100)) + 1
-        const newLevel = Math.floor(Math.sqrt(totalExp / 100)) + 1;
+        const newLevel = Math.floor(Math.sqrt(Math.max(0, totalExp) / 100)) + 1;
 
         await conn.query(
             "UPDATE user_stats SET current_points = ?, total_exp = ?, level = ? WHERE id = 1",
@@ -141,13 +141,20 @@ async function updateUserStats(pointsChange, expChange, reason) {
             [pointsChange, reason]
         );
 
-        // Optional: Update Pet State here
+        // Update Pet State based on points and performance
         let state = 'neutral';
         if (currentPoints > 500) state = 'happy';
         if (currentPoints < 0) state = 'sad';
+        if (expChange < 0) state = 'sick'; // Penalize for missed tasks
+
         await conn.query("UPDATE user_stats SET pet_state = ? WHERE id = 1", [state]);
 
-        return { points: currentPoints, level: newLevel, leveledUp: newLevel > stats[0].level };
+        return { 
+            points: currentPoints, 
+            exp: totalExp,
+            level: newLevel, 
+            leveledUp: newLevel > stats[0].level 
+        };
     } catch (err) {
         console.error('❌ Error updating user stats:', err);
     } finally {

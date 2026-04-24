@@ -29,30 +29,45 @@ class PetCog(commands.Cog, name="🌿 Thú ảo Matcha"):
         state = stats.get('pet_state', 'neutral').capitalize()
 
         moods = {
-            "Happy": "😊 Hạnh phúc (Đang rất vui vì bạn chăm chỉ!)",
-            "Neutral": "😐 Bình thường (Cần thêm tương tác nhé)",
-            "Sad": "😔 Buồn bã (Bạn bỏ bê Matcha quá...)",
-            "Sick": "🤢 Đang ốm (Tài chính hoặc task đang báo động!)"
+            "Happy": "😊 Đang 'flee' cực kỳ (Nhìn bạn cày tiền mà Matcha rớt nước mắt hạnh phúc!)",
+            "Neutral": "😐 Bình thường (Cần thêm tương tác nhé, nhạt nhẽo quá...)",
+            "Sad": "😔 Trầm cảm level max (Bạn đang bỏ bê bản thân, trái tim này đang tan vỡ...)",
+            "Sick": "🤢 SOS! Báo động đỏ (Task thì nợ, tiền thì tiêu, cứu Matcha với!)"
         }
         mood_str = moods.get(state, f"😶 {state}")
 
+        def get_rank(lvl):
+            if lvl <= 3: return "🐣 Tân binh Vô tri"
+            if lvl <= 7: return "⚔️ Chiến thần Cày cuốc"
+            if lvl <= 12: return "🗿 Bậc thầy SIGMA (Chúa tể ví tiền)"
+            if lvl <= 20: return "👑 Chúa tể Tài chính (Vua Meme)"
+            return "🍵 Người Tày Matcha  (Đỉnh của chóp)"
+
+        rank_str = get_rank(level)
+
         embed = discord.Embed(
-            title="🌿 Trạng thái Matcha Pet",
+            title=f"🌿 Trạng thái Matcha Pet - {rank_str}",
             description=f"Matcha đang cảm thấy: **{mood_str}**",
             color=discord.Color.green()
         )
         embed.add_field(name="🧬 Cấp độ", value=f"`Level {level}`", inline=True)
         embed.add_field(name="✨ Matcha Points", value=f"`{points} PTS`", inline=True)
         
-        # Progress bar
-        next_exp = (level ** 2) * 100
-        progress = min(100, round((exp / next_exp) * 100))
+        # Progress bar logic
+        # Current formula: Level = sqrt(EXP/100) + 1 => EXP = (Level-1)^2 * 100
+        # Next Level EXP = Level^2 * 100
+        current_level_min_exp = ((level - 1) ** 2) * 100
+        next_level_exp = (level ** 2) * 100
+        exp_in_level = exp - current_level_min_exp
+        exp_needed = next_level_exp - current_level_min_exp
+        
+        progress = min(100, max(0, round((exp_in_level / exp_needed) * 100)))
         bar_len = 10
         filled = int(progress / 10)
         bar = "🟩" * filled + "⬜" * (bar_len - filled)
         
-        embed.add_field(name=f"📈 Kinh nghiệm ({progress}%)", value=f"{bar} `{exp}/{next_exp}`", inline=False)
-        embed.set_footer(text="Matcha Bot v5.0 | Chúc bạn một ngày năng suất! ✨")
+        embed.add_field(name=f"📈 Kinh nghiệm ({progress}%)", value=f"{bar} `{exp}/{next_level_exp}`", inline=False)
+        embed.set_footer(text="Matcha Bot v6.0 | Hệ thống Pet đã đồng bộ Web & Bot ✨")
         
         await interaction.followup.send(embed=embed)
 

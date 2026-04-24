@@ -66,6 +66,10 @@ router.post('/purchases', upload.single('photo'), async (req, res) => {
 
 
         await db.logActivity('expense', item_name, amount, photo_path);
+
+        // Gamification: -5 PTS (Penalty for spending, optional)
+        await db.updateUserStats(-5, 0, `Chi tiêu (Web): ${item_name}`);
+
         res.json({ success: true, id: result.insertId, photo_path });
     } catch (err) {
         res.status(500).json({ error: err.message });

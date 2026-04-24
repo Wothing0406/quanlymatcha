@@ -265,25 +265,23 @@ def add_points(points, exp, reason):
         log_type = 'reward' if points > 0 else 'penalty'
         log_activity(log_type, f"{'Cộng' if points > 0 else 'Trừ'} {abs(points)} điểm: {reason}", amount=points)
         
-        # Automatically update pet state
-        update_pet_state()
+        # Update pet state based on performance
+        state = 'neutral'
+        if new_points > 500: state = 'happy'
+        if new_points < 0: state = 'sad'
+        if exp < 0: state = 'sick' # Penalty for missed tasks
         
-        return {"points": new_points, "level": new_level, "leveled_up": new_level > stats['level']}
+        execute("UPDATE user_stats SET pet_state = %s WHERE id = 1", (state,))
+        
+        return {
+            "points": new_points, 
+            "exp": new_exp,
+            "level": new_level, 
+            "leveled_up": new_level > stats['level']
+        }
     except Exception as e:
         logger.error(f"❌ Lỗi add_points: {e}")
 
-def update_pet_state():
-    """Cập nhật trạng thái thú ảo dựa trên số điểm và tài chính."""
-    try:
-        stats = execute("SELECT * FROM user_stats WHERE id = 1", fetch='one')
-        # Simple logic: If points < 0 or remaining % < 10% -> Sad/Sick
-        # If level high -> Evolved?
-        state = 'neutral'
-        if stats['current_points'] > 500: state = 'happy'
-        if stats['current_points'] < 0: state = 'sad'
-        
-        execute("UPDATE user_stats SET pet_state = %s WHERE id = 1", (state,))
-    except: pass
 
 def get_user_stats():
     return execute("SELECT * FROM user_stats WHERE id = 1", fetch='one')

@@ -8,7 +8,7 @@ logger = logging.getLogger('MatchaBot.Ollama')
 class OllamaClient:
     def __init__(self):
         self.base_url = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
-        self.model = os.getenv("OLLAMA_MODEL", "gemma2:2b")
+        self.model = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
 
     async def chat(self, messages, stream=False):
         url = f"{self.base_url}/api/chat"

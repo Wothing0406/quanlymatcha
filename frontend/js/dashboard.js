@@ -62,10 +62,11 @@ function renderGamification(stats) {
   const progress = (expInCurrentLevel / expNeededForNext) * 100;
 
   const getRankTitle = (lvl) => {
-    if (lvl <= 3) return "Niu bi";
-    if (lvl <= 7) return "Nguoi Tay";
-    if (lvl <= 12) return "Bac thay SIGMA";
-    return "Thanh tiet kiem";
+    if (lvl <= 3) return "Tân binh Vô tri 🐣";
+    if (lvl <= 7) return "Chiến thần Cày cuốc ⚔️";
+    if (lvl <= 12) return "Bậc thầy SIGMA 🗿";
+    if (lvl <= 20) return "Chúa tể Tài chính 👑";
+    return "Người Tày Matcha 🍵";
   };
 
   if (levelEl) levelEl.innerText = `Level ${level}`;

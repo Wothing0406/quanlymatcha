@@ -64,6 +64,10 @@ router.post('/income', async (req, res) => {
         `;
         await db.query(sql, [currentMonth, amount, amount, amount, amount]);
         await db.logActivity('income', title || 'Thu nhập mới (từ Web)', amount);
+        
+        // Gamification: +10 PTS, +20 EXP
+        await db.updateUserStats(10, 20, `Thu nhập (Web): ${title || 'Chưa rõ'}`);
+        
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -82,6 +86,10 @@ router.post('/saving', async (req, res) => {
         `;
         await db.query(sql, [currentMonth, amount, -amount, amount, amount]);
         await db.logActivity('saving', title || 'Tiết kiệm mới (từ Web)', amount);
+        
+        // Gamification: +30 PTS, +50 EXP
+        await db.updateUserStats(30, 50, `Tiết kiệm (Web): ${title || 'Chưa rõ'}`);
+        
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
