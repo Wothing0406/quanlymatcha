@@ -81,7 +81,6 @@ class OCRCog(commands.Cog, name="🧾 Quét Hóa Đơn"):
             embed.add_field(name="💰 Số tiền", value=f"{amount:,} VNĐ", inline=True)
             embed.add_field(name="🏷️ Loại", value=category, inline=True)
             embed.set_image(url=attachment.url)
-            embed.set_footer(text="Nhấn nút bên dưới để xác nhận ghi sổ.")
 
             view = ReceiptConfirmView(item_name, amount, category, attachment.url)
             await interaction.followup.send(embed=embed, view=view)

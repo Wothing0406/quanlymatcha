@@ -37,7 +37,6 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
         )
 
         embed.add_field(name="🔒 Mã PIN Bảo Mật:", value=f"`{pin}`", inline=False)
-        embed.set_footer(text="Nếu link lỗi, đợi 1-2 phút để Server tạo URL mới nhé!")
         
         # Tin nhắn dạng ephemeral tức là chỉ bạn nhìn thấy, người khác trong channel không thấy PIN
         await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -89,7 +88,6 @@ class ManagementCog(commands.Cog, name="🔧 Quản lý"):
             ),
             inline=False
         )
-        embed.set_footer(text="Matcha Bot v5.0 | Dành riêng cho chủ nhân ✨")
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="status", description="Kiểm tra trạng thái bot và database")

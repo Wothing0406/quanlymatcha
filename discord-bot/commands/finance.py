@@ -53,20 +53,39 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
 
         status = "⚠️ Bạn đang chi vượt ngân sách!" if remaining < 0 else "✅ Tài chính đang trong tầm kiểm soát."
         embed.description = status
-        embed.set_footer(text="Matcha Finance Manager ✨")
         await interaction.followup.send(embed=embed)
 
     # ─── /expense ────────────────────────────────────────────────────────────
     expense_group = app_commands.Group(name="expense", description="Quản lý chi tiêu")
 
     @expense_group.command(name="add", description="Ghi nhận chi tiêu mới")
-    @app_commands.describe(amount="Số tiền (Ví dụ: 30k, 1.5tr)", description="Khoản chi cho việc gì?")
-    async def expense_add(self, interaction: discord.Interaction, amount: str, description: str):
+    @app_commands.describe(amount="Số tiền (Ví dụ: 30k, 1.5tr)", description="Khoản chi cho việc gì?", attachment="Ảnh hóa đơn (Tùy chọn)")
+    async def expense_add(self, interaction: discord.Interaction, amount: str, description: str, attachment: discord.Attachment = None):
         if not interaction.response.is_done():
             await interaction.response.defer()
         parsed_amount = db.parse_amount(amount)
         if parsed_amount <= 0:
             return await interaction.followup.send("❌ Số tiền không hợp lệ! Vui lòng nhập kiểu `30000`, `30k` hoặc `1.5tr`.", ephemeral=True)
+
+        local_path = None
+        if attachment:
+            # Download and save image to local server
+            from commands.tasks import UPLOAD_DIR
+            import os
+            import aiohttp
+            from datetime import datetime
+            
+            os.makedirs(UPLOAD_DIR, exist_ok=True)
+            ext = os.path.splitext(attachment.filename)[1] or ".jpg"
+            filename = f"exp_{int(datetime.now().timestamp())}{ext}"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(attachment.url) as resp:
+                    if resp.status == 200:
+                        with open(filepath, 'wb') as f:
+                            f.write(await resp.read())
+                        local_path = f"/uploads/{filename}"
 
         month = get_current_month()
         db.execute(
@@ -79,9 +98,9 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         )
 
         # ✨ ĐỒNG BỘ: Thêm vào nhật ký hoạt động chung (activity_log)
-        db.log_activity('expense', description, parsed_amount)
+        db.log_activity('expense', description, parsed_amount, photo_path=local_path)
 
-        # Legacy Sync (vẫn giữ bảng purchases cho tính tương thích nếu cần)
+        # Legacy Sync
         db.execute("INSERT INTO purchases (item_name, amount) VALUES (%s, %s)", (description, parsed_amount))
 
         row = db.execute("SELECT remaining FROM monthly_finance WHERE month = %s", (month,), fetch='one')
@@ -93,6 +112,8 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
             description=f"**{description}**: `-{vnd(parsed_amount)}`\n\n💎 **Còn lại tháng này:** `{vnd(remaining)}`",
             color=discord.Color.orange()
         )
+        if attachment:
+            embed.set_image(url=attachment.url)
         await interaction.followup.send(embed=embed)
 
     # ─── /income ────────────────────────────────────────────────────────────
@@ -232,7 +253,6 @@ class FinanceCog(commands.Cog, name="💰 Tài chính"):
         embed.add_field(name="💸 Tổng chi", value=f"`{vnd(total_expenses)}`", inline=True)
         embed.add_field(name="🏦 Tổng tiết kiệm", value=f"`{vnd(total_saving)}`", inline=True)
         embed.add_field(name="💎 Tổng còn lại", value=f"**`{vnd(total_remaining)}`**", inline=False)
-        embed.set_footer(text="Matcha Finance Summary ✨")
         await interaction.followup.send(embed=embed)
 
 

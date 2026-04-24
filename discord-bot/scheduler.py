@@ -45,7 +45,6 @@ async def check_tasks(bot, dm_channel):
                 description=f"🌿 Heey! Đã đến giờ làm việc rồi nè. Tập trung thôi nào!\n\n⏱️ **Thời gian:** `{task['start_time']} - {task['end_time']}`",
                 color=discord.Color.blue()
             )
-            embed.set_footer(text="Hoàn thành xong dùng /task done <id> hoặc upload ảnh minh chứng!")
             await dm_channel.send(embed=embed)
             db.execute("UPDATE tasks SET notified_start = 1 WHERE id = %s", (task['id'],))
 

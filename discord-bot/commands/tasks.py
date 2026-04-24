@@ -75,7 +75,6 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         )
         embed.add_field(name="📝 Tên", value=name, inline=True)
         embed.add_field(name="⏱️ Giờ", value=f"`{time} - {end_time}`", inline=True)
-        embed.set_footer(text=f"IDs: {', '.join(map(str, task_ids))} | Cố lên nhé! 💪")
         await interaction.response.send_message(embed=embed)
 
     @task_group.command(name="edit", description="Chỉnh sửa thông tin công việc")
@@ -177,7 +176,6 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
             )
 
         current_time_vn = datetime.now().strftime("%H:%M:%S")
-        embed.set_footer(text=f"Cập nhật lúc: {current_time_vn} | Dùng /task done <id> để hoàn thành!")
         await interaction.followup.send(embed=embed)
 
     # ─── /weekly_report ────────────────────────────────────────────────────
@@ -210,14 +208,6 @@ class TasksCog(commands.Cog, name="📋 Công việc"):
         embed.add_field(name="❌ Bỏ lỡ", value=str(missed), inline=True)
         embed.add_field(name="⏳ Đang chờ", value=str(pending), inline=True)
         embed.add_field(name="📈 Tổng", value=str(total), inline=True)
-
-        if percentage >= 70:
-            embed.set_footer(text="🔥 Xuất sắc! Bạn đang làm rất tốt!")
-        elif percentage >= 40:
-            embed.set_footer(text="💪 Cố gắng lên! Bạn làm được!")
-        else:
-            embed.set_footer(text="😔 Hãy xem lại lịch trình, cần điều chỉnh không?")
-
         await interaction.followup.send(embed=embed)
 
     # ─── /upload ────────────────────────────────────────────────────────────

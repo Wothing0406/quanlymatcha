@@ -67,7 +67,6 @@ class PetCog(commands.Cog, name="🌿 Thú ảo Matcha"):
         bar = "🟩" * filled + "⬜" * (bar_len - filled)
         
         embed.add_field(name=f"📈 Kinh nghiệm ({progress}%)", value=f"{bar} `{exp}/{next_level_exp}`", inline=False)
-        embed.set_footer(text="Matcha Bot v6.0 | Hệ thống Pet đã đồng bộ Web & Bot ✨")
         
         await interaction.followup.send(embed=embed)
 
