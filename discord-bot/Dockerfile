@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY bot.py .
 COPY database.py .
 COPY scheduler.py .
-COPY ollama_client.py .
+COPY ai_client.py .
 COPY ai/ ./ai/
 COPY commands/ ./commands/
 
