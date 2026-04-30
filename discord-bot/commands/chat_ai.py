@@ -12,9 +12,9 @@ from ai.planner import decide_strategy
 from ai.prompt_builder import build_messages
 
 try:
-    from ollama_client import OllamaClient
+    from ai_client import AIClient
 except ImportError:
-    from ..ollama_client import OllamaClient
+    from ..ai_client import AIClient
 
 logger = logging.getLogger('MatchaBot.ChatAI')
 
@@ -23,9 +23,9 @@ class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
 
     def __init__(self, bot):
         self.bot = bot
-        self.ollama = OllamaClient()
+        self.ai = AIClient()
         self.ai_enabled = True # Enabled by default since it's local
-        logger.info(f"🧠 Assistant Matcha đã được nạp não bộ ({self.ollama.model} via Ollama).")
+        logger.info(f"🧠 Assistant Matcha đã được nạp não bộ ({self.ai.model}).")
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message: discord.Message):
@@ -63,7 +63,7 @@ class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
         try:
             async with message.channel.typing():
                 # 6. LLM Client
-                ai_response = await self.ollama.chat(messages)
+                ai_response = await self.ai.chat(messages)
                 
                 if ai_response:
                     # 7. Update Memory
@@ -72,7 +72,7 @@ class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
                     
                     await message.reply(ai_response)
                 else:
-                    await message.reply("Não bị lag rồi, tí nói tiếp. (Lỗi kết nối Ollama)")
+                    await message.reply("Não bị lag rồi, tí nói tiếp. (Lỗi kết nối API)")
 
         except Exception as e:
             logger.error(f"Lỗi AI Pipeline: {e}")
@@ -85,7 +85,7 @@ class ChatAICog(commands.Cog, name="🧠 Trợ lý AI"):
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
         
-        return await self.ollama.chat(messages)
+        return await self.ai.chat(messages)
 
 async def setup(bot):
     await bot.add_cog(ChatAICog(bot))
